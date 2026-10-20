@@ -13,7 +13,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-06 Puzzles E01-E05, E16, E17 with their refusals and cutscenes (AC-21) - proof: unit
 - [x] T-07 Chess problem: legal-move generator, guided mate in 2, uniqueness proof, E06 (AC-26) - proof: unit
 - [x] T-08 Keypads and the rest of the chain: E07-E14, E11-E13, ending (AC-21, AC-27, AC-28, AC-32) - proof: unit
-- [ ] T-09 Clue notebook N01-N12 and once-only cutscenes (AC-29) - proof: unit
+- [x] T-09 Clue notebook N01-N12 and once-only cutscenes (AC-29) - proof: unit
 - [ ] T-10 Dialogues (Papa, Maman, Julien), busy lines, door lines (AC-20) - proof: unit
 - [ ] T-11 Solution walkthrough, exhaustive state-graph search, dependency order (AC-31, AC-32) - proof: unit
 - [ ] T-12 Save format v1 (full state), corrupt/unknown save rejected (AC-35) - proof: unit
