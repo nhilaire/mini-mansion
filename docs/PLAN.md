@@ -20,7 +20,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-13 Story content in French and English: lines, names, documents, notebook, clue map, typography (AC-03, AC-30, AC-45) - proof: unit
 - [x] T-14 Art: palette, pixel buffer, 6 characters with walk/idle/talk/activity frames, 17 item icons (AC-14, AC-19) - proof: unit
 - [x] T-15 Art: 24 provisional place scenes and the house at dusk (AC-15) - proof: unit
-- [ ] T-16 Native stack: Skia, Reanimated, expo-audio, splash, landscape, scheme, fullscreen plugin, Jest mocks; Skia scene and backdrop (AC-05) - proof: unit
+- [x] T-16 Native stack: Skia, Reanimated, expo-audio, splash, landscape, scheme, fullscreen plugin, Jest mocks; Skia scene and backdrop (AC-05) - proof: unit
 - [ ] T-17 Game screen: walking, hotspots, exits, action menu, line banner, inventory band with paging, use-with hint, tutorial bubbles (AC-11, AC-16, AC-17, AC-49) - proof: unit
 - [ ] T-18 Game overlays: dialogue choices, digit keypad, chess board, clue notebook, capture fade (AC-26, AC-27, AC-34) - proof: unit
 - [ ] T-19 App flow: home (title, subtitle, continue, confirm), intro, ending, pause, background pause (AC-10, AC-11, AC-36, AC-37, AC-39, AC-40) - proof: unit
