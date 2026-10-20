@@ -26,7 +26,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-19 App flow: home (title, subtitle, continue, confirm), intro, ending, pause, background pause (AC-10, AC-11, AC-36, AC-37, AC-39, AC-40) - proof: unit
 - [x] T-20 Settings and About: sfx, music, statistics, language, erase; story and author text in each language (AC-04, AC-42, AC-44) - proof: unit
 - [x] T-21 Persistence wiring: autosave triggers, background save, cutscene-safe save, kill during the ending (AC-35, AC-50) - proof: unit
-- [ ] T-22 Telemetry calls: game_start, tutorial_complete, puzzle_solved, capture, game_complete, settings_change (AC-06, AC-07, AC-08) - proof: unit
+- [x] T-22 Telemetry calls: game_start, tutorial_complete, puzzle_solved, capture, game_complete, settings_change (AC-06, AC-07, AC-08) - proof: unit
 - [x] T-23 Audio: generated 8-bit effects, activity loops and music; toggles, background pause, activity sound per guarded room (AC-25, AC-43) - proof: unit
 - [ ] T-24 Pixel icon and splash generated from code (AC-05) - proof: device
 - [ ] T-25 Fast-mode deep link and walkthrough flow generated from the solution (AC-41) - proof: unit
