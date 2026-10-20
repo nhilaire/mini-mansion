@@ -1,4 +1,4 @@
-﻿# Plan: Mini Mansion v0.1.0
+# Plan: Mini Mansion v0.1.0
 
 Each task is small (one commit), references the acceptance criteria it serves, and names its proof.
 Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the box only when the proof passes.
