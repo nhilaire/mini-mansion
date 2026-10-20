@@ -1,17 +1,18 @@
 // AC-09: the author's room photos are personal data. photos/ is git-ignored and nothing under it is tracked.
-import { execFileSync } from 'child_process';
-import fs from 'fs';
-import path from 'path';
+// Node modules come through jest.requireActual (the app's TypeScript config has no Node types).
+const childProcess = jest.requireActual('child_process');
+const fs = jest.requireActual('fs');
+const path = jest.requireActual('path');
 
-const ROOT = path.join(__dirname, '..', '..');
+const ROOT: string = process.cwd();
 
 function git(...args: string[]): string {
-  return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' });
+  return childProcess.execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' });
 }
 
 describe('room photos stay out of the repository (AC-09)', () => {
   it('.gitignore ignores photos/', () => {
-    const lines = fs.readFileSync(path.join(ROOT, '.gitignore'), 'utf8').split(/\r?\n/).map((l) => l.trim());
+    const lines = (fs.readFileSync(path.join(ROOT, '.gitignore'), 'utf8') as string).split(/\r?\n/).map((l) => l.trim());
     expect(lines).toContain('photos/');
     // git itself agrees, for any file that could be dropped there.
     expect(git('check-ignore', 'photos/salon.jpg').trim()).toBe('photos/salon.jpg');
