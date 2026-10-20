@@ -1,5 +1,5 @@
 appId: io.github.nhilaire.minimansion
-name: Smoke (any phone language) - first launch, refuse telemetry, play one round
+name: Smoke (any phone language) - first launch, refuse telemetry, start a game
 tags:
   - smoke
 ---
@@ -7,27 +7,18 @@ tags:
     clearState: true
 - assertVisible:
     id: "consent-screen"
-- takeScreenshot: 01-consent
 - tapOn:
     id: "consent-refuse"
 - assertVisible:
     id: "home-screen"
-- takeScreenshot: readme-1-home
 - tapOn:
-    id: "home-play"
-- assertVisible:
-    id: "game-tap-zone"
+    id: "home-new-game"
 - tapOn:
-    id: "game-tap-zone"
-- tapOn:
-    id: "game-tap-zone"
-- takeScreenshot: readme-2-game
+    id: "intro-skip"
 - extendedWaitUntil:
     visible:
-      id: "game-over-screen"
-    timeout: 20000
-- takeScreenshot: readme-3-game-over
-- tapOn:
-    id: "game-home"
+      id: "game-screen"
+    timeout: 15000
 - assertVisible:
-    id: "home-screen"
+    id: "hs-front.doormat"
+- takeScreenshot: smoke-front

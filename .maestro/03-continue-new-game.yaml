@@ -1,0 +1,74 @@
+appId: io.github.nhilaire.minimansion
+name: Continue after a relaunch, then a new game asks for confirmation (AC-36, AC-37)
+tags:
+  - game
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "consent-refuse"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
+- openLink: "minimansion://test/fast"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
+- tapOn:
+    id: "home-new-game"
+- tapOn:
+    id: "intro-skip"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-front.doormat"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- assertVisible:
+    id: "inv-key"
+- stopApp
+- launchApp:
+    stopApp: false
+- extendedWaitUntil:
+    visible:
+      id: "home-continue"
+    timeout: 15000
+- takeScreenshot: 07-home-continue
+- tapOn:
+    id: "home-continue"
+- extendedWaitUntil:
+    visible:
+      id: "game-screen"
+    timeout: 15000
+- assertVisible:
+    id: "inv-key"
+- assertVisible:
+    id: "hs-front.door"
+- takeScreenshot: 08-continued
+- tapOn:
+    id: "game-menu"
+- tapOn:
+    id: "pause-home"
+- tapOn:
+    id: "home-new-game"
+- assertVisible:
+    id: "home-confirm"
+- takeScreenshot: 09-confirm-new
+- tapOn:
+    id: "home-confirm-yes"
+- tapOn:
+    id: "intro-skip"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- assertNotVisible:
+    id: "inv-key"

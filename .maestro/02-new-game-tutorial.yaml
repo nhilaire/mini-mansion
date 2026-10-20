@@ -1,0 +1,98 @@
+appId: io.github.nhilaire.minimansion
+name: New game - intro cards, tutorial, the doormat key opens the door, the booklet, the notebook (AC-11, AC-16, AC-33, AC-34)
+tags:
+  - game
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "consent-refuse"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
+- openLink: "minimansion://test/fast"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
+- tapOn:
+    id: "home-new-game"
+- assertVisible:
+    id: "intro-card-1"
+- takeScreenshot: 02-intro
+- tapOn:
+    id: "intro-next"
+- assertVisible:
+    id: "intro-card-2"
+- tapOn:
+    id: "intro-next"
+- assertVisible:
+    id: "intro-card-3"
+- tapOn:
+    id: "intro-next"
+- extendedWaitUntil:
+    visible:
+      id: "game-screen"
+    timeout: 15000
+- assertVisible:
+    id: "tutorial-bubble"
+- takeScreenshot: 03-front-tutorial
+# The floor (lower part of the scene): Sam walks.
+- tapOn:
+    point: "30%,72%"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-front.doormat"
+- assertVisible:
+    id: "action-menu"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- assertVisible:
+    id: "inv-key"
+- takeScreenshot: 04-key
+- tapOn:
+    id: "inv-key"
+- tapOn:
+    id: "hs-front.door"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- assertVisible:
+    id: "hs-hall.coats"
+- tapOn:
+    id: "exit-hall.toLiving"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-living.bookshelf"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- assertVisible:
+    id: "inv-booklet"
+- takeScreenshot: 05-living-booklet
+- tapOn:
+    id: "game-notebook"
+- assertVisible:
+    id: "notebook"
+- assertVisible:
+    id: "note-n01"
+- takeScreenshot: 06-notebook
+- tapOn:
+    id: "notebook-close"
+- assertNotVisible:
+    id: "notebook"

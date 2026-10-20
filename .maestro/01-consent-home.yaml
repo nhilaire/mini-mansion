@@ -1,0 +1,34 @@
+appId: io.github.nhilaire.minimansion
+name: Consent and home - first launch asks once, home without a save (AC-01, AC-02, AC-10)
+tags:
+  - home
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "consent-screen"
+- assertVisible:
+    id: "consent-accept"
+- assertVisible:
+    id: "consent-refuse"
+- takeScreenshot: 01-consent
+- tapOn:
+    id: "consent-refuse"
+- assertVisible:
+    id: "home-screen"
+- assertVisible:
+    id: "home-new-game"
+- assertVisible:
+    id: "home-settings"
+- assertVisible:
+    id: "home-about"
+- assertNotVisible:
+    id: "home-continue"
+- takeScreenshot: readme-1-home
+- stopApp
+- launchApp:
+    stopApp: false
+- assertVisible:
+    id: "home-screen"
+- assertNotVisible:
+    id: "consent-screen"

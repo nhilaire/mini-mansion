@@ -1,0 +1,42 @@
+appId: io.github.nhilaire.minimansion
+name: Pause - menu button, resume, and the game is paused after going to the background (AC-39)
+tags:
+  - game
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "consent-refuse"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
+- tapOn:
+    id: "home-new-game"
+- tapOn:
+    id: "intro-skip"
+- extendedWaitUntil:
+    visible:
+      id: "game-screen"
+    timeout: 15000
+- tapOn:
+    id: "game-menu"
+- assertVisible:
+    id: "pause-resume"
+- assertVisible:
+    id: "pause-settings"
+- assertVisible:
+    id: "pause-home"
+- takeScreenshot: 10-pause
+- tapOn:
+    id: "pause-resume"
+- assertNotVisible:
+    id: "pause"
+- pressKey: Home
+- launchApp:
+    stopApp: false
+- extendedWaitUntil:
+    visible:
+      id: "pause"
+    timeout: 15000
+- takeScreenshot: 11-paused-after-background

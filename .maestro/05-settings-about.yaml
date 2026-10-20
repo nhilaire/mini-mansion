@@ -1,0 +1,84 @@
+appId: io.github.nhilaire.minimansion
+name: Settings and About - toggles survive a relaunch, erasing the game keeps the settings, the story (AC-42, AC-44)
+tags:
+  - settings
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "consent-refuse"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
+- tapOn:
+    id: "home-settings"
+- assertVisible:
+    id: "settings-sfx"
+- assertVisible:
+    id: "settings-music"
+- assertVisible:
+    id: "settings-telemetry"
+- assertVisible:
+    id: "settings-language-auto"
+- takeScreenshot: 12-settings
+- tapOn:
+    id: "settings-music"
+- tapOn:
+    id: "settings-back"
+- stopApp
+- launchApp:
+    stopApp: false
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
+- tapOn:
+    id: "home-settings"
+- assertVisible:
+    id: "settings-music"
+    checked: false
+- assertVisible:
+    id: "settings-sfx"
+    checked: true
+- tapOn:
+    id: "settings-music"
+- tapOn:
+    id: "settings-back"
+# A game in progress, then erased from the settings of the pause menu.
+- tapOn:
+    id: "home-new-game"
+- tapOn:
+    id: "intro-skip"
+- extendedWaitUntil:
+    visible:
+      id: "game-screen"
+    timeout: 15000
+- tapOn:
+    id: "game-menu"
+- tapOn:
+    id: "pause-settings"
+- tapOn:
+    id: "settings-erase"
+- assertVisible:
+    id: "settings-confirm"
+- tapOn:
+    id: "settings-erase-yes"
+- tapOn:
+    id: "settings-back"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
+- assertNotVisible:
+    id: "home-continue"
+- tapOn:
+    id: "home-about"
+- assertVisible:
+    id: "about-screen"
+- assertVisible: ".*Maniac Mansion.*"
+- takeScreenshot: 13-about
+- tapOn:
+    id: "about-back"
+- assertVisible:
+    id: "home-screen"

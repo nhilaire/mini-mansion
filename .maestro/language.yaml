@@ -1,5 +1,5 @@
 appId: io.github.nhilaire.minimansion
-name: Language - switch from the settings, the whole UI follows at once and the choice survives a restart
+name: Language - switch from the settings, the whole UI follows at once and the choice survives a restart (AC-04)
 tags:
   - language
 ---
@@ -12,19 +12,22 @@ tags:
 - tapOn:
     id: "settings-language-fr"
 - assertVisible: "Paramètres"
+- assertVisible: "Bruitages"
 - takeScreenshot: language-fr-settings
 - tapOn:
     id: "settings-language-en"
 - assertVisible: "Settings"
+- assertVisible: "Sound effects"
 - takeScreenshot: language-en-settings
 - tapOn:
     id: "settings-back"
-- assertVisible: "Play"
+- assertVisible: "New game"
+- assertVisible: "The House Secret"
 - takeScreenshot: language-en-home
 - stopApp
 - launchApp:
     stopApp: false
-- assertVisible: "Play"
+- assertVisible: "New game"
 - tapOn:
     id: "home-settings"
 - tapOn:
@@ -33,4 +36,5 @@ tags:
     id: "settings-language-fr"
 - tapOn:
     id: "settings-back"
-- assertVisible: "Jouer"
+- assertVisible: "Nouvelle partie"
+- assertVisible: "Le Secret de la Maison"
