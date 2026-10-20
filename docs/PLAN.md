@@ -10,9 +10,9 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-03 World data: 24 places, canonical exits with lock rules, walkable floors, hotspots, scene transform, tap sizes (AC-15, AC-19) - proof: unit
 - [x] T-04 Interaction core: verbs per hotspot, use/give/combine items, wrong lines in rotation, look item, spoken line timing (AC-17, AC-18, AC-49) - proof: unit
 - [x] T-05 Character states, guarded rooms, door announcements, captures, wine cellar and shutter (AC-22, AC-23, AC-24, AC-25) - proof: unit
-- [ ] T-06 Puzzles E01-E05, E16, E17 with their refusals and cutscenes (AC-21) - proof: unit
+- [x] T-06 Puzzles E01-E05, E16, E17 with their refusals and cutscenes (AC-21) - proof: unit
 - [ ] T-07 Chess problem: legal-move generator, guided mate in 2, uniqueness proof, E06 (AC-26) - proof: unit
-- [ ] T-08 Keypads and the rest of the chain: E07-E14, E11-E13, ending (AC-21, AC-27, AC-28, AC-32) - proof: unit
+- [x] T-08 Keypads and the rest of the chain: E07-E14, E11-E13, ending (AC-21, AC-27, AC-28, AC-32) - proof: unit
 - [ ] T-09 Clue notebook N01-N12 and once-only cutscenes (AC-29) - proof: unit
 - [ ] T-10 Dialogues (Papa, Maman, Julien), busy lines, door lines (AC-20) - proof: unit
 - [ ] T-11 Solution walkthrough, exhaustive state-graph search, dependency order (AC-31, AC-32) - proof: unit
