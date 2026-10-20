@@ -18,7 +18,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-11 Solution walkthrough, exhaustive state-graph search, dependency order (AC-31, AC-32) - proof: unit
 - [x] T-12 Save format v1 (full state), corrupt/unknown save rejected (AC-35) - proof: unit
 - [x] T-13 Story content in French and English: lines, names, documents, notebook, clue map, typography (AC-03, AC-30, AC-45) - proof: unit
-- [ ] T-14 Art: palette, pixel buffer, 6 characters with walk/idle/talk/activity frames, 17 item icons (AC-14, AC-19) - proof: unit
+- [x] T-14 Art: palette, pixel buffer, 6 characters with walk/idle/talk/activity frames, 17 item icons (AC-14, AC-19) - proof: unit
 - [ ] T-15 Art: 24 provisional place scenes and the house at dusk (AC-15) - proof: unit
 - [ ] T-16 Native stack: Skia, Reanimated, expo-audio, splash, landscape, scheme, fullscreen plugin, Jest mocks; Skia scene and backdrop (AC-05) - proof: unit
 - [ ] T-17 Game screen: walking, hotspots, exits, action menu, line banner, inventory band with paging, use-with hint, tutorial bubbles (AC-11, AC-16, AC-17, AC-49) - proof: unit
