@@ -43,5 +43,10 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
   finite; if it is too slow for Jest, it explores per track with the shared flags (documented in the test).
 - Content (lines in fr and en) is the largest part: keys are produced by the engine, a test checks every key the
   engine can emit exists in both languages.
+- T-26 proof (2026-10-20): x86_64 release APK on the emulator, 7/7 short flows and the full walkthrough passed
+  (walkthrough reached the ending screen and home without "continue"). The telemetry flow runs in `/verify-app
+  --telemetry`.
+- T-27 is preparation only: its device proofs (launcher name per language, landscape fullscreen, cold start, no crash,
+  feel test) are produced by `/verify-app` and `/release-apk`.
 - Risks: art volume (24 scenes, 6 characters) and startup time (decode per place, lazily); Maestro walkthrough length
   (fast mode).
