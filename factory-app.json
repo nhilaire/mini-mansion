@@ -2,7 +2,7 @@
   "slug": "mini-mansion",
   "displayName": "Mini Mansion",
   "package": "io.github.nhilaire.minimansion",
-  "stack": null,
+  "stack": "expo",
   "description": "Family point-and-click mystery in a real house turned pixel art, inspired by Maniac Mansion",
   "languages": [
     "fr",
