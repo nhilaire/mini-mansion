@@ -1,89 +1,511 @@
-import { useEffect, useReducer, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+// The adventure: Skia scene + touch overlays. Taps make Sam walk, hotspots open the verb menu, inventory items are
+// used on hotspots, characters or other items. Engine outcomes are played as beats (lines, dialogues, keypads, the
+// chess board, documents, captures). Rules live in src/game.
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState, BackHandler, GestureResponderEvent, Pressable, StatusBar, StyleSheet, useWindowDimensions, View } from 'react-native';
 
-import { durationSeconds, initialState, reduce, remainingSeconds } from '../game/engine';
+import { ambience, ambienceFor, sounds } from '../audio/sound';
+import { exitName, hotspotName, itemName, line } from '../content/index';
+import { dialogueOptions } from '../game/dialogue';
+import { findPath } from '../game/geometry';
+import { addPlayTime, advanceTutorial, TutorialSignal, tutorialBubble, tutorialDone } from '../game/progress';
+import { interact, readNotes } from '../game/rules';
+import { Beat, CharacterId, Facing, GameState, Input, ItemId, KeypadId, Point, Speaker, Verb } from '../game/types';
+import { poseAt } from '../game/walker';
+import {
+  exitsIn,
+  FLOORS,
+  HotspotDef,
+  hotspotsIn,
+  inventoryPage,
+  MENU_BUTTON,
+  NOTEBOOK_BUTTON,
+  ROOM_H,
+  sceneTransform,
+  slotRect,
+  SLOTS,
+  toLogical,
+  toScreenRect,
+} from '../game/world';
 import { useI18n } from '../i18n/I18nProvider';
+import { HeroPose, Scene } from '../render/Scene';
+import { eventsFor } from '../telemetry/gameTelemetry';
 import { track } from '../telemetry/telemetry';
-import { Button } from '../ui/Button';
-import { Screen } from '../ui/Screen';
-import { colors, font, spacing } from '../ui/theme';
+import { isFastMode, lineDurationMs } from '../testing/fastMode';
+import {
+  ActionMenu,
+  CaptureFade,
+  ChessBoard,
+  DialogueChoices,
+  DocumentsOverlay,
+  Keypad,
+  LineBanner,
+  NotebookOverlay,
+  NoteToast,
+  PauseMenu,
+  TutorialBubble,
+  UseWithHint,
+} from './game/overlays';
 
-type Props = { onExit: () => void; onGameOver: (score: number) => void };
+type Presentation =
+  | { kind: 'line'; speaker: Speaker; text: string; until: number }
+  | { kind: 'dialogue'; character: CharacterId }
+  | { kind: 'keypad'; keypad: KeypadId }
+  | { kind: 'chess' }
+  | { kind: 'documents' }
+  | { kind: 'capture'; until: number };
 
-export function GameScreen({ onExit, onGameOver }: Props) {
+interface Walk {
+  from: Point;
+  path: Point[];
+  start: number;
+  facing: Facing;
+  then: (() => void) | null;
+  lastFrame: number;
+}
+
+interface Props {
+  initialState: GameState;
+  startPaused: boolean;
+  sfx: boolean;
+  onChange: (state: GameState) => void;
+  onEnding: (state: GameState) => void;
+  onHome: (state: GameState) => void;
+  onSettings: (state: GameState) => void;
+}
+
+const TICK_MS = 33;
+const CAPTURE_MS = 900;
+const TOAST_MS = 1800;
+
+export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding, onHome, onSettings }: Props) {
   const { t } = useI18n();
-  const [state, dispatch] = useReducer(reduce, initialState);
-  const [now, setNow] = useState(() => Date.now());
-  const reported = useRef(false);
+  const { width, height } = useWindowDimensions();
+  const transform = sceneTransform(width, height);
 
-  const start = () => {
-    reported.current = false;
-    const t = Date.now();
-    dispatch({ type: 'start', now: t });
-    setNow(t);
-    track('game_start', { mode: 'new' });
+  const [game, setGame] = useState(initialState);
+  const gameRef = useRef(initialState);
+  const [pose, setPose] = useState<HeroPose>({ pos: initialState.pos, facing: initialState.facing, frame: -1 });
+  const walkRef = useRef<Walk | null>(null);
+  const [present, setPresent] = useState<Presentation | null>(null);
+  const presentRef = useRef<Presentation | null>(null);
+  const queue = useRef<Beat[]>([]);
+  const [menu, setMenu] = useState<HotspotDef | null>(null);
+  const [selected, setSelected] = useState<ItemId | null>(null);
+  const [page, setPage] = useState(0);
+  const [notebook, setNotebook] = useState(false);
+  const [toastUntil, setToastUntil] = useState(0);
+  const [paused, setPaused] = useState(startPaused);
+  const pausedRef = useRef(startPaused);
+  const [foreground, setForeground] = useState(true);
+  const [clock, setClock] = useState(0);
+  const [walking, setWalking] = useState(false);
+  const endedRef = useRef(false);
+
+  const commit = useCallback(
+    (s: GameState) => {
+      gameRef.current = s;
+      setGame(s);
+      onChange(s);
+    },
+    [onChange],
+  );
+
+  const signal = useCallback(
+    (sig: TutorialSignal) => {
+      const before = gameRef.current;
+      const after = advanceTutorial(before, sig);
+      if (after === before) return;
+      commit(after);
+      if (tutorialDone(after)) track('tutorial_complete', {});
+    },
+    [commit],
+  );
+
+  const show = useCallback((p: Presentation | null) => {
+    presentRef.current = p;
+    setPresent(p);
+  }, []);
+
+  // Plays the next beat of the queue (sounds, notes and place changes do not wait).
+  const runNext = useCallback(() => {
+    for (;;) {
+      const b = queue.current.shift();
+      if (!b) {
+        show(null);
+        return;
+      }
+      const now = Date.now();
+      switch (b.type) {
+        case 'say': {
+          const text = line(t, b.key);
+          show({ kind: 'line', speaker: b.speaker, text, until: now + lineDurationMs(text) });
+          return;
+        }
+        case 'dialogue':
+          show({ kind: 'dialogue', character: b.character });
+          return;
+        case 'keypad':
+          show({ kind: 'keypad', keypad: b.keypad });
+          return;
+        case 'chess':
+          show({ kind: 'chess' });
+          return;
+        case 'documents':
+          show({ kind: 'documents' });
+          return;
+        case 'capture':
+          show({ kind: 'capture', until: now + (isFastMode() ? 200 : CAPTURE_MS) });
+          return;
+        case 'sfx':
+          sounds.play(b.sfx);
+          break;
+        case 'note':
+          setToastUntil(now + TOAST_MS);
+          break;
+        case 'room': {
+          const s = gameRef.current;
+          walkRef.current = null;
+          setWalking(false);
+          setPose({ pos: s.pos, facing: s.facing, frame: -1 });
+          setSelected(null);
+          setPage(0);
+          break;
+        }
+        case 'ending':
+          show(null);
+          if (!endedRef.current) {
+            endedRef.current = true;
+            onEnding(gameRef.current);
+          }
+          return;
+      }
+    }
+  }, [onEnding, show, t]);
+
+  const play = useCallback(
+    (beats: readonly Beat[]) => {
+      queue.current.push(...beats);
+      if (!presentRef.current) runNext();
+    },
+    [runNext],
+  );
+
+  const apply = useCallback(
+    (input: Input) => {
+      const o = interact(gameRef.current, input);
+      if (!o.accepted) return;
+      commit(o.state);
+      if (input.kind === 'verb' || input.kind === 'item') signal('verbUsed');
+      for (const e of eventsFor(o.events, o.state)) track(e.name, e.params as never);
+      play(o.beats);
+    },
+    [commit, play, signal],
+  );
+
+  // Walks to `target` along the floor; `then` runs on arrival, facing `face`.
+  const walkTo = useCallback(
+    (target: Point, face: Facing | null, then: (() => void) | null) => {
+      const s = gameRef.current;
+      const w = walkRef.current;
+      const from = w ? poseAt(w.from, w.path, Date.now() - w.start, w.facing).pos : s.pos;
+      const path = findPath(from, target, FLOORS[s.place]);
+      signal('walked');
+      const arrive = () => {
+        const end = path.length ? path[path.length - 1] : from;
+        const facing = face ?? walkRef.current?.facing ?? gameRef.current.facing;
+        walkRef.current = null;
+        setWalking(false);
+        setPose({ pos: end, facing, frame: -1 });
+        commit({ ...gameRef.current, pos: end, facing });
+        then?.();
+      };
+      if (path.length === 0 || isFastMode()) {
+        walkRef.current = null;
+        arrive();
+        return;
+      }
+      walkRef.current = { from, path, start: Date.now(), facing: s.facing, then: arrive, lastFrame: -1 };
+      setWalking(true);
+    },
+    [commit, signal],
+  );
+
+  // Game loop: walking, play time, line timers, animation clock.
+  useEffect(() => {
+    let last = Date.now();
+    const id = setInterval(() => {
+      const now = Date.now();
+      const dt = now - last;
+      last = now;
+      if (pausedRef.current) return;
+      setClock((c) => c + dt);
+      gameRef.current = addPlayTime(gameRef.current, dt, true);
+      const w = walkRef.current;
+      if (w) {
+        const p = poseAt(w.from, w.path, now - w.start, w.facing);
+        w.facing = p.facing;
+        if (p.frame !== w.lastFrame && (p.frame === 0 || p.frame === 2)) sounds.play('step');
+        w.lastFrame = p.frame;
+        if (p.done) w.then?.();
+        else setPose({ pos: p.pos, facing: p.facing, frame: p.frame });
+      }
+      const pr = presentRef.current;
+      if (pr && (pr.kind === 'line' || pr.kind === 'capture') && now >= pr.until) runNext();
+    }, TICK_MS);
+    return () => clearInterval(id);
+  }, [runNext]);
+
+  // Activity sounds of the place (guarded rooms heard from their corridor, drums, washing machine).
+  useEffect(() => {
+    ambience.update(ambienceFor(game), { enabled: sfx, foreground: foreground && !paused });
+  }, [game, sfx, foreground, paused]);
+  useEffect(() => () => ambience.update([], { enabled: false, foreground: false }), []);
+
+  const pause = useCallback(() => {
+    pausedRef.current = true;
+    setPaused(true);
+    setMenu(null);
+    onChange(gameRef.current);
+  }, [onChange]);
+
+  const resume = useCallback(() => {
+    pausedRef.current = false;
+    setPaused(false);
+  }, []);
+
+  // Background: pause and save. Coming back shows the pause menu.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (st) => {
+      setForeground(st === 'active');
+      if (st !== 'active') pause();
+    });
+    return () => sub.remove();
+  }, [pause]);
+
+  const closeNotebook = useCallback(() => {
+    setNotebook(false);
+    commit(readNotes(gameRef.current));
+  }, [commit]);
+
+  // Android back closes the notebook, else opens the pause menu (or closes it).
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (notebook) closeNotebook();
+      else if (pausedRef.current) resume();
+      else pause();
+      return true;
+    });
+    return () => sub.remove();
+  }, [notebook, closeNotebook, pause, resume]);
+
+  const busy = present !== null;
+  const blocked = busy || paused || notebook;
+
+  const onFloor = (e: GestureResponderEvent) => {
+    if (blocked) return;
+    const p = toLogical(transform, e.nativeEvent.locationX, e.nativeEvent.locationY);
+    if (p.y >= ROOM_H) return;
+    setMenu(null);
+    walkTo(p, null, null);
   };
 
-  useEffect(start, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const onHotspot = (h: HotspotDef) => {
+    if (blocked) return;
+    if (selected) {
+      const item = selected;
+      setSelected(null);
+      walkTo(h.at, h.face, () => apply({ kind: 'item', item, target: h.id }));
+      return;
+    }
+    setMenu(h);
+  };
 
-  useEffect(() => {
-    if (state.status !== 'playing') return;
-    const id = setInterval(() => {
-      const t = Date.now();
-      setNow(t);
-      dispatch({ type: 'tick', now: t });
-    }, 200);
-    return () => clearInterval(id);
-  }, [state.status]);
+  const onVerb = (h: HotspotDef, v: Verb) => {
+    setMenu(null);
+    // Looking at a thing needs no walk; everything else is done standing next to it.
+    if (v === 'look' && !h.character) apply({ kind: 'verb', verb: v, target: h.id });
+    else walkTo(h.at, h.face, () => apply({ kind: 'verb', verb: v, target: h.id }));
+  };
 
-  useEffect(() => {
-    if (state.status !== 'over' || reported.current) return;
-    reported.current = true;
-    track('game_complete', { duration_s: durationSeconds(state), captures: 0 });
-    onGameOver(state.score);
-  }, [state, onGameOver]);
+  const onExit = (id: string, at: Point) => {
+    if (blocked) return;
+    setMenu(null);
+    setSelected(null);
+    walkTo(at, 'up', () => apply({ kind: 'exit', exit: id }));
+  };
 
-  if (state.status === 'over') {
-    return (
-      <Screen testID="game-over-screen">
-        <View style={styles.center}>
-          <Text style={styles.title} accessibilityRole="header">
-            {t.game.over}
-          </Text>
-          <Text style={styles.score}>{t.game.finalScore(state.score)}</Text>
-        </View>
-        <Button label={t.game.playAgain} onPress={start} testID="game-play-again" />
-        <Button label={t.game.home} onPress={onExit} variant="secondary" testID="game-home" />
-      </Screen>
-    );
-  }
+  const onSlot = (item: ItemId) => {
+    if (blocked) return;
+    setMenu(null);
+    if (selected && selected !== item) {
+      const first = selected;
+      setSelected(null);
+      apply({ kind: 'item', item: first, target: `item:${item}` });
+      return;
+    }
+    setSelected((cur) => (cur === item ? null : item));
+    signal('itemSelected');
+  };
+
+  const hotspots = hotspotsIn(game);
+  const exits = exitsIn(game);
+  const inv = inventoryPage(game.inventory, page);
+  const bubble = !blocked ? tutorialBubble(game) : null;
+  const speaker = present?.kind === 'line' ? present.speaker : null;
+  const idle = !blocked && !walking && !menu;
+  const menuRect = toScreenRect(transform, MENU_BUTTON);
+  const notebookRect = toScreenRect(transform, NOTEBOOK_BUTTON);
+  const toast = clock >= 0 && Date.now() < toastUntil && !paused;
 
   return (
-    <Screen testID="game-screen">
-      <View style={styles.hud}>
-        <Text style={styles.hudText}>{t.game.score(state.score)}</Text>
-        <Text style={styles.hudText}>{t.game.timeLeft(remainingSeconds(state, now))}</Text>
-      </View>
+    <View testID="game-screen" style={styles.screen}>
+      <StatusBar hidden />
+      <Scene
+        state={game}
+        hero={pose}
+        transform={transform}
+        width={width}
+        height={height}
+        speaker={speaker}
+        selected={selected}
+        page={inv.page}
+        unread={game.unread.length > 0}
+        clock={clock}
+      />
+
+      <Pressable testID="scene-floor" style={StyleSheet.absoluteFill} onPress={onFloor} accessible={false} />
+      {exits.map((e) => {
+        const r = toScreenRect(transform, e.rect);
+        return (
+          <Pressable
+            key={e.id}
+            testID={`exit-${e.id}`}
+            accessibilityRole="button"
+            accessibilityLabel={exitName(t, e.id)}
+            onPress={() => onExit(e.id, e.at)}
+            style={[styles.abs, { left: r.x, top: r.y, width: r.w, height: r.h }]}
+          />
+        );
+      })}
+      {hotspots.map((h) => {
+        const r = toScreenRect(transform, h.rect);
+        return (
+          <Pressable
+            key={h.id}
+            testID={`hs-${h.id}`}
+            accessibilityRole="button"
+            accessibilityLabel={hotspotName(t, h.id)}
+            onPress={() => onHotspot(h)}
+            style={[styles.abs, { left: r.x, top: r.y, width: r.w, height: r.h }]}
+          />
+        );
+      })}
+      {inv.items.map((item, i) => {
+        const r = toScreenRect(transform, slotRect(i));
+        return (
+          <Pressable
+            key={item}
+            testID={`inv-${item}`}
+            accessibilityRole="button"
+            accessibilityLabel={itemName(t, item)}
+            accessibilityState={{ selected: selected === item }}
+            onPress={() => onSlot(item)}
+            onLongPress={() => !blocked && apply({ kind: 'lookItem', item })}
+            style={[styles.abs, { left: r.x, top: r.y, width: r.w, height: r.h }]}
+          />
+        );
+      })}
+      {inv.pages > 1 &&
+        (() => {
+          const r = toScreenRect(transform, slotRect(SLOTS - 1));
+          return (
+            <Pressable
+              testID="inv-more"
+              accessibilityRole="button"
+              accessibilityLabel={t.game.morePage}
+              onPress={() => !blocked && setPage((p) => p + 1)}
+              style={[styles.abs, { left: r.x, top: r.y, width: r.w, height: r.h }]}
+            />
+          );
+        })()}
       <Pressable
-        testID="game-tap-zone"
+        testID="game-notebook"
         accessibilityRole="button"
-        accessibilityLabel={t.game.tap}
-        onPress={() => dispatch({ type: 'tap', now: Date.now() })}
-        style={({ pressed }) => [styles.tapZone, pressed && styles.tapZonePressed]}
-      >
-        <Text style={styles.tapText}>{t.game.tap}</Text>
-      </Pressable>
-    </Screen>
+        accessibilityLabel={t.game.notebook}
+        onPress={() => {
+          if (busy || paused) return;
+          setMenu(null);
+          setNotebook(true);
+        }}
+        style={[styles.abs, { left: notebookRect.x, top: notebookRect.y, width: notebookRect.w, height: notebookRect.h }]}
+      />
+      <Pressable
+        testID="game-menu"
+        accessibilityRole="button"
+        accessibilityLabel={t.game.menu}
+        onPress={pause}
+        style={[styles.abs, { left: menuRect.x, top: menuRect.y, width: menuRect.w, height: menuRect.h }]}
+      />
+
+      {selected && !busy && <UseWithHint text={t.game.useWith(itemName(t, selected))} />}
+      {bubble && <TutorialBubble text={t.tutorial[bubble]} />}
+      {toast && <NoteToast text={t.game.newNote} />}
+      {/* Marker for the e2e flows: nothing is moving or being said. collapsable=false keeps it in the native tree. */}
+      {idle && <View testID="scene-idle" collapsable={false} pointerEvents="none" style={styles.idle} />}
+
+      {menu && (
+        <ActionMenu
+          title={hotspotName(t, menu.id)}
+          verbs={menu.verbs}
+          anchor={toScreenRect(transform, menu.rect)}
+          screenW={width}
+          screenH={height}
+          onVerb={(v) => onVerb(menu, v)}
+          onClose={() => setMenu(null)}
+        />
+      )}
+      {present?.kind === 'line' && <LineBanner speaker={present.speaker} text={present.text} onPress={runNext} />}
+      {present?.kind === 'dialogue' && (
+        <DialogueChoices
+          choices={dialogueOptions(game, present.character)}
+          onChoose={(id) => {
+            show(null);
+            apply({ kind: 'dialogue', character: present.character, option: id });
+          }}
+        />
+      )}
+      {present?.kind === 'keypad' && (
+        <Keypad
+          title={t.keypad[present.keypad]}
+          onSubmit={(code) => {
+            const keypad = present.keypad;
+            show(null);
+            apply({ kind: 'keypad', keypad, code });
+          }}
+          onClose={runNext}
+        />
+      )}
+      {present?.kind === 'chess' && (
+        <ChessBoard
+          onSolved={(moves) => {
+            show(null);
+            apply({ kind: 'chess', moves });
+          }}
+          onClose={runNext}
+        />
+      )}
+      {present?.kind === 'documents' && <DocumentsOverlay onClose={runNext} />}
+      {present?.kind === 'capture' && <CaptureFade onPress={runNext} />}
+      {notebook && <NotebookOverlay notes={game.notes} unread={game.unread} onClose={closeNotebook} />}
+
+      {paused && <PauseMenu onResume={resume} onSettings={() => onSettings(gameRef.current)} onHome={() => onHome(gameRef.current)} />}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md },
-  title: { color: colors.text, fontSize: font.title, fontWeight: '800' },
-  score: { color: colors.accent, fontSize: font.heading, fontWeight: '700' },
-  hud: { flexDirection: 'row', justifyContent: 'space-between' },
-  hudText: { color: colors.text, fontSize: font.body, fontWeight: '600' },
-  tapZone: { flex: 1, borderRadius: 24, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
-  tapZonePressed: { backgroundColor: colors.accent },
-  tapText: { color: colors.text, fontSize: font.title, fontWeight: '800' },
+  screen: { flex: 1, backgroundColor: '#000000' },
+  abs: { position: 'absolute' },
+  idle: { position: 'absolute', right: 0, bottom: 0, width: 2, height: 2 },
 });

@@ -1,10 +1,7 @@
 // English translation of fr.ts (same keys, enforced by the Strings type). English typography: no space before
 // ": ! ?", comma as thousands separator.
 import { story } from '../content/en';
-import { formatter } from './format';
 import type { Strings } from './types';
-
-const { label } = formatter('en-US');
 
 export const en: Strings = {
   consent: {
@@ -23,8 +20,6 @@ export const en: Strings = {
     settings: 'Settings',
     about: 'About',
     confirmNew: 'Erase your current game?',
-    play: 'Play',
-    bestScore: (score: number) => label('Best score', score),
   },
   common: { yes: 'Yes', no: 'No' },
   intro: {
@@ -50,13 +45,6 @@ export const en: Strings = {
     tapToContinue: 'Tap to continue',
     morePage: 'More items',
     newNote: 'Written in the notebook!',
-    tap: 'Tap!',
-    score: (score: number) => label('Score', score),
-    timeLeft: (seconds: number) => label('Time', `${seconds} s`),
-    over: 'Game over',
-    finalScore: (score: number) => label('Your score', score),
-    playAgain: 'Play again',
-    home: 'Home',
   },
   notebook: { title: 'Clue notebook', empty: 'Nothing noted yet.', close: 'Close' },
   keypad: { computer: "Papa's computer", safe: 'The safe', ok: 'OK', clear: 'Clear', close: 'Close' },
@@ -105,6 +93,7 @@ export const en: Strings = {
     language: 'Language',
     languageAuto: 'Automatic (phone language)',
     erase: 'Erase the game',
+    erased: 'Game erased.',
     confirmErase: 'Erase your game? You will start again from the beginning.',
     back: 'Back',
   },

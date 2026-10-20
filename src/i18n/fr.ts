@@ -2,10 +2,8 @@
 // they read `t` from useI18n(). The story (lines, names, notebook, documents) is in src/content/<lang>.ts and is part
 // of the dictionary, so every language must provide every key. Written with plain spaces where typo() is applied.
 import { story } from '../content/fr';
-import { formatter, NBSP } from './format';
+import { NBSP } from './format';
 import { typo } from './typo';
-
-const { label } = formatter('fr-FR');
 
 export const fr = {
   consent: {
@@ -24,9 +22,6 @@ export const fr = {
     settings: 'Paramètres',
     about: 'À propos',
     confirmNew: typo('Effacer ta partie en cours ?'),
-    // Template placeholders, removed with the template screens.
-    play: 'Jouer',
-    bestScore: (score: number) => label('Meilleur score', score),
   },
   common: { yes: 'Oui', no: 'Non' },
   intro: {
@@ -52,14 +47,6 @@ export const fr = {
     tapToContinue: 'Touche pour continuer',
     morePage: "Autres objets",
     newNote: typo('Noté dans le carnet !'),
-    // Template placeholders, removed with the template screens.
-    tap: `Touchez${NBSP}!`,
-    score: (score: number) => label('Score', score),
-    timeLeft: (seconds: number) => label('Temps', `${seconds}${NBSP}s`),
-    over: 'Partie terminée',
-    finalScore: (score: number) => label('Ton score', score),
-    playAgain: 'Rejouer',
-    home: 'Accueil',
   },
   notebook: { title: "Carnet d'indices", empty: "Rien noté pour l'instant.", close: 'Fermer' },
   keypad: { computer: "L'ordinateur de Papa", safe: 'Le coffre-fort', ok: 'Valider', clear: 'Effacer', close: 'Fermer' },
@@ -112,6 +99,7 @@ export const fr = {
     language: 'Langue',
     languageAuto: 'Automatique (langue du téléphone)',
     erase: 'Effacer la partie',
+    erased: 'Partie effacée.',
     confirmErase: typo('Effacer ta partie ? Tu recommenceras depuis le début.'),
     back: 'Retour',
   },

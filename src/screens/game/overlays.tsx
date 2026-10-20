@@ -1,0 +1,367 @@
+// Overlays of the game screen: action menu, spoken line banner, dialogue choices, digit keypad, chess board, clue
+// notebook, documents, capture fade, tutorial bubble, "use with" hint, note toast and the pause menu. Plain React
+// Native views (readable by Maestro and screen readers); every text comes from the dictionaries.
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+
+import { line, noteText, speakerName } from '../../content/index';
+import { Board, ChessSession, coords, legalFrom, newSession, playWhite, square } from '../../game/chess';
+import { DialogueChoice } from '../../game/dialogue';
+import { NoteId, Rect, Speaker, Verb } from '../../game/types';
+import { useI18n } from '../../i18n/I18nProvider';
+import { Button } from '../../ui/Button';
+import { colors, font, spacing, speakerColors } from '../../ui/theme';
+
+export function ActionMenu({ title, verbs, anchor, screenW, screenH, onVerb, onClose }: {
+  title: string;
+  verbs: readonly Verb[];
+  anchor: Rect;
+  screenW: number;
+  screenH: number;
+  onVerb: (v: Verb) => void;
+  onClose: () => void;
+}) {
+  const { t } = useI18n();
+  const width = 170;
+  const height = 34 + verbs.length * 50;
+  const cx = anchor.x + anchor.w / 2;
+  const left = Math.max(8, Math.min(screenW - width - 8, cx - width / 2));
+  const top = Math.max(8, Math.min(screenH - height - 8, anchor.y + anchor.h / 2 - height / 2));
+  return (
+    <View style={StyleSheet.absoluteFill}>
+      <Pressable testID="menu-close" accessibilityLabel={t.game.cancel} style={StyleSheet.absoluteFill} onPress={onClose} />
+      <View testID="action-menu" style={[styles.panel, { position: 'absolute', left, top, width }]}>
+        <Text style={styles.menuTitle} numberOfLines={1}>
+          {title}
+        </Text>
+        {verbs.map((v) => (
+          <Pressable
+            key={v}
+            testID={`verb-${v}`}
+            accessibilityRole="button"
+            accessibilityLabel={t.verbs[v]}
+            onPress={() => onVerb(v)}
+            style={({ pressed }) => [styles.verb, pressed && styles.pressed]}
+          >
+            <Text style={styles.verbText}>{t.verbs[v]}</Text>
+          </Pressable>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+export function LineBanner({ speaker, text, onPress }: { speaker: Speaker; text: string; onPress: () => void }) {
+  const { t } = useI18n();
+  // The narrator has no name tag.
+  const name = speaker === 'narrator' ? null : speakerName(t, speaker);
+  return (
+    <Pressable testID="line-banner" accessibilityRole="button" accessibilityHint={t.game.tapToContinue} onPress={onPress} style={StyleSheet.absoluteFill}>
+      <View style={[styles.panel, styles.banner]}>
+        {name ? <Text style={[styles.speaker, { color: speakerColors[speaker] }]}>{name}</Text> : null}
+        <Text style={[styles.lineText, { color: speakerColors[speaker] }, speaker === 'narrator' && styles.italic]}>{text}</Text>
+      </View>
+    </Pressable>
+  );
+}
+
+export function DialogueChoices({ choices, onChoose }: { choices: DialogueChoice[]; onChoose: (id: string) => void }) {
+  const { t } = useI18n();
+  return (
+    <View style={StyleSheet.absoluteFill}>
+      <View testID="dialogue" style={[styles.panel, styles.dialogue]}>
+        {choices.map((c) => (
+          <Pressable
+            key={c.id}
+            testID={`dlg-${c.id}`}
+            accessibilityRole="button"
+            accessibilityLabel={line(t, c.label)}
+            onPress={() => onChoose(c.id)}
+            style={({ pressed }) => [styles.choice, pressed && styles.pressed]}
+          >
+            <Text style={[styles.choiceText, c.seen && styles.seen]}>› {line(t, c.label)}</Text>
+          </Pressable>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+// A 4-digit code pad (the computer and the safe). OK is enabled once 4 digits are typed.
+export function Keypad({ title, onSubmit, onClose }: { title: string; onSubmit: (code: string) => void; onClose: () => void }) {
+  const { t } = useI18n();
+  const [code, setCode] = useState('');
+  const digit = (d: string) => setCode((c) => (c.length < 4 ? c + d : c));
+  return (
+    <View testID="keypad" style={[StyleSheet.absoluteFill, styles.center, styles.dim]}>
+      <View style={[styles.panel, styles.keypad]}>
+        <Text style={styles.menuTitle}>{title}</Text>
+        <Text testID="keypad-display" style={styles.display}>
+          {code.padEnd(4, '_').split('').join(' ')}
+        </Text>
+        <View style={styles.keyRows}>
+          {['123', '456', '789'].map((row) => (
+            <View key={row} style={styles.row}>
+              {row.split('').map((d) => (
+                <Key key={d} label={d} testID={`keypad-digit-${d}`} onPress={() => digit(d)} />
+              ))}
+            </View>
+          ))}
+          <View style={styles.row}>
+            <Key label={t.keypad.clear} testID="keypad-clear" onPress={() => setCode('')} wide />
+            <Key label="0" testID="keypad-digit-0" onPress={() => digit('0')} />
+            <Key label={t.keypad.ok} testID="keypad-ok" onPress={() => code.length === 4 && onSubmit(code)} wide disabled={code.length !== 4} />
+          </View>
+        </View>
+        <Button label={t.keypad.close} onPress={onClose} variant="secondary" testID="keypad-close" compact />
+      </View>
+    </View>
+  );
+}
+
+function Key({ label, testID, onPress, wide, disabled }: { label: string; testID: string; onPress: () => void; wide?: boolean; disabled?: boolean }) {
+  return (
+    <Pressable
+      testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: Boolean(disabled) }}
+      onPress={onPress}
+      style={({ pressed }) => [styles.key, wide && styles.keyWide, disabled && styles.disabled, pressed && styles.pressed]}
+    >
+      <Text style={styles.keyText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+const GLYPHS: Record<string, string> = { K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙', k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
+
+// Théo's chess problem: tap a white piece (its legal moves light up), then a destination. Black answers by itself.
+export function ChessBoard({ onSolved, onClose }: { onSolved: (moves: string[]) => void; onClose: () => void }) {
+  const { t } = useI18n();
+  const { height } = useWindowDimensions();
+  const [session, setSession] = useState<ChessSession>(newSession);
+  const [from, setFrom] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const size = Math.max(28, Math.min(40, Math.floor((height - 40) / 8)));
+  const targets = from ? legalFrom(session.board, from) : [];
+  const reset = () => {
+    setSession(newSession());
+    setFrom(null);
+  };
+
+  const tap = (sq: string) => {
+    if (session.step >= 2) return;
+    const piece = session.board[sq];
+    if (from && targets.includes(sq)) {
+      const result = playWhite(session, `${from}${sq}`);
+      setFrom(null);
+      if (result.kind === 'wrong') {
+        setMessage(t.chess.wrong);
+        reset();
+      } else if (result.kind === 'progress') {
+        setMessage(null);
+        setSession(result.session);
+      } else if (result.kind === 'solved') {
+        setSession(result.session);
+        setMessage(t.chess.solved);
+        onSolved(result.session.moves);
+      }
+      return;
+    }
+    setFrom(piece && piece === piece.toUpperCase() ? sq : null);
+  };
+
+  const label = (board: Board, sq: string) => {
+    const p = board[sq];
+    return p ? t.chess.square(t.chess.pieces[p as keyof typeof t.chess.pieces], sq) : t.chess.empty(sq);
+  };
+
+  return (
+    <View testID="chess" style={[StyleSheet.absoluteFill, styles.center, styles.dim]}>
+      <View style={[styles.panel, styles.chessPanel]}>
+        <View style={{ width: size * 8 }}>
+          {[7, 6, 5, 4, 3, 2, 1, 0].map((rank) => (
+            <View key={rank} style={styles.boardRow}>
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((file) => {
+                const sq = square(file, rank)!;
+                const piece = session.board[sq];
+                const dark = (file + rank) % 2 === 0;
+                const [ff, rr] = coords(sq);
+                return (
+                  <Pressable
+                    key={sq}
+                    testID={`chess-sq-${sq}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={label(session.board, sq)}
+                    onPress={() => tap(sq)}
+                    style={[
+                      { width: size, height: size },
+                      styles.cell,
+                      dark ? styles.dark : styles.light,
+                      from === sq && styles.selected,
+                      targets.includes(sq) && styles.target,
+                    ]}
+                  >
+                    {piece ? <Text style={[styles.piece, { fontSize: size * 0.72 }, piece === piece.toUpperCase() ? styles.whitePiece : styles.blackPiece]}>{GLYPHS[piece]}</Text> : null}
+                    {ff === 0 ? <Text style={styles.coordRank}>{rr + 1}</Text> : null}
+                    {rr === 0 ? <Text style={styles.coordFile}>{'abcdefgh'[ff]}</Text> : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))}
+        </View>
+        <View style={styles.chessSide}>
+          <Text style={styles.chessTitle}>{t.chess.title}</Text>
+          {message ? (
+            <Text testID="chess-message" style={styles.chessMessage}>
+              {message}
+            </Text>
+          ) : null}
+          <Button label={t.chess.reset} onPress={reset} variant="secondary" testID="chess-reset" compact />
+          <Button label={t.chess.close} onPress={onClose} variant="secondary" testID="chess-close" compact />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+export function NotebookOverlay({ notes, unread, onClose }: { notes: readonly NoteId[]; unread: readonly NoteId[]; onClose: () => void }) {
+  const { t } = useI18n();
+  const newestFirst = [...notes].reverse();
+  return (
+    <View testID="notebook" style={[StyleSheet.absoluteFill, styles.center, styles.dim]}>
+      <View style={[styles.panel, styles.sheet]}>
+        <Text style={styles.sheetTitle}>{t.notebook.title}</Text>
+        <ScrollView contentContainerStyle={styles.sheetBody}>
+          {newestFirst.length === 0 ? <Text style={styles.noteText}>{t.notebook.empty}</Text> : null}
+          {newestFirst.map((n) => (
+            <Text key={n} testID={`note-${n}`} style={[styles.noteText, unread.includes(n) && styles.noteNew]}>
+              • {noteText(t, n)}
+            </Text>
+          ))}
+        </ScrollView>
+        <Button label={t.notebook.close} onPress={onClose} variant="secondary" testID="notebook-close" compact />
+      </View>
+    </View>
+  );
+}
+
+export function DocumentsOverlay({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
+  return (
+    <View testID="documents" style={[StyleSheet.absoluteFill, styles.center, styles.dim]}>
+      <View style={[styles.panel, styles.sheet, styles.screenPanel]}>
+        <Text style={styles.sheetTitle}>{t.documents.title}</Text>
+        <ScrollView contentContainerStyle={styles.sheetBody}>
+          {t.story.docs.map((d) => (
+            <Text key={d} style={styles.docText}>
+              {d}
+            </Text>
+          ))}
+        </ScrollView>
+        <Button label={t.documents.close} onPress={onClose} variant="secondary" testID="documents-close" compact />
+      </View>
+    </View>
+  );
+}
+
+export function CaptureFade({ onPress }: { onPress: () => void }) {
+  return <Pressable testID="capture-fade" onPress={onPress} style={[StyleSheet.absoluteFill, styles.black]} />;
+}
+
+export function TutorialBubble({ text }: { text: string }) {
+  return (
+    <View testID="tutorial-bubble" pointerEvents="none" style={[styles.panel, styles.tutorial]}>
+      <Text style={styles.tutorialText}>{text}</Text>
+    </View>
+  );
+}
+
+export function UseWithHint({ text }: { text: string }) {
+  return (
+    <View testID="use-with" pointerEvents="none" style={[styles.panel, styles.useWith]}>
+      <Text style={styles.small}>{text}</Text>
+    </View>
+  );
+}
+
+export function NoteToast({ text }: { text: string }) {
+  return (
+    <View testID="note-toast" pointerEvents="none" style={[styles.panel, styles.toast]}>
+      <Text style={styles.small}>{text}</Text>
+    </View>
+  );
+}
+
+export function PauseMenu({ onResume, onSettings, onHome }: { onResume: () => void; onSettings: () => void; onHome: () => void }) {
+  const { t } = useI18n();
+  return (
+    <View testID="pause" style={[StyleSheet.absoluteFill, styles.center, styles.dim]}>
+      <View style={[styles.panel, styles.pause]}>
+        <Text style={styles.titleText}>{t.pause.title}</Text>
+        <Button label={t.pause.resume} onPress={onResume} testID="pause-resume" />
+        <Button label={t.pause.settings} onPress={onSettings} variant="secondary" testID="pause-settings" />
+        <Button label={t.pause.home} onPress={onHome} variant="secondary" testID="pause-home" />
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  panel: { backgroundColor: colors.panel, borderColor: colors.border, borderWidth: 2, borderRadius: 3, padding: spacing.sm },
+  pressed: { opacity: 0.7 },
+  disabled: { opacity: 0.4 },
+  center: { alignItems: 'center', justifyContent: 'center' },
+  dim: { backgroundColor: 'rgba(0,0,0,0.6)' },
+  black: { backgroundColor: '#000000' },
+  row: { flexDirection: 'row', gap: spacing.sm, justifyContent: 'center' },
+  menuTitle: { color: colors.accent, fontFamily: font.family, fontSize: font.small, fontWeight: '700', marginBottom: spacing.xs, textAlign: 'center' },
+  verb: { minHeight: 46, justifyContent: 'center', paddingHorizontal: spacing.sm, borderTopWidth: 1, borderTopColor: colors.surface },
+  verbText: { color: colors.text, fontFamily: font.family, fontSize: font.body, fontWeight: '700' },
+  banner: { position: 'absolute', top: spacing.sm, left: '8%', right: '8%' },
+  speaker: { fontFamily: font.family, fontSize: font.small, fontWeight: '700' },
+  lineText: { fontFamily: font.family, fontSize: font.body, lineHeight: 22 },
+  italic: { fontStyle: 'italic' },
+  dialogue: { position: 'absolute', bottom: spacing.sm, left: '10%', right: '10%' },
+  choice: { minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.sm },
+  choiceText: { color: colors.text, fontFamily: font.family, fontSize: font.body },
+  seen: { color: colors.muted },
+  keypad: { alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.lg },
+  display: { color: colors.accent, fontFamily: font.family, fontSize: 28, fontWeight: '700', letterSpacing: 2 },
+  keyRows: { gap: spacing.xs },
+  key: { width: 52, height: 44, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
+  keyWide: { width: 96 },
+  keyText: { color: colors.text, fontFamily: font.family, fontSize: font.body, fontWeight: '700' },
+  chessPanel: { flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
+  boardRow: { flexDirection: 'row' },
+  cell: { alignItems: 'center', justifyContent: 'center' },
+  light: { backgroundColor: '#e8d8b0' },
+  dark: { backgroundColor: '#9a6a3c' },
+  selected: { backgroundColor: '#d4a23a' },
+  target: { borderWidth: 3, borderColor: '#5a9a48' },
+  piece: { fontWeight: '700' },
+  whitePiece: { color: '#ffffff', textShadowColor: '#000000', textShadowRadius: 2 },
+  blackPiece: { color: '#120e18' },
+  coordRank: { position: 'absolute', left: 1, top: 0, fontSize: 9, color: '#3e2414', fontFamily: font.family },
+  coordFile: { position: 'absolute', right: 2, bottom: 0, fontSize: 9, color: '#3e2414', fontFamily: font.family },
+  chessSide: { width: 210, gap: spacing.sm },
+  chessTitle: { color: colors.text, fontFamily: font.family, fontSize: font.small, lineHeight: 18 },
+  chessMessage: { color: colors.accent, fontFamily: font.family, fontSize: font.body, fontWeight: '700' },
+  sheet: { width: '70%', maxHeight: '88%', gap: spacing.sm },
+  screenPanel: { backgroundColor: 'rgba(20, 52, 54, 0.96)' },
+  sheetTitle: { color: colors.accent, fontFamily: font.family, fontSize: font.heading, fontWeight: '700', textAlign: 'center' },
+  sheetBody: { gap: spacing.sm, paddingBottom: spacing.sm },
+  noteText: { color: colors.text, fontFamily: font.family, fontSize: font.small, lineHeight: 19 },
+  noteNew: { color: colors.accent },
+  docText: { color: '#9af0c0', fontFamily: font.family, fontSize: font.small, lineHeight: 19 },
+  small: { color: colors.text, fontFamily: font.family, fontSize: font.small },
+  titleText: { color: colors.accent, fontFamily: font.family, fontSize: font.title, fontWeight: '700', textAlign: 'center' },
+  // At the top: the floor stays visible and free to tap.
+  tutorial: { position: 'absolute', left: '14%', right: '14%', top: spacing.sm },
+  tutorialText: { color: colors.accent, fontFamily: font.family, fontSize: font.body, textAlign: 'center' },
+  useWith: { position: 'absolute', top: spacing.sm, alignSelf: 'center', left: '25%', right: '25%', alignItems: 'center' },
+  toast: { position: 'absolute', bottom: '22%', right: spacing.md },
+  pause: { width: 300, gap: spacing.sm, padding: spacing.md },
+});

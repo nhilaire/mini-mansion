@@ -21,11 +21,11 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-14 Art: palette, pixel buffer, 6 characters with walk/idle/talk/activity frames, 17 item icons (AC-14, AC-19) - proof: unit
 - [x] T-15 Art: 24 provisional place scenes and the house at dusk (AC-15) - proof: unit
 - [x] T-16 Native stack: Skia, Reanimated, expo-audio, splash, landscape, scheme, fullscreen plugin, Jest mocks; Skia scene and backdrop (AC-05) - proof: unit
-- [ ] T-17 Game screen: walking, hotspots, exits, action menu, line banner, inventory band with paging, use-with hint, tutorial bubbles (AC-11, AC-16, AC-17, AC-49) - proof: unit
-- [ ] T-18 Game overlays: dialogue choices, digit keypad, chess board, clue notebook, capture fade (AC-26, AC-27, AC-34) - proof: unit
-- [ ] T-19 App flow: home (title, subtitle, continue, confirm), intro, ending, pause, background pause (AC-10, AC-11, AC-36, AC-37, AC-39, AC-40) - proof: unit
-- [ ] T-20 Settings and About: sfx, music, statistics, language, erase; story and author text in each language (AC-04, AC-42, AC-44) - proof: unit
-- [ ] T-21 Persistence wiring: autosave triggers, background save, cutscene-safe save, kill during the ending (AC-35, AC-50) - proof: unit
+- [x] T-17 Game screen: walking, hotspots, exits, action menu, line banner, inventory band with paging, use-with hint, tutorial bubbles (AC-11, AC-16, AC-17, AC-49) - proof: unit
+- [x] T-18 Game overlays: dialogue choices, digit keypad, chess board, clue notebook, capture fade (AC-26, AC-27, AC-34) - proof: unit
+- [x] T-19 App flow: home (title, subtitle, continue, confirm), intro, ending, pause, background pause (AC-10, AC-11, AC-36, AC-37, AC-39, AC-40) - proof: unit
+- [x] T-20 Settings and About: sfx, music, statistics, language, erase; story and author text in each language (AC-04, AC-42, AC-44) - proof: unit
+- [x] T-21 Persistence wiring: autosave triggers, background save, cutscene-safe save, kill during the ending (AC-35, AC-50) - proof: unit
 - [ ] T-22 Telemetry calls: game_start, tutorial_complete, puzzle_solved, capture, game_complete, settings_change (AC-06, AC-07, AC-08) - proof: unit
 - [x] T-23 Audio: generated 8-bit effects, activity loops and music; toggles, background pause, activity sound per guarded room (AC-25, AC-43) - proof: unit
 - [ ] T-24 Pixel icon and splash generated from code (AC-05) - proof: device
