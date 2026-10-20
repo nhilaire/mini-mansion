@@ -11,7 +11,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-04 Interaction core: verbs per hotspot, use/give/combine items, wrong lines in rotation, look item, spoken line timing (AC-17, AC-18, AC-49) - proof: unit
 - [x] T-05 Character states, guarded rooms, door announcements, captures, wine cellar and shutter (AC-22, AC-23, AC-24, AC-25) - proof: unit
 - [x] T-06 Puzzles E01-E05, E16, E17 with their refusals and cutscenes (AC-21) - proof: unit
-- [ ] T-07 Chess problem: legal-move generator, guided mate in 2, uniqueness proof, E06 (AC-26) - proof: unit
+- [x] T-07 Chess problem: legal-move generator, guided mate in 2, uniqueness proof, E06 (AC-26) - proof: unit
 - [x] T-08 Keypads and the rest of the chain: E07-E14, E11-E13, ending (AC-21, AC-27, AC-28, AC-32) - proof: unit
 - [ ] T-09 Clue notebook N01-N12 and once-only cutscenes (AC-29) - proof: unit
 - [ ] T-10 Dialogues (Papa, Maman, Julien), busy lines, door lines (AC-20) - proof: unit
