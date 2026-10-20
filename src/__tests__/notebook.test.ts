@@ -88,6 +88,19 @@ describe('once-only cutscenes', () => {
     for (const k of ['cut01', 'cut04', 'cut05', 'cut06', 'cut08', 'cut09', 'cut10']) expect(narratorKeys.filter((x) => x === k)).toHaveLength(1);
   });
 
+  it('a cutscene is never half-played in the state: its effects are in the state of the same interaction (AC-50)', () => {
+    // The UI saves the outcome state at once, before playing the lines: whatever moment the app is killed, the save
+    // holds the state after the cutscene.
+    let s = newGame();
+    for (const input of SOLUTION) {
+      const o = interact(s, input);
+      const narrated = o.beats.filter((b) => b.type === 'say' && b.speaker === 'narrator' && /^cut\d\d$/.test(b.key)).map((b) => (b as { key: string }).key);
+      for (const cut of narrated) expect(o.state.cuts).toContain(cut);
+      if (o.state.cuts.includes('cut11')) expect(o.state.finished).toBe(true);
+      s = o.state;
+    }
+  });
+
   it('the drum cutscene cannot replay even if Florent drums again', () => {
     const s = at('music', { cuts: ['cut05'], chars: chars({ florent: 'in_room' }), inventory: ['sticks'] });
     const o = interact(s, { kind: 'item', item: 'sticks', target: 'music.drums' });

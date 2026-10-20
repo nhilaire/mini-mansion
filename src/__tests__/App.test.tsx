@@ -146,6 +146,36 @@ describe('App', () => {
     expect(screen.getByTestId('inv-pole')).toBeTruthy();
   });
 
+  it('erasing the game keeps the chosen language (AC-42)', async () => {
+    await denied();
+    await AsyncStorage.multiSet([
+      [SAVE_KEY, serialize(newGame())],
+      ['settings.language.v1', 'en'],
+    ]);
+    const first = await render(<App />);
+    await fireEvent.press(await screen.findByTestId('home-settings'));
+    await fireEvent.press(screen.getByTestId('settings-erase'));
+    await fireEvent.press(screen.getByTestId('settings-erase-yes'));
+    await act(async () => {});
+    expect(await AsyncStorage.getItem(SAVE_KEY)).toBeNull();
+    expect(await AsyncStorage.getItem('settings.language.v1')).toBe('en');
+    await first.unmount();
+    await render(<App />);
+    expect(await screen.findByText(en.home.newGame)).toBeTruthy();
+  });
+
+  it('killed during the ending: the relaunch sends no second game_complete (AC-50)', async () => {
+    const { logEvent } = jest.requireMock('@react-native-firebase/analytics');
+    await AsyncStorage.setItem('telemetry.consent.v1', 'granted');
+    await AsyncStorage.setItem(SAVE_KEY, serialize({ ...newGame(), place: 'laundry', finished: true, flags: { ending: true }, solved: [13] }));
+    logEvent.mockClear();
+    await render(<App />);
+    await screen.findByTestId('home-new-game');
+    expect(screen.queryByTestId('home-continue')).toBeNull();
+    await act(async () => {});
+    expect(logEvent.mock.calls.filter((c: unknown[]) => c[1] === 'game_complete')).toEqual([]);
+  });
+
   it('settings: toggles persist, erasing removes Continue but keeps settings and consent (AC-42)', async () => {
     await denied();
     await AsyncStorage.setItem(SAVE_KEY, serialize(newGame()));

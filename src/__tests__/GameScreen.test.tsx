@@ -253,6 +253,19 @@ describe('GameScreen', () => {
     expect(saved.playMs).toBeLessThan(2900);
   });
 
+  it('a save during a cutscene stores the state after it: the steam on the mirror (AC-50)', async () => {
+    const i = stepOf((x) => x.kind === 'verb' && x.verb === 'use' && x.target === 'parents.shower');
+    const props = await mount(stateAt(i));
+    await fireEvent.press(screen.getByTestId('hs-parents.shower'));
+    await fireEvent.press(screen.getByTestId('verb-use'));
+    expect(screen.getByText(line(t, 'cut08'))).toBeTruthy();
+    // Still playing, but the saved state is already the one after CUT08.
+    const saved = lastSaved(props);
+    expect(saved.cuts).toContain('cut08');
+    expect(saved.flags.mirror_code).toBe(true);
+    expect(saved.notes).toContain('n11');
+  });
+
   it('the recipe scrap on the notebook leads to the revelation and the ending, saved as finished (AC-32, AC-50)', async () => {
     const props = await mount(stateAt(SOLUTION.length - 1));
     await fireEvent.press(screen.getByTestId('inv-scrap'));
