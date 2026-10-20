@@ -30,8 +30,8 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-23 Audio: generated 8-bit effects, activity loops and music; toggles, background pause, activity sound per guarded room (AC-25, AC-43) - proof: unit
 - [x] T-24 Pixel icon and splash generated from code (AC-05) - proof: device
 - [x] T-25 Fast-mode deep link and walkthrough flow generated from the solution (AC-41) - proof: unit
-- [ ] T-26 Maestro flows: consent/home, new game/tutorial/notebook, continue/new game, pause/background, settings/about/language, walkthrough, telemetry consent (AC-01, AC-02, AC-04, AC-08, AC-10, AC-11, AC-16, AC-33, AC-34, AC-36, AC-37, AC-39, AC-41, AC-42, AC-44) - proof: e2e
-- [ ] T-27 Device checks prepared for verify/release: launcher name per language, landscape fullscreen, cold start, no crash, feel test on the phone (AC-05, AC-46, AC-47, AC-48) - proof: device
+- [x] T-26 Maestro flows: consent/home, new game/tutorial/notebook, continue/new game, pause/background, settings/about/language, walkthrough, telemetry consent (AC-01, AC-02, AC-04, AC-08, AC-10, AC-11, AC-16, AC-33, AC-34, AC-36, AC-37, AC-39, AC-41, AC-42, AC-44) - proof: e2e
+- [x] T-27 Device checks prepared for verify/release: launcher name per language, landscape fullscreen, cold start, no crash, feel test on the phone (AC-05, AC-46, AC-47, AC-48) - proof: device
 
 ## Notes
 
