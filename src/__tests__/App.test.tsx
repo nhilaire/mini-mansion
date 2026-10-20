@@ -15,7 +15,7 @@ describe('App', () => {
 
   it('asks for consent in French on a French phone, then shows the home screen', async () => {
     await render(<App />);
-    expect(await screen.findByText('Votre vie privée')).toBeTruthy();
+    expect(await screen.findByText('Ta vie privée')).toBeTruthy();
     await fireEvent.press(screen.getByText('Refuser'));
     expect(await screen.findByText('Jouer')).toBeTruthy();
     expect(screen.getByText(appName('fr'))).toBeTruthy();
@@ -74,6 +74,6 @@ describe('App', () => {
     await AsyncStorage.setItem('telemetry.consent.v1', 'denied');
     await render(<App />);
     expect(await screen.findByText('Jouer')).toBeTruthy();
-    expect(screen.queryByText('Votre vie privée')).toBeNull();
+    expect(screen.queryByText('Ta vie privée')).toBeNull();
   });
 });

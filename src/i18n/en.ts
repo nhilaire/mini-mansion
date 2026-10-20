@@ -1,5 +1,6 @@
 // English translation of fr.ts (same keys, enforced by the Strings type). English typography: no space before
 // ": ! ?", comma as thousands separator.
+import { story } from '../content/en';
 import { formatter } from './format';
 import type { Strings } from './types';
 
@@ -16,12 +17,39 @@ export const en: Strings = {
     footnote: 'You can change your mind at any time in the settings.',
   },
   home: {
-    play: 'Play',
+    subtitle: 'The House Secret',
+    continue: 'Continue',
+    newGame: 'New game',
     settings: 'Settings',
     about: 'About',
+    confirmNew: 'Erase your current game?',
+    play: 'Play',
     bestScore: (score: number) => label('Best score', score),
   },
+  common: { yes: 'Yes', no: 'No' },
+  intro: {
+    skip: 'Skip',
+    next: 'Next',
+    cards: [
+      'A rumour is going around the neighbourhood: Papa has invented a secret recipe with extraordinary powers…',
+      'Some say it could cause a disaster in the whole town!',
+      'Sam, a friend of the boys of the house, decides to investigate. Quietly.',
+    ],
+  },
+  tutorial: {
+    walk: 'Tap the ground to make Sam walk.',
+    verbs: 'Tap an object or a person to see what you can do.',
+    inventory: 'Your items are here. Tap one, then tap what to use it on.',
+  },
+  verbs: { look: 'Look', take: 'Take', talk: 'Talk', use: 'Use' },
   game: {
+    useWith: (item: string) => `Use ${item} with…`,
+    menu: 'Menu',
+    notebook: 'Clue notebook',
+    cancel: 'Close the menu',
+    tapToContinue: 'Tap to continue',
+    morePage: 'More items',
+    newNote: 'Written in the notebook!',
     tap: 'Tap!',
     score: (score: number) => label('Score', score),
     timeLeft: (seconds: number) => label('Time', `${seconds} s`),
@@ -30,10 +58,32 @@ export const en: Strings = {
     playAgain: 'Play again',
     home: 'Home',
   },
+  notebook: { title: 'Clue notebook', empty: 'Nothing noted yet.', close: 'Close' },
+  keypad: { computer: "Papa's computer", safe: 'The safe', ok: 'OK', clear: 'Clear', close: 'Close' },
+  chess: {
+    title: "Théo's problem: White to play and mate in 2",
+    wrong: 'Missed, Black escapes. Try again!',
+    solved: 'Checkmate!',
+    reset: 'Restart',
+    close: 'Close',
+    pieces: { K: 'White king', Q: 'White queen', R: 'White rook', B: 'White bishop', N: 'White knight', P: 'White pawn', k: 'Black king', q: 'Black queen', r: 'Black rook', b: 'Black bishop', n: 'Black knight', p: 'Black pawn' },
+    square: (name: string, square: string) => `${name} on ${square}`,
+    empty: (square: string) => `Square ${square}`,
+  },
+  documents: { title: "Papa's secret documents", close: 'Close' },
+  pause: { title: 'Pause', resume: 'Resume', settings: 'Settings', home: 'Main menu' },
+  ending: {
+    title: 'The End',
+    time: (h: number, mm: string) => `Play time: ${h} h ${mm}`,
+    captures: (n: number) => `Times caught: ${n}`,
+    home: 'Main menu',
+  },
   about: {
     title: 'About',
     storyTitle: 'The story of this game',
-    story: ['A small home-made game, with no ads and no account.'],
+    story: [
+      'As a child, I spent hours searching every room of the Maniac Mansion manor, home to a completely crazy family. This time, I wanted the mansion to be a real house: mine, turned into pixel art, with its zany inhabitants and a well-kept secret.',
+    ],
     authorTitle: 'A word from the author',
     author: [
       "This game does not come from a studio: it was imagined and programmed in my free time, by a passionate developer, without pretension.",
@@ -48,10 +98,14 @@ export const en: Strings = {
   },
   settings: {
     title: 'Settings',
+    sfx: 'Sound effects',
+    music: 'Music',
     telemetry: 'Share anonymous statistics',
     telemetryHelp: 'Helps fix bugs and improve the game. No personal data is sent.',
     language: 'Language',
     languageAuto: 'Automatic (phone language)',
+    erase: 'Erase the game',
+    confirmErase: 'Erase your game? You will start again from the beginning.',
     back: 'Back',
   },
   errors: {
@@ -59,4 +113,5 @@ export const en: Strings = {
     body: 'Something went wrong. Restart the game.',
     retry: 'Try again',
   },
+  story,
 };

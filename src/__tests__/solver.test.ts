@@ -3,7 +3,9 @@
 // The search (src/game/explore.ts) prunes inputs that cannot change the story; the "pruning" tests below check each
 // of those claims on a regular sample of the explored states. Takes about a minute.
 import { actionInputs, allInputs, canFinish, exploreStory, StoryGraph, storyKey } from '../game/explore';
+import { hasLine } from '../content/index';
 import { interact } from '../game/rules';
+import { DICTIONARIES, LANGUAGES } from '../i18n';
 import { GameState } from '../game/types';
 import { ITEMS } from '../game/world';
 
@@ -48,6 +50,7 @@ const USED: [keyof GameState['flags'], (s: GameState) => boolean][] = [
 const SAMPLE_EVERY = 97;
 
 describe('story graph (AC-31)', () => {
+  const spoken = new Set<string>();
   const problems: string[] = [];
   const samples: GameState[] = [];
   let count = 0;
@@ -88,9 +91,10 @@ describe('story graph (AC-31)', () => {
         // A pruned input may only keep the story or land where a tried input lands (the reversed combination).
         const allowed = new Set([storyKey(s), ...tried.map((i) => storyKey(interact(s, i).state))]);
         for (const input of allInputs(s)) {
+          const o = interact(s, input);
+          for (const b of o.beats) if (b.type === 'say') spoken.add(b.key);
           if (input.kind === 'exit' || triedIds.has(JSON.stringify(input))) continue;
           if (input.kind === 'verb' && input.verb === 'use') continue; // door uses are moves, explored as such
-          const o = interact(s, input);
           if (o.accepted && !allowed.has(storyKey(o.state))) pruned.push(`pruned input changes the story: ${JSON.stringify(input)}`);
         }
       }
@@ -114,6 +118,13 @@ describe('story graph (AC-31)', () => {
         }
       }
       expect(differs.slice(0, 5)).toEqual([]);
+    });
+
+    // After the pruning checks, which also collect the lines of every input tried on the samples.
+    it.each(LANGUAGES)('every line any explored interaction says exists in %s (AC-45)', (language) => {
+      for (const b of graph.beats) if (b.type === 'say') spoken.add(b.key);
+      expect(spoken.size).toBeGreaterThan(250);
+      expect([...spoken].filter((k) => !hasLine(DICTIONARIES[language], k))).toEqual([]);
     });
   });
 });
