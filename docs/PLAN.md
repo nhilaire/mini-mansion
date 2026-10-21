@@ -48,8 +48,8 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-38 Audio: breaker, toilet spray, food processor; activity sounds for the kitchen and the garden (AC-25, AC-43) - proof: unit
 - [x] T-39 Art: rooms redrawn after the author's photos, front-facing stairs in a doorway, gates, hatch, cluttered attic, wet toilet floor (AC-15, AC-57) - proof: unit
 - [x] T-40 Art: Florent drumming from the back, Julien's ball on the grass, electronic chess set, Papa at the front door (AC-14, AC-57) - proof: unit
-- [ ] T-41 Maestro flows updated and rerun on the emulator, walkthrough included (AC-11, AC-16, AC-33, AC-34, AC-36, AC-41) - proof: e2e
-- [ ] T-42 Device checks of the amended build prepared for verify/release (AC-05, AC-46, AC-47, AC-48, AC-57) - proof: device
+- [x] T-41 Maestro flows updated and rerun on the emulator, walkthrough included (AC-11, AC-16, AC-33, AC-34, AC-36, AC-41) - proof: e2e
+- [x] T-42 Device checks of the amended build prepared for verify/release (AC-05, AC-46, AC-47, AC-48, AC-57) - proof: device
 
 ## Notes
 
@@ -66,5 +66,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
   --telemetry`.
 - T-27 is preparation only: its device proofs (launcher name per language, landscape fullscreen, cold start, no crash,
   feel test) are produced by `/verify-app` and `/release-apk`.
+- T-41 proof (2026-10-21, commit f383657): x86_64 release APK on the emulator, 7/7 short flows and the generated walkthrough passed (the dough timer reached CUT12 in fast mode; ending screen then home without "continue").
+- T-42 is preparation only, as T-27: the device proofs come from /verify-app and /release-apk.
 - Risks: art volume (24 scenes, 6 characters) and startup time (decode per place, lazily); Maestro walkthrough length
   (fast mode).
