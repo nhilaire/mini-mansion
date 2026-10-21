@@ -28,9 +28,9 @@ export const fr = {
     skip: 'Passer',
     next: 'Suite',
     cards: [
-      typo('Une rumeur court dans le quartier : Papa aurait inventé une recette secrète aux pouvoirs extraordinaires…'),
+      typo("Une rumeur court à l'école : dans une maison du quartier, quelqu'un aurait inventé une recette secrète aux pouvoirs extraordinaires…"),
       typo("Certains disent qu'elle pourrait provoquer une catastrophe dans toute la ville !"),
-      'Sam, copain des garçons de la maison, décide d\'enquêter. Discrètement.',
+      "Sam l'a entendue dans la cour de récré et a décidé de mener l'enquête. Discrètement.",
     ],
   },
   tutorial: {
@@ -49,7 +49,7 @@ export const fr = {
     newNote: typo('Noté dans le carnet !'),
   },
   notebook: { title: "Carnet d'indices", empty: "Rien noté pour l'instant.", close: 'Fermer' },
-  keypad: { computer: "L'ordinateur de Papa", safe: 'Le coffre-fort', ok: 'Valider', clear: 'Effacer', close: 'Fermer' },
+  keypad: { computer: "L'ordinateur de Papa", safe: 'Le coffre-fort', lab: 'La porte du labo', ok: 'Valider', clear: 'Effacer', close: 'Fermer' },
   chess: {
     title: typo('Problème de Théo : les Blancs jouent et font mat en 2 coups'),
     wrong: typo('Raté, les Noirs s\'en sortent. On recommence !'),

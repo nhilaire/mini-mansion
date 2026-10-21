@@ -1,4 +1,4 @@
-// T-15: the 24 provisional place scenes and the house at dusk (AC-15 support: one scene per place of the plan).
+// T-15 / T-39: the 23 place scenes (photographed rooms redrawn after the photos) and the house at dusk (AC-15 support: one scene per place of the plan).
 import { paintHouse, paintRoom, PAINTED_HOTSPOTS, roomKey, VISUAL_FLAGS } from '../art/rooms';
 import { newGame } from '../game/rules';
 import { GameState } from '../game/types';
@@ -43,6 +43,7 @@ describe('places drawn in code', () => {
       pool_drained: { cover_open: true },
       safe_open: { safe_found: true },
       secret_open: { door_revealed: true },
+      lab_code: { door_revealed: true },
     };
     for (const place of PLACES) {
       for (const flag of VISUAL_FLAGS[place]) {

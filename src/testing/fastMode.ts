@@ -1,5 +1,6 @@
 // Testing hook (PRD non-functional requirements): the deep link minimansion://test/fast makes walks instant and spoken
-// lines short for the current run only, so that the end-to-end walkthrough fits the verification budget.
+// lines short and timers 30 times faster for the current run only, so that the end-to-end walkthrough fits the
+// verification budget.
 // It changes no rule and no save.
 let fast = false;
 
@@ -15,6 +16,13 @@ export function applyTestingLink(url: string | null): boolean {
     return true;
   }
   return false;
+}
+
+// How much faster the engine's timers run than play time (PRD "Timers").
+export const FAST_TIMER_SCALE = 30;
+
+export function timerScale(): number {
+  return fast ? FAST_TIMER_SCALE : 1;
 }
 
 export function resetFastModeForTests(): void {

@@ -41,6 +41,14 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
+    id: "hs-hall.shoes"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
     id: "exit-hall.toCorridor"
 - extendedWaitUntil:
     visible:
@@ -54,14 +62,6 @@ tags:
     timeout: 15000
 - tapOn:
     id: "hs-garage.pole"
-- tapOn:
-    id: "verb-take"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "hs-garage.crate"
 - tapOn:
     id: "verb-take"
 - extendedWaitUntil:
@@ -85,15 +85,51 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "inv-pole"
+    id: "hs-garage.breaker"
 - tapOn:
-    id: "inv-extension"
+    id: "verb-use"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
     id: "exit-garage.toCorridor"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-corridor0.toUtility"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-utility.shelf"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-utility.flours"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-detergent"
+- tapOn:
+    id: "hs-utility.machine"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-utility.toCorridor"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
@@ -111,7 +147,43 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
+    id: "inv-gatekey"
+- tapOn:
+    id: "hs-front.gateRight"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
     id: "exit-front.toPool"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-pool.toFootball"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-football.bench"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-pole"
+- tapOn:
+    id: "inv-extension"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-football.toPool"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
@@ -163,14 +235,6 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "hs-front.bell"
-- tapOn:
-    id: "verb-use"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
     id: "exit-front.toHall"
 - extendedWaitUntil:
     visible:
@@ -197,21 +261,9 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "exit-music.toDining"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "hs-dining.basket"
+    id: "hs-music.basket"
 - tapOn:
     id: "verb-take"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "exit-dining.toMusic"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
@@ -225,7 +277,59 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
+    id: "exit-music.toKitchen"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-kitchen.fridge"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-ricemilk"
+- tapOn:
+    id: "hs-kitchen.robot"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-chestnut"
+- tapOn:
+    id: "hs-kitchen.robot"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-riceflour"
+- tapOn:
+    id: "hs-kitchen.robot"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-kitchen.toMusic"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
     id: "exit-music.toLiving"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      id: "timers-idle"
+    timeout: 60000
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
@@ -428,34 +532,6 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "exit-corridor0.toUtility"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "hs-utility.shelf"
-- tapOn:
-    id: "verb-take"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "inv-detergent"
-- tapOn:
-    id: "hs-utility.machine"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "exit-utility.toCorridor"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
     id: "exit-corridor0.toHall"
 - extendedWaitUntil:
     visible:
@@ -571,6 +647,28 @@ tags:
     id: "inv-oldkey"
 - tapOn:
     id: "hs-attic.door"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-attic.door"
+- tapOn:
+    id: "verb-use"
+- extendedWaitUntil:
+    visible:
+      id: "keypad"
+    timeout: 15000
+- tapOn:
+    id: "keypad-digit-2"
+- tapOn:
+    id: "keypad-digit-5"
+- tapOn:
+    id: "keypad-digit-1"
+- tapOn:
+    id: "keypad-digit-0"
+- tapOn:
+    id: "keypad-ok"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"

@@ -26,9 +26,9 @@ export const en: Strings = {
     skip: 'Skip',
     next: 'Next',
     cards: [
-      'A rumour is going around the neighbourhood: Papa has invented a secret recipe with extraordinary powers…',
+      'A rumour is going around the school: in a house of the neighbourhood, someone has invented a secret recipe with extraordinary powers…',
       'Some say it could cause a disaster in the whole town!',
-      'Sam, a friend of the boys of the house, decides to investigate. Quietly.',
+      'Sam heard it in the playground and decided to investigate. Quietly.',
     ],
   },
   tutorial: {
@@ -47,7 +47,7 @@ export const en: Strings = {
     newNote: 'Written in the notebook!',
   },
   notebook: { title: 'Clue notebook', empty: 'Nothing noted yet.', close: 'Close' },
-  keypad: { computer: "Papa's computer", safe: 'The safe', ok: 'OK', clear: 'Clear', close: 'Close' },
+  keypad: { computer: "Papa's computer", safe: 'The safe', lab: 'The lab door', ok: 'OK', clear: 'Clear', close: 'Close' },
   chess: {
     title: "Théo's problem: White to play and mate in 2",
     wrong: 'Missed, Black escapes. Try again!',

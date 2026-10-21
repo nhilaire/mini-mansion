@@ -1,14 +1,17 @@
-// T-05: character states, guarded rooms, door announcements, captures, the wine cellar and its shutter.
-import { interact, newGame, playAll } from '../game/rules';
-import { CharacterStates, GameState, GuardedRoom, Input, PlaceId } from '../game/types';
+// T-05 / T-28 / T-31: character states, timers, guarded places, door announcements, captures and the cellar hatch.
+import { interact, newGame, playAll, TIMER_MS } from '../game/rules';
+import { CharacterStates, DoorRoom, GameState, GuardedRoom, Input, PlaceId } from '../game/types';
 import { charactersIn, DOOR_SPAWN, occupant } from '../game/world';
 
 const base = (place: PlaceId, extra: Partial<GameState> = {}): GameState => ({ ...newGame(), place, flags: { door_unlocked: true }, ...extra });
 const chars = (patch: Partial<CharacterStates>): CharacterStates => ({ ...newGame().chars, ...patch });
-const enter = (room: GuardedRoom): Input => ({ kind: 'verb', verb: 'use', target: DOOR_SPAWN[room].door });
+const enter = (room: DoorRoom): Input => ({ kind: 'verb', verb: 'use', target: DOOR_SPAWN[room].door });
+const go = (exit: string): Input => ({ kind: 'exit', exit });
+const tick = (ms: number): Input => ({ kind: 'tick', ms });
+const said = (who: string, key: string) => ({ type: 'say', speaker: who, key });
 
-const ROOMS: GuardedRoom[] = ['office', 'parents', 'julien', 'florent', 'theo'];
-const AWAY: Record<GuardedRoom, Partial<CharacterStates>> = {
+const ROOMS: DoorRoom[] = ['office', 'parents', 'julien', 'florent', 'theo'];
+const AWAY: Record<DoorRoom, Partial<CharacterStates>> = {
   office: { dad: 'cooking' },
   parents: { mom: 'gardening' },
   julien: { julien: 'football' },
@@ -17,54 +20,52 @@ const AWAY: Record<GuardedRoom, Partial<CharacterStates>> = {
 };
 const OCCUPANT = { office: 'dad', parents: 'mom', julien: 'julien', florent: 'florent', theo: 'theo' } as const;
 
+// The open places guarded by an occupant who came there, entered by an exit (AC-23).
+const OPEN: [GuardedRoom, PlaceId, string, Partial<CharacterStates>, 'dad' | 'mom'][] = [
+  ['front', 'hall', 'hall.toFront', { dad: 'outside' }, 'dad'],
+  ['kitchen', 'music', 'music.toKitchen', { dad: 'cooking' }, 'dad'],
+  ['garden', 'football', 'football.toGarden', { mom: 'gardening' }, 'mom'],
+];
+
 describe('character states (AC-22)', () => {
-  it('everyone starts in their room, Papa at his desk', () => {
+  it('everyone starts in their room, Papa at his desk, no timer running', () => {
     expect(newGame().chars).toEqual({ dad: 'at_desk', mom: 'folding', julien: 'in_room', florent: 'in_room', theo: 'in_room' });
+    expect(newGame().timers).toEqual({ dad: null, dough: null });
   });
 
-  it('walking around changes nobody', () => {
-    const { state } = playAll(base('hall'), [
-      { kind: 'exit', exit: 'hall.toLiving' },
-      { kind: 'exit', exit: 'living.toMusic' },
-      { kind: 'exit', exit: 'music.toLiving' },
-      { kind: 'exit', exit: 'living.toHall' },
-      { kind: 'exit', exit: 'hall.stairs' },
-    ]);
+  it('walking around and time passing change nobody while no timer runs', () => {
+    const { state } = playAll(base('hall'), [go('hall.toLiving'), go('living.toMusic'), tick(600_000), go('music.toLiving'), go('living.toHall'), go('hall.stairs')]);
     expect(state.chars).toEqual(newGame().chars);
+    expect(interact(base('hall'), { kind: 'wait' }).accepted).toBe(false);
   });
 
   it('Florent goes back to his room once the O-ring is taken and the hero leaves his room', () => {
     const drumming = base('florent', { chars: chars({ florent: 'drumming' }) });
-    // Leaving without the O-ring: he keeps drumming.
-    expect(interact(drumming, { kind: 'exit', exit: 'florent.toLanding' }).state.chars.florent).toBe('drumming');
-    const { state } = playAll(drumming, [
-      { kind: 'verb', verb: 'take', target: 'florent.kit' },
-      { kind: 'exit', exit: 'florent.toLanding' },
-    ]);
+    expect(interact(drumming, go('florent.toLanding')).state.chars.florent).toBe('drumming');
+    const { state } = playAll(drumming, [{ kind: 'verb', verb: 'take', target: 'florent.kit' }, go('florent.toLanding')]);
     expect(state.chars.florent).toBe('in_room');
     expect(state.place).toBe('landing');
   });
 
   it('Théo goes back to his room once the cube is solved and the hero leaves his room; CUT07 plays once', () => {
     const playing = base('theo', { chars: chars({ theo: 'chess' }), inventory: ['booklet'] });
-    expect(interact(playing, { kind: 'exit', exit: 'theo.toLanding' }).state.chars.theo).toBe('chess');
-    const { state, outcomes } = playAll(playing, [
-      { kind: 'item', item: 'booklet', target: 'theo.cube' },
-      { kind: 'exit', exit: 'theo.toLanding' },
-    ]);
+    expect(interact(playing, go('theo.toLanding')).state.chars.theo).toBe('chess');
+    const { state, outcomes } = playAll(playing, [{ kind: 'item', item: 'booklet', target: 'theo.cube' }, go('theo.toLanding')]);
     expect(state.chars.theo).toBe('in_room');
     expect(state.flags.theo_back).toBe(true);
     expect(state.cuts).toContain('cut07');
     const mono = outcomes[1].beats.filter((b) => b.type === 'say' && b.key.startsWith('line.theoMono'));
-    expect(mono).toHaveLength(3);
+    expect(mono).toEqual([said('theo', 'line.theoMono1'), said('theo', 'line.theoMono2')]);
     expect(state.notes).toContain('n07');
-    // Never twice.
-    const again = interact({ ...state, place: 'theo', chars: chars({ theo: 'chess' }) }, { kind: 'exit', exit: 'theo.toLanding' });
+    const again = interact({ ...state, place: 'theo', chars: chars({ theo: 'chess' }) }, go('theo.toLanding'));
     expect(again.beats.filter((b) => b.type === 'say' && b.key.startsWith('line.theoMono'))).toHaveLength(0);
   });
 
-  it('the inhabitants met in common places are where their state says', () => {
+  it('the inhabitants are where their state says (Papa nowhere on his way back)', () => {
     expect(charactersIn(base('kitchen', { chars: chars({ dad: 'cooking' }) })).map((c) => c.id)).toEqual(['dad']);
+    expect(charactersIn(base('front', { chars: chars({ dad: 'outside' }) })).map((c) => c.id)).toEqual(['dad']);
+    expect(charactersIn(base('office', { chars: chars({ dad: 'answering' }) })).map((c) => c.id)).toEqual(['dad']);
+    for (const place of ['front', 'office', 'kitchen'] as const) expect(charactersIn(base(place, { chars: chars({ dad: 'returning' }) }))).toEqual([]);
     expect(charactersIn(base('garden', { chars: chars({ mom: 'gardening' }) })).map((c) => c.id)).toEqual(['mom']);
     expect(charactersIn(base('football', { chars: chars({ julien: 'football' }) })).map((c) => c.id)).toEqual(['julien']);
     expect(charactersIn(base('music', { chars: chars({ florent: 'drumming' }) })).map((c) => c.id)).toEqual(['florent']);
@@ -73,21 +74,146 @@ describe('character states (AC-22)', () => {
   });
 });
 
-describe('guarded rooms and captures (AC-23)', () => {
+describe('the doorbell sequence (AC-51)', () => {
+  const rung = () => interact(base('front'), { kind: 'verb', verb: 'use', target: 'front.bell' });
+
+  it('ringing: Papa answers from his desk and stays in his office for 120 s of play time', () => {
+    const o = rung();
+    expect(o.beats).toContainEqual(said('dad', 'line.dadAnswer'));
+    expect(o.state.chars.dad).toBe('answering');
+    expect(occupant('office', o.state.chars)).toBe('dad');
+    expect(o.events).toEqual([{ type: 'puzzle', puzzle: 16 }]);
+    const later = interact({ ...o.state, place: 'hall' }, tick(TIMER_MS.answer - 1)).state;
+    expect(later.chars.dad).toBe('answering');
+  });
+
+  it('then the front door view: Papa outside 120 s (office free, front guarded), then back 60 s after his line', () => {
+    const s = { ...rung().state, place: 'hall' as const };
+    const out = interact(s, tick(TIMER_MS.answer));
+    expect(out.beats).toContainEqual({ type: 'view', view: 'door' });
+    expect(out.beats).toContainEqual(said('dad', 'line.dadAtDoor'));
+    expect(out.state.chars.dad).toBe('outside');
+    expect(out.state.place).toBe('hall');
+    expect(occupant('office', out.state.chars)).toBeNull();
+    expect(occupant('front', out.state.chars)).toBe('dad');
+    const back = interact(out.state, tick(TIMER_MS.outside));
+    expect(back.beats).toContainEqual(said('dad', 'line.dadGoingBack'));
+    expect(back.state.chars.dad).toBe('returning');
+    expect(occupant('front', back.state.chars)).toBeNull();
+    expect(occupant('office', back.state.chars)).toBeNull();
+    const desk = interact(back.state, tick(TIMER_MS.back));
+    expect(desk.state.chars.dad).toBe('at_desk');
+    expect(desk.state.timers.dad).toBeNull();
+  });
+
+  it('Sam still in front of the house when Papa opens is caught', () => {
+    const o = interact(rung().state, tick(TIMER_MS.answer));
+    expect(o.state.place).toBe('cellar');
+    expect(o.events).toEqual([{ type: 'capture', room: 'front', count: 1 }]);
+  });
+
+  it('Sam still in the office when Papa is back is caught', () => {
+    const s = interact({ ...rung().state, place: 'corridor0' }, tick(TIMER_MS.answer)).state;
+    const inOffice = interact(s, enter('office')).state;
+    expect(inOffice.place).toBe('office');
+    const o = interact(inOffice, tick(TIMER_MS.outside + TIMER_MS.back));
+    expect(o.state.place).toBe('cellar');
+    expect(o.events).toEqual([{ type: 'capture', room: 'office', count: 1 }]);
+  });
+
+  it('the doorbell is busy meanwhile and can be rung again once Papa is back (no second puzzle_solved)', () => {
+    const s = rung().state;
+    const busy = interact(s, { kind: 'verb', verb: 'use', target: 'front.bell' });
+    expect(busy.beats).toContainEqual(said('hero', 'line.bellBusy'));
+    const backHome = playAll({ ...s, place: 'hall' }, [tick(TIMER_MS.answer + TIMER_MS.outside + TIMER_MS.back), go('hall.toFront')]).state;
+    expect(backHome.chars.dad).toBe('at_desk');
+    const again = interact(backHome, { kind: 'verb', verb: 'use', target: 'front.bell' });
+    expect(again.state.chars.dad).toBe('answering');
+    expect(again.events).toEqual([]);
+  });
+
+  it('one long tick resolves the timers in order, each from the end of the previous one', () => {
+    const o = interact({ ...rung().state, place: 'hall' }, tick(TIMER_MS.answer + TIMER_MS.outside + TIMER_MS.back + 5000));
+    expect(o.state.chars.dad).toBe('at_desk');
+    expect(o.state.clock).toBe(TIMER_MS.answer + TIMER_MS.outside + TIMER_MS.back + 5000);
+    expect(o.beats.filter((b) => b.type === 'say').map((b) => (b as { key: string }).key)).toEqual(['line.dadAtDoor', 'line.dadGoingBack']);
+  });
+});
+
+describe('the dough (AC-52)', () => {
+  const mixed = () =>
+    playAll(base('kitchen', { inventory: ['ricemilk', 'chestnut', 'riceflour'] }), [
+      { kind: 'item', item: 'riceflour', target: 'kitchen.robot' },
+      { kind: 'item', item: 'ricemilk', target: 'kitchen.robot' },
+      { kind: 'item', item: 'chestnut', target: 'kitchen.robot' },
+    ]);
+
+  it('the three ingredients in any order: E19, then Papa comes to cook 120 s later, for good', () => {
+    const { state, outcomes } = mixed();
+    expect(outcomes[2].beats).toContainEqual(said('hero', 'line.doughMixed'));
+    expect(outcomes[2].events).toEqual([{ type: 'puzzle', puzzle: 19 }]);
+    expect(outcomes[0].events).toEqual([]);
+    const away = interact(state, go('kitchen.toMusic')).state;
+    expect(interact(away, tick(TIMER_MS.dough - 1)).state.chars.dad).toBe('at_desk');
+    const o = interact(away, tick(TIMER_MS.dough));
+    expect(o.beats).toContainEqual({ type: 'view', view: 'kitchen' });
+    expect(o.beats).toContainEqual(said('dad', 'line.dadDough'));
+    expect(o.state.chars.dad).toBe('cooking');
+    expect(o.state.cuts).toContain('cut12');
+    expect(occupant('office', o.state.chars)).toBeNull();
+    expect(interact(o.state, tick(3_600_000)).state.chars.dad).toBe('cooking');
+  });
+
+  it('Sam still in the kitchen when Papa arrives is caught', () => {
+    const o = interact(mixed().state, tick(TIMER_MS.dough));
+    expect(o.state.place).toBe('cellar');
+    expect(o.events).toEqual([{ type: 'capture', room: 'kitchen', count: 1 }]);
+  });
+
+  it('the dough cancels a doorbell sequence and the doorbell then finds nobody', () => {
+    // Rung first, mixed 100 s later: Papa comes out, then the dough calls him to the kitchen.
+    let s = interact(base('front'), { kind: 'verb', verb: 'use', target: 'front.bell' }).state;
+    s = interact({ ...s, place: 'hall' }, tick(100_000)).state;
+    s = playAll({ ...s, place: 'kitchen', inventory: ['ricemilk', 'chestnut', 'riceflour'] }, [
+      { kind: 'item', item: 'riceflour', target: 'kitchen.robot' },
+      { kind: 'item', item: 'ricemilk', target: 'kitchen.robot' },
+      { kind: 'item', item: 'chestnut', target: 'kitchen.robot' },
+      go('kitchen.toMusic'),
+    ]).state;
+    s = interact(s, tick(TIMER_MS.answer - 100_000)).state;
+    expect(s.chars.dad).toBe('outside');
+    s = interact(s, { kind: 'wait' }).state;
+    expect(s.chars.dad).toBe('cooking');
+    expect(s.timers).toEqual({ dad: null, dough: null });
+    const bell = interact({ ...s, place: 'front' }, { kind: 'verb', verb: 'use', target: 'front.bell' });
+    expect(bell.beats).toContainEqual(said('hero', 'line.bellNobody'));
+  });
+});
+
+describe('the timers and play time (AC-58)', () => {
+  it('only advance through tick inputs, which the screen sends while playing', () => {
+    const s = interact(base('front'), { kind: 'verb', verb: 'use', target: 'front.bell' }).state;
+    expect(s.timers.dad).toBe(TIMER_MS.answer);
+    expect({ ...s, playMs: s.playMs + 600_000 }.chars.dad).toBe('answering');
+    expect(interact(s, tick(-1)).accepted).toBe(false);
+  });
+});
+
+describe('guarded places and captures (AC-23)', () => {
   it.each(ROOMS)('entering %s with its occupant inside is a capture that keeps everything', (room) => {
     const from = DOOR_SPAWN[room].from;
     const s = base(from, { inventory: ['pole', 'booklet'], notes: ['n01', 'n02'], solved: [1] });
     const o = interact(s, enter(room));
     expect(o.state.place).toBe('cellar');
-    expect(o.state.flags.trap_locked).toBe(true);
     expect(o.state.captures).toBe(1);
     expect(o.events).toEqual([{ type: 'capture', room, count: 1 }]);
-    expect(o.beats).toContainEqual({ type: 'say', speaker: OCCUPANT[room], key: `capture.${OCCUPANT[room]}` });
+    expect(o.beats).toContainEqual(said(OCCUPANT[room], `capture.${OCCUPANT[room]}`));
     expect(o.state.inventory).toEqual(s.inventory);
     expect(o.state.notes).toEqual(s.notes);
     expect(o.state.solved).toEqual(s.solved);
     expect(o.state.chars).toEqual(s.chars);
-    expect({ ...o.state.flags, trap_locked: undefined }).toEqual({ ...s.flags, trap_locked: undefined });
+    expect(o.state.flags).toEqual(s.flags);
+    expect(o.state.timers).toEqual(s.timers);
   });
 
   it.each(ROOMS)('entering %s while its occupant is away is safe', (room) => {
@@ -97,76 +223,73 @@ describe('guarded rooms and captures (AC-23)', () => {
     expect(o.state.captures).toBe(0);
   });
 
+  it.each(OPEN)('walking into the %s while its occupant is there is a capture', (room, from, exit, patch, who) => {
+    const s = base(from, { chars: chars(patch), flags: { door_unlocked: true, gates_open: true } });
+    const o = interact(s, go(exit));
+    expect(o.state.place).toBe('cellar');
+    expect(o.events).toEqual([{ type: 'capture', room, count: 1 }]);
+    expect(o.beats).toContainEqual(said(who, `capture.${who}`));
+    const free = interact({ ...s, chars: newGame().chars }, go(exit));
+    expect(free.state.place).not.toBe('cellar');
+  });
+
   it('walking in common places never captures, even next to the inhabitants', () => {
     const s = base('music', { chars: chars({ florent: 'drumming' }) });
-    const { state, outcomes } = playAll(s, [
-      { kind: 'exit', exit: 'music.toLiving' },
-      { kind: 'exit', exit: 'living.toMusic' },
-      { kind: 'exit', exit: 'music.toDining' },
-    ]);
+    const { state, outcomes } = playAll(s, [go('music.toLiving'), go('living.toMusic'), go('music.toKitchen')]);
     expect(state.captures).toBe(0);
     expect(outcomes.flatMap((o) => o.events)).toEqual([]);
   });
 });
 
-describe('the wine cellar (AC-24)', () => {
+describe('the cellar hatch (AC-24)', () => {
   const caught = () => interact(base('landing'), enter('julien')).state;
+  const take = (target: string): Input => ({ kind: 'verb', verb: 'take', target });
 
-  it('after a first capture the trapdoor is locked and the shutter stuck until the iron bar opens it', () => {
-    let s = caught();
-    expect(interact(s, { kind: 'exit', exit: 'cellar.toGarage' }).beats).toContainEqual({ type: 'say', speaker: 'hero', key: 'line.trapLocked' });
-    expect(interact(s, { kind: 'exit', exit: 'cellar.toGarage' }).state.place).toBe('cellar');
-    expect(interact(s, { kind: 'verb', verb: 'use', target: 'cellar.shutter' }).beats).toContainEqual({ type: 'say', speaker: 'hero', key: 'line.shutterStuck' });
-    const { state, outcomes } = playAll(s, [
-      { kind: 'verb', verb: 'take', target: 'cellar.rack' },
-      { kind: 'item', item: 'bar', target: 'cellar.shutter' },
-    ]);
+  it('the hatch is stuck from below until the iron bar unblocks it (E15), then it leads up for good', () => {
+    const s = caught();
+    expect(interact(s, go('cellar.toGarage')).accepted).toBe(false);
+    expect(interact(s, { kind: 'verb', verb: 'use', target: 'cellar.hatch' }).beats).toContainEqual(said('hero', 'line.hatchStuck'));
+    const { state, outcomes } = playAll(s, [take('cellar.rack'), { kind: 'item', item: 'bar', target: 'cellar.hatch' }]);
     expect(outcomes[1].events).toEqual([{ type: 'puzzle', puzzle: 15 }]);
-    expect(state.flags.shutter_open).toBe(true);
+    expect(state.flags.hatch_open).toBe(true);
     expect(state.inventory).not.toContain('bar');
-    s = interact(state, { kind: 'exit', exit: 'cellar.toFront' }).state;
-    expect(s.place).toBe('front');
-    expect(s.flags.trap_locked).toBeUndefined();
+    const up = interact(state, go('cellar.toGarage')).state;
+    expect(up.place).toBe('garage');
+    expect(interact(up, go('garage.toCellar')).state.place).toBe('cellar');
   });
 
-  it('a later capture says "Encore toi ?!" and the shutter is already open', () => {
-    const first = playAll(caught(), [
-      { kind: 'verb', verb: 'take', target: 'cellar.rack' },
-      { kind: 'item', item: 'bar', target: 'cellar.shutter' },
-      { kind: 'exit', exit: 'cellar.toFront' },
-    ]).state;
-    const again = interact({ ...first, place: 'landing' }, enter('florent'));
-    expect(again.beats).toContainEqual({ type: 'say', speaker: 'florent', key: 'line.captureAgain' });
+  it('going down from the garage is always possible, then the hatch is stuck from below', () => {
+    const down = interact(base('garage'), go('garage.toCellar')).state;
+    expect(down.place).toBe('cellar');
+    expect(interact(down, go('cellar.toGarage')).accepted).toBe(false);
+  });
+
+  it('a later capture says "Encore toi ?!" and Sam can walk straight up', () => {
+    const open = playAll(caught(), [take('cellar.rack'), { kind: 'item', item: 'bar', target: 'cellar.hatch' }]).state;
+    const again = interact({ ...open, place: 'landing' }, enter('florent'));
+    expect(again.beats).toContainEqual(said('florent', 'line.captureAgain'));
     expect(again.state.captures).toBe(2);
     expect(again.events).toEqual([{ type: 'capture', room: 'florent', count: 2 }]);
-    expect(interact(again.state, { kind: 'exit', exit: 'cellar.toFront' }).state.place).toBe('front');
-  });
-
-  it('a free visit through the trapdoor can open the shutter, which solves E15; a capture then works like a later one', () => {
-    const visit = playAll(base('garage'), [
-      { kind: 'exit', exit: 'garage.toCellar' },
-      { kind: 'verb', verb: 'take', target: 'cellar.rack' },
-      { kind: 'item', item: 'bar', target: 'cellar.shutter' },
-      { kind: 'exit', exit: 'cellar.toGarage' },
-    ]);
-    expect(visit.state.solved).toEqual([15]);
-    expect(visit.state.place).toBe('garage');
-    const caughtLater = interact({ ...visit.state, place: 'landing' }, enter('theo'));
-    expect(caughtLater.beats).toContainEqual({ type: 'say', speaker: 'theo', key: 'line.captureAgain' });
+    expect(interact(again.state, go('cellar.toGarage')).state.place).toBe('garage');
   });
 });
 
-describe('door announcements (AC-25)', () => {
+describe('announcements (AC-25)', () => {
   it.each(ROOMS)('the door of %s names its occupant (look and talk) and says when the room is free', (room) => {
     const { from, door } = DOOR_SPAWN[room];
     const who = OCCUPANT[room];
     const s = base(from);
     expect(occupant(room, s.chars)).toBe(who);
-    expect(interact(s, { kind: 'verb', verb: 'look', target: door }).beats).toEqual([{ type: 'say', speaker: 'hero', key: `door.${room}.occupied` }]);
+    expect(interact(s, { kind: 'verb', verb: 'look', target: door }).beats).toEqual([said('hero', `door.${room}.occupied`)]);
     const talk = interact(s, { kind: 'verb', verb: 'talk', target: door });
-    expect(talk.beats[0]).toEqual({ type: 'say', speaker: who, key: `${who}.door` });
+    expect(talk.beats[0]).toEqual(said(who, `${who}.door`));
     const free = base(from, { chars: chars(AWAY[room]) });
-    expect(interact(free, { kind: 'verb', verb: 'look', target: door }).beats).toEqual([{ type: 'say', speaker: 'hero', key: `door.${room}.empty` }]);
+    expect(interact(free, { kind: 'verb', verb: 'look', target: door }).beats).toEqual([said('hero', `door.${room}.empty`)]);
     expect(interact(free, { kind: 'verb', verb: 'talk', target: door }).accepted).toBe(false);
+  });
+
+  it('Papa answering the bell says he is coming through his door', () => {
+    const s = base('corridor0', { chars: chars({ dad: 'answering' }) });
+    expect(interact(s, { kind: 'verb', verb: 'talk', target: 'corridor0.officeDoor' }).beats).toEqual([said('dad', 'dad.doorComing')]);
   });
 });

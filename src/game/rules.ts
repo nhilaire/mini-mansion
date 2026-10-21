@@ -1,6 +1,6 @@
-// The story rules: what each verb, item, exit, keypad and chess input does in each state (PRD puzzle chain E01-E17,
-// character states, guarded rooms and captures). interact() is pure: it returns a new state, the beats to play and
-// the telemetry facts.
+// The story rules: what each verb, item, exit, keypad, chess and time input does in each state (PRD puzzle chain
+// E01-E19, character states, timers, guarded places and captures). interact() is pure: it returns a new state, the
+// beats to play and the telemetry facts.
 import { isSolution } from './chess';
 import { cloneState, Ctx } from './ctx';
 import { BUSY_LINE, BYE, findOption } from './dialogue';
@@ -16,15 +16,19 @@ import {
   START_CHARS,
   START_POS,
 } from './world';
-import { CharacterId, Facing, GameState, GuardedRoom, Input, ItemId, KeypadId, NoteId, Outcome, PlaceId, Point, Verb } from './types';
+import { CharacterId, DoorRoom, Facing, Flag, GameState, GuardedRoom, Input, ItemId, KeypadId, NoteId, Outcome, PlaceId, Point, SfxName, Verb } from './types';
 
-export const CODES: Record<KeypadId, string> = { computer: '7867', safe: '1987' };
+export const CODES: Record<KeypadId, string> = { computer: '7867', safe: '1987', lab: '2510' };
 // The notebook entry that tells each code: the keypad does not open before it is known (no guessing).
-export const CODE_NOTE: Record<KeypadId, NoteId> = { computer: 'n08', safe: 'n11' };
+export const CODE_NOTE: Record<KeypadId, NoteId> = { computer: 'n08', safe: 'n11', lab: 'n10' };
+const KEYPAD_PLACE: Record<KeypadId, PlaceId> = { computer: 'office', safe: 'parents', lab: 'attic' };
+
+// Timer durations in ms of the timer clock (PRD "Timers").
+export const TIMER_MS = { answer: 120_000, outside: 120_000, back: 60_000, dough: 120_000 } as const;
 
 export function newGame(): GameState {
   return {
-    v: 1,
+    v: 2,
     place: 'front',
     pos: { ...START_POS },
     facing: 'right',
@@ -39,6 +43,8 @@ export function newGame(): GameState {
     seen: [],
     tutorial: 0,
     playMs: 0,
+    clock: 0,
+    timers: { dad: null, dough: null },
     finished: false,
     wrongIdx: 0,
   };
@@ -78,11 +84,6 @@ export function interact(state: GameState, input: Input): Outcome {
     case 'exit': {
       const e = findExit(state, input.exit);
       if (!e) return rejected(state);
-      if (input.exit === 'cellar.toGarage' && c.is('trap_locked')) {
-        c.hero('line.trapLocked');
-        return done(c);
-      }
-      if (input.exit === 'cellar.toFront') c.clear('trap_locked');
       c.sfx('door');
       goTo(c, e.to, e.spawn, e.spawnFace);
       return done(c);
@@ -105,12 +106,85 @@ export function interact(state: GameState, input: Input): Outcome {
       c.set('chess_solved').hero('e06.solved').note('n08').solve(6);
       return done(c);
     }
+    case 'tick':
+      if (!(input.ms >= 0)) return rejected(state);
+      advanceClock(c, c.s.clock + input.ms);
+      return done(c);
+    case 'wait': {
+      const next = nextDeadline(state);
+      if (next === null) return rejected(state);
+      advanceClock(c, Math.max(next, c.s.clock));
+      return done(c);
+    }
   }
 }
 
+// ---------- time ----------
+
+export function nextDeadline(s: GameState): number | null {
+  const ds = [s.timers.dad, s.timers.dough].filter((d): d is number => d !== null);
+  return ds.length ? Math.min(...ds) : null;
+}
+
+// Moves the timer clock forward, resolving every timer that ends on the way, in time order (a timer started by an
+// expiry counts from that expiry).
+function advanceClock(c: Ctx, to: number): void {
+  for (;;) {
+    const next = nextDeadline(c.s);
+    if (next === null || next > to || c.s.finished) break;
+    c.s.clock = Math.max(c.s.clock, next);
+    if (c.s.timers.dough !== null && c.s.timers.dough <= next) doughReady(c);
+    else dadTimer(c);
+  }
+  c.s.clock = Math.max(c.s.clock, to);
+}
+
+// The doorbell sequence: answering -> (front door view) outside -> returning -> at his desk.
+function dadTimer(c: Ctx): void {
+  const now = c.s.clock;
+  switch (c.state('dad')) {
+    case 'answering':
+      c.move('dad', 'outside');
+      c.s.timers.dad = now + TIMER_MS.outside;
+      c.sfx('door').beats.push({ type: 'view', view: 'door' });
+      c.say('dad', 'line.dadAtDoor');
+      arrival(c, 'front');
+      return;
+    case 'outside':
+      c.move('dad', 'returning');
+      c.s.timers.dad = now + TIMER_MS.back;
+      c.say('dad', 'line.dadGoingBack');
+      return;
+    default:
+      c.move('dad', 'at_desk');
+      c.s.timers.dad = null;
+      arrival(c, 'office');
+  }
+}
+
+// E19: the dough is ready; Papa comes to the kitchen for good (CUT12), whatever the doorbell sequence was doing.
+function doughReady(c: Ctx): void {
+  c.s.timers.dough = null;
+  c.s.timers.dad = null;
+  c.move('dad', 'cooking');
+  c.cut('cut12', (k) => {
+    k.beats.push({ type: 'view', view: 'kitchen' });
+    k.say('dad', 'line.dadDough');
+  });
+  arrival(c, 'kitchen');
+}
+
+// An inhabitant arrives where the hero is: a capture.
+function arrival(c: Ctx, place: GuardedRoom): void {
+  const who = occupant(place, c.s.chars);
+  if (c.s.place === place && who) capture(c, place, who);
+}
+
+// ---------- moving ----------
+
 // Moves the hero to another place, running the events tied to a place change in this order: inhabitants going back
 // to their room when the hero leaves it, the washing machine's end of cycle, then a capture if the destination is
-// a guarded room with its occupant inside.
+// guarded by its occupant.
 function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
   const from = c.s.place;
   if (from === 'florent' && c.state('florent') === 'drumming' && c.is('oring_taken')) {
@@ -118,7 +192,7 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
   }
   if (from === 'theo' && c.state('theo') === 'chess' && c.is('cube_solved')) {
     c.move('theo', 'in_room').set('theo_back');
-    c.cut('cut07', (k) => k.say('theo', 'line.theoBack').say('theo', 'line.theoMono1').say('theo', 'line.theoMono2').say('theo', 'line.theoMono3').note('n07'));
+    c.cut('cut07', (k) => k.say('theo', 'line.theoBack').say('theo', 'line.theoMono1').say('theo', 'line.theoMono2').note('n07'));
   }
   if (c.is('machine_running')) {
     c.clear('machine_running').set('machine_done').sfx('ding').narrator('line.machineDing').say('mom', 'mom.machine');
@@ -138,12 +212,11 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
 }
 
 function capture(c: Ctx, room: GuardedRoom, who: CharacterId): void {
-  const again = c.is('shutter_open');
+  const again = c.is('hatch_open');
   c.sfx('capture').say(who, again ? 'line.captureAgain' : `capture.${who}`);
   c.s.captures += 1;
   c.events.push({ type: 'capture', room, count: c.s.captures });
   c.beats.push({ type: 'capture' });
-  c.set('trap_locked');
   c.s.place = 'cellar';
   c.s.pos = { ...CELLAR_SPAWN };
   c.s.facing = 'down';
@@ -164,7 +237,7 @@ function character(c: Ctx, id: CharacterId, verb: Verb): void {
 const DOOR_NOTE: Record<CharacterId, NoteId> = { julien: 'n02', florent: 'n03', theo: 'n04', mom: 'n05', dad: 'n06' };
 
 function doorVerb(c: Ctx, h: HotspotDef, verb: Verb): void {
-  const room = h.door as GuardedRoom;
+  const room = h.door as DoorRoom;
   const who = occupant(room, c.s.chars);
   if (verb === 'look') {
     c.hero(who ? `door.${room}.occupied` : `door.${room}.empty`);
@@ -172,7 +245,8 @@ function doorVerb(c: Ctx, h: HotspotDef, verb: Verb): void {
   }
   if (verb === 'talk') {
     if (!who) return;
-    c.say(who, `${who}.door`).note(DOOR_NOTE[who]);
+    if (who === 'dad' && c.state('dad') === 'answering') c.say('dad', 'dad.doorComing');
+    else c.say(who, `${who}.door`).note(DOOR_NOTE[who]);
     return;
   }
   // use: open the door and go in (never blocked; a capture when the occupant is inside).
@@ -180,7 +254,83 @@ function doorVerb(c: Ctx, h: HotspotDef, verb: Verb): void {
   goTo(c, room, { x: 36, y: 116 }, 'right');
 }
 
+// ---------- hotspots ----------
+
+// Optional gags: using them only says a line (with a sound); they never change the story. The Japanese toilet also
+// wets the floor for good (`wc_wet`, only drawn).
+export const GAGS: Readonly<Record<string, SfxName>> = {
+  'front.mailbox': 'gag',
+  'football.goal': 'gag',
+  'garden.flowers': 'gag',
+  'garden.hose': 'water',
+  'garden.swing': 'gag',
+  'hall.mirror': 'gag',
+  'living.sofa': 'gag',
+  'living.tv': 'gag',
+  'music.piano': 'gag',
+  'music.guitar': 'gag',
+  'kitchen.oven': 'gag',
+  'wc0.toilet': 'spray',
+  'wc0.paper': 'gag',
+  'office.lamp': 'gag',
+  'office.chair': 'gag',
+  'garage.bike': 'gag',
+  'attic.horse': 'gag',
+  'attic.lamp': 'gag',
+  'attic.trunk': 'gag',
+  'attic.stain': 'gag',
+  'laundry.mixer': 'robot',
+  'landing.lamp': 'gag',
+  'wc1.freshener': 'spray',
+  'wc1.toilet': 'water',
+  'julien.radio': 'gag',
+  'bathroom.sink': 'water',
+  'bathroom.scale': 'gag',
+  'bathroom.duck': 'gag',
+  'theo.lamp': 'gag',
+  'theo.cube': 'gag',
+  'florent.nerf': 'gag',
+  'florent.console': 'gag',
+  'parents.sink': 'water',
+};
+
+const GATES = ['front.gateLeft', 'front.gateRight', 'football.gate', 'pool.gate'];
+const INGREDIENTS: Partial<Record<ItemId, Flag>> = { ricemilk: 'milk_in', chestnut: 'chestnut_in', riceflour: 'riceflour_in' };
+
+// A take hotspot that gives its item once: [flag set when taken, item, line].
+const TAKES: Readonly<Record<string, readonly [Flag, ItemId, string]>> = {
+  'hall.shoes': ['gatekey_taken', 'gatekey', 'hall.shoes.take'],
+  'music.basket': ['sticks_taken', 'sticks', 'music.basket.take'],
+  'julien.trophy': ['queen_taken', 'queen', 'julien.trophy.take'],
+  'living.bookshelf': ['booklet_taken', 'booklet', 'living.bookshelf.take'],
+  'utility.shelf': ['detergent_taken', 'detergent', 'utility.shelf.take'],
+  'florent.kit': ['oring_taken', 'oring', 'florent.kit.take'],
+  'garage.bench': ['wrench_taken', 'wrench', 'garage.bench.take'],
+  'garage.drawer': ['pliers_taken', 'pliers', 'garage.drawer.take'],
+  'garage.pole': ['pole_taken', 'pole', 'garage.pole.take'],
+  'football.bench': ['extension_taken', 'extension', 'football.bench.take'],
+  'cellar.rack': ['bar_taken', 'bar', 'cellar.rack.take'],
+  'kitchen.fridge': ['milk_taken', 'ricemilk', 'kitchen.fridge.take'],
+};
+
 function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
+  const take = TAKES[id];
+  if (take) {
+    const [flag, item, line] = take;
+    if (verb === 'look') {
+      c.hero(c.is(flag) ? `${id}.lookEmpty` : `${id}.look`);
+      return;
+    }
+    if (verb === 'take') {
+      if (c.is(flag)) c.hero(`${id}.empty`);
+      else c.set(flag).give(item).hero(line);
+      return;
+    }
+  }
+  if (GATES.includes(id) && verb === 'use') {
+    c.hero('line.gateLocked');
+    return;
+  }
   switch (`${id}:${verb}`) {
     // E01: the key under the doormat, the front door.
     case 'front.doormat:look':
@@ -193,15 +343,37 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
     case 'front.door:use':
       c.hero('front.door.locked');
       return;
-    // E16: the doorbell sends Papa to the kitchen for good.
+    // E16: the doorbell starts Papa's doorbell sequence; it can be rung again once he is back at his desk.
     case 'front.bell:use':
       if (!c.is('door_unlocked')) c.hero('line.bellRefuse');
-      else if (c.state('dad') !== 'at_desk') c.hero('line.bellNobody');
+      else if (c.state('dad') === 'cooking') c.hero('line.bellNobody');
+      else if (c.state('dad') !== 'at_desk') c.hero('line.bellBusy');
       else {
-        c.sfx('bell');
-        c.cut('cut02', (k) => k.narrator('cut02.hide').say('dad', 'line.dadDoor1').say('dad', 'line.dadDoor2'));
-        c.move('dad', 'cooking').solve(16);
+        c.sfx('bell').say('dad', 'line.dadAnswer');
+        c.move('dad', 'answering');
+        c.s.timers.dad = c.s.clock + TIMER_MS.answer;
+        c.solve(16);
       }
+      return;
+    // E19: the flours (two items on one shelf).
+    case 'utility.flours:look':
+      c.hero(c.is('flours_taken') ? 'utility.flours.lookEmpty' : 'utility.flours.look');
+      return;
+    case 'utility.flours:take':
+      if (c.is('flours_taken')) c.hero('utility.flours.empty');
+      else c.set('flours_taken').give('chestnut').give('riceflour').hero('utility.flours.take');
+      return;
+    // E19: the food processor.
+    case 'kitchen.robot:look':
+      c.hero(c.is('dough_mixed') ? 'kitchen.robot.lookDone' : 'kitchen.robot.look');
+      return;
+    case 'kitchen.robot:use':
+      if (c.is('dough_mixed')) c.hero('kitchen.robot.done');
+      else if (Object.values(INGREDIENTS).some((f) => c.is(f!))) c.hero('line.doughMissing');
+      else c.hero('kitchen.robot.empty');
+      return;
+    case 'kitchen.bowl:look':
+      c.hero(c.is('dough_mixed') ? 'kitchen.bowl.lookDone' : 'kitchen.bowl.look');
       return;
     // E02 / E14: the pool, its cover, the ball, the pump and the bottle at the bottom.
     case 'pool.ball:look':
@@ -237,28 +409,14 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
     case 'living.bay:use':
       c.set('bay_open').sfx('door').hero('living.bay.open');
       return;
-    // E03: the drumsticks in the bread basket, the drums.
-    case 'dining.basket:look':
-      c.hero(c.is('sticks_taken') ? 'dining.basket.lookEmpty' : 'dining.basket.look');
-      return;
-    case 'dining.basket:take':
-      if (c.is('sticks_taken')) c.hero('dining.basket.empty');
-      else c.set('sticks_taken').give('sticks').hero('dining.basket.take');
-      return;
+    // E03: the drums.
     case 'music.drums:look':
       c.hero(c.played('cut05') ? 'music.drums.lookPlayed' : 'music.drums.look');
       return;
     case 'music.drums:use':
       c.hero(c.played('cut05') ? 'music.drums.usePlayed' : 'music.drums.use');
       return;
-    // E04-E06: the queen on Julien's trophy, the chessboard, the Rubik's Cube.
-    case 'julien.trophy:look':
-      c.hero(c.is('queen_taken') ? 'julien.trophy.lookEmpty' : 'julien.trophy.look');
-      return;
-    case 'julien.trophy:take':
-      if (c.is('queen_taken')) c.hero('julien.trophy.empty');
-      else c.set('queen_taken').give('queen').hero('julien.trophy.take');
-      return;
+    // E04-E06: the electronic chessboard, the Rubik's Cube.
     case 'living.chess:look':
       if (!c.is('queen_placed')) c.hero('living.chess.lookMissing').note('n04');
       else if (c.state('theo') === 'chess') c.hero('living.chess.lookPlaying');
@@ -270,15 +428,11 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       else if (c.is('chess_solved')) c.hero('living.chess.lookSolved');
       else c.beats.push({ type: 'chess' });
       return;
-    case 'living.bookshelf:look':
-      c.hero(c.is('booklet_taken') ? 'living.bookshelf.lookEmpty' : 'living.bookshelf.look');
-      return;
-    case 'living.bookshelf:take':
-      if (c.is('booklet_taken')) c.hero('living.bookshelf.empty');
-      else c.set('booklet_taken').give('booklet').hero('living.bookshelf.take');
-      return;
     case 'theo.cube:look':
       c.hero(c.is('cube_solved') ? 'theo.cube.lookSolved' : 'theo.cube.look');
+      return;
+    case 'theo.cube:use':
+      c.sfx('gag').hero(c.is('cube_solved') ? 'theo.cube.useSolved' : 'theo.cube.use');
       return;
     // E07: Papa's computer.
     case 'office.computer:look':
@@ -289,40 +443,28 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       else if (!c.s.notes.includes(CODE_NOTE.computer)) c.hero('line.codeUnknown');
       else c.beats.push({ type: 'keypad', keypad: 'computer' });
       return;
-    // E17: the washing machine.
-    case 'utility.shelf:look':
-      c.hero(c.is('detergent_taken') ? 'utility.shelf.lookEmpty' : 'utility.shelf.look');
+    // E17: the circuit breaker and the washing machine.
+    case 'garage.breaker:look':
+      c.hero(c.is('power_on') ? 'garage.breaker.lookOn' : 'garage.breaker.look');
       return;
-    case 'utility.shelf:take':
-      if (c.is('detergent_taken')) c.hero('utility.shelf.empty');
-      else c.set('detergent_taken').give('detergent').hero('utility.shelf.take');
+    case 'garage.breaker:use':
+      if (c.is('power_on')) c.hero('garage.breaker.already');
+      else c.set('power_on').sfx('breaker').hero('garage.breaker.on');
       return;
     case 'utility.machine:look':
-      c.hero(c.is('machine_done') ? 'utility.machine.lookDone' : c.is('machine_running') ? 'utility.machine.lookRunning' : 'utility.machine.look');
+      c.hero(c.is('machine_done') ? 'utility.machine.lookDone' : c.is('machine_running') ? 'utility.machine.lookRunning' : c.is('power_on') ? 'utility.machine.lookPower' : 'utility.machine.look');
       return;
     case 'utility.machine:use':
-      c.hero(c.is('machine_done') || c.is('machine_running') ? 'line.machineDone' : 'line.machineEmpty');
+      if (c.is('machine_done') || c.is('machine_running')) c.hero('line.machineDone');
+      else c.hero(c.is('power_on') ? 'line.machineEmpty' : 'line.machinePower');
       return;
-    // E08-E10: the Nerf modding kit, the wrench, the shower, the mirror, the painting and the safe.
-    case 'florent.kit:look':
-      c.hero(c.is('oring_taken') ? 'florent.kit.lookEmpty' : 'florent.kit.look');
-      return;
-    case 'florent.kit:take':
-      if (c.is('oring_taken')) c.hero('florent.kit.empty');
-      else c.set('oring_taken').give('oring').hero('florent.kit.take');
-      return;
-    case 'garage.bench:look':
-      c.hero(c.is('wrench_taken') ? 'garage.bench.lookEmpty' : 'garage.bench.look');
-      return;
-    case 'garage.bench:take':
-      if (c.is('wrench_taken')) c.hero('garage.bench.empty');
-      else c.set('wrench_taken').give('wrench').hero('garage.bench.take');
-      return;
+    // E08-E10: the shower (broken, joint fitted, repaired), the mirror, the painting and the safe.
     case 'parents.shower:look':
-      c.hero(c.is('mirror_code') ? 'parents.shower.lookDone' : c.is('shower_repaired') ? 'parents.shower.lookRepaired' : 'parents.shower.look');
+      c.hero(c.is('mirror_code') ? 'parents.shower.lookDone' : c.is('shower_repaired') ? 'parents.shower.lookRepaired' : c.is('oring_fitted') ? 'parents.shower.lookLoose' : 'parents.shower.look');
       return;
     case 'parents.shower:use':
-      if (!c.is('shower_repaired')) c.hero('line.showerBroken');
+      if (!c.is('oring_fitted')) c.hero('line.showerBroken');
+      else if (!c.is('shower_repaired')) c.sfx('water').hero('line.showerLoose');
       else if (c.is('mirror_code')) c.sfx('water').hero('parents.shower.again');
       else {
         c.sfx('water').set('mirror_code');
@@ -344,59 +486,48 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       else if (!c.s.notes.includes(CODE_NOTE.safe)) c.hero('line.codeUnknown');
       else c.beats.push({ type: 'keypad', keypad: 'safe' });
       return;
-    // E14: the pliers.
-    case 'garage.drawer:look':
-      c.hero(c.is('pliers_taken') ? 'garage.drawer.lookEmpty' : 'garage.drawer.look');
+    // E11-E13: the attic, the lab door (lock + keypad), Papa's lab.
+    case 'attic.door:look':
+      c.hero(c.is('lab_code') ? 'attic.door.lookCode' : c.is('lab_lock') ? 'attic.door.lookKey' : 'attic.door.look');
       return;
-    case 'garage.drawer:take':
-      if (c.is('pliers_taken')) c.hero('garage.drawer.empty');
-      else c.set('pliers_taken').give('pliers').hero('garage.drawer.take');
-      return;
-    // E02: the pole and its extension.
-    case 'garage.pole:look':
-      c.hero(c.is('pole_taken') ? 'garage.pole.lookEmpty' : 'garage.pole.look');
-      return;
-    case 'garage.pole:take':
-      if (c.is('pole_taken')) c.hero('garage.pole.empty');
-      else c.set('pole_taken').give('pole').hero('garage.pole.take');
-      return;
-    case 'garage.crate:look':
-      c.hero(c.is('extension_taken') ? 'garage.crate.lookEmpty' : 'garage.crate.look');
-      return;
-    case 'garage.crate:take':
-      if (c.is('extension_taken')) c.hero('garage.crate.empty');
-      else c.set('extension_taken').give('extension').hero('garage.crate.take');
-      return;
-    // E11-E13: the attic, the secret door, Papa's lab.
     case 'attic.door:use':
-      c.hero('line.doorLocked');
+      if (c.is('lab_code')) c.hero('attic.door.lockStill');
+      else if (!c.s.notes.includes(CODE_NOTE.lab)) c.hero('line.doorLocked');
+      else c.beats.push({ type: 'keypad', keypad: 'lab' });
       return;
     case 'laundry.notebook:use':
       c.hero('laundry.notebook.use');
       return;
-    // E15: the wine cellar.
-    case 'cellar.rack:look':
-      c.hero(c.is('bar_taken') ? 'cellar.rack.lookEmpty' : 'cellar.rack.look');
+    // E15: the cellar hatch, stuck from below.
+    case 'cellar.hatch:use':
+      c.hero('line.hatchStuck');
       return;
-    case 'cellar.rack:take':
-      if (c.is('bar_taken')) c.hero('cellar.rack.empty');
-      else c.set('bar_taken').give('bar').hero('cellar.rack.take');
+    case 'wc0.toilet:look':
+      c.hero(c.is('wc_wet') ? 'wc0.toilet.lookWet' : 'wc0.toilet.look');
       return;
-    case 'cellar.shutter:use':
-      c.hero('line.shutterStuck');
+    case 'wc0.toilet:use':
+      c.sfx('spray').hero(c.is('wc_wet') ? 'wc0.toilet.useAgain' : 'wc0.toilet.use').set('wc_wet');
       return;
   }
   if (verb === 'look') {
     c.hero(`${id}.look`);
     return;
   }
+  const gag = GAGS[id];
+  if (verb === 'use' && gag) {
+    c.sfx(gag).hero(`${id}.use`);
+    return;
+  }
   c.wrong();
 }
+
+// ---------- items ----------
 
 // Every item>target pair that has a rule; any other pair only answers a generic wrong line (checked by a test, used
 // to prune the exhaustive search).
 export const USE_RULES: readonly string[] = [
   'key>front.door',
+  ...GATES.map((g) => `gatekey>${g}`),
   'pole>pool.ball',
   'longpole>pool.ball',
   'sticks>music.drums',
@@ -409,10 +540,26 @@ export const USE_RULES: readonly string[] = [
   'thinner>attic.stain',
   'oldkey>attic.door',
   'scrap>laundry.notebook',
-  'bar>cellar.shutter',
+  'bar>cellar.hatch',
+  'ricemilk>kitchen.robot',
+  'chestnut>kitchen.robot',
+  'riceflour>kitchen.robot',
 ];
 
 function useItem(c: Ctx, item: ItemId, target: string): void {
+  if (item === 'gatekey' && GATES.includes(target)) {
+    c.remove('gatekey').set('gates_open').sfx('door').hero('e18.open').solve(18);
+    return;
+  }
+  const ingredient = INGREDIENTS[item];
+  if (ingredient && target === 'kitchen.robot') {
+    c.remove(item).set(ingredient).hero('kitchen.robot.add');
+    if (Object.values(INGREDIENTS).every((f) => c.is(f!))) {
+      c.set('dough_mixed').sfx('robot').hero('line.doughMixed').solve(19);
+      c.s.timers.dough = c.s.clock + TIMER_MS.dough;
+    }
+    return;
+  }
   switch (`${item}>${target}`) {
     case 'key>front.door':
       c.remove('key').set('door_unlocked').sfx('door').solve(1);
@@ -442,15 +589,21 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
       return;
     case 'detergent>utility.machine':
       if (c.is('machine_running') || c.is('machine_done')) break;
+      if (!c.is('power_on')) {
+        c.hero('line.machinePower');
+        return;
+      }
       c.remove('detergent').set('machine_running').sfx('machine').hero('e17.start');
       return;
     case 'oring>parents.shower':
       c.remove('oring').set('oring_fitted').hero('e08.oring');
-      repairShower(c);
       return;
     case 'wrench>parents.shower':
-      c.remove('wrench').set('wrench_used').hero('e08.wrench');
-      repairShower(c);
+      if (!c.is('oring_fitted')) {
+        c.hero('line.wrenchNothing');
+        return;
+      }
+      c.remove('wrench').set('wrench_used').set('shower_repaired').hero('e08.wrench').hero('e08.done').solve(8);
       return;
     case 'pliers>pool.pump':
       c.remove('pliers').set('plug_fixed').hero('pool.pump.fix');
@@ -461,15 +614,10 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
       c.solve(11);
       return;
     case 'oldkey>attic.door':
-      c.remove('oldkey').set('secret_open').sfx('secret');
-      c.cut('cut10', (k) => k.narrator('cut10'));
-      c.solve(12);
+      c.remove('oldkey').set('lab_lock').sfx('door').hero('e12.key');
+      openLab(c);
       return;
     case 'scrap>laundry.notebook':
-      if (!c.is('computer_read')) {
-        c.hero('line.finalMissing');
-        return;
-      }
       c.remove('scrap').solve(13).finish();
       c.cut('cut11', (k) =>
         k
@@ -484,15 +632,20 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
       );
       c.beats.push({ type: 'ending' });
       return;
-    case 'bar>cellar.shutter':
-      c.remove('bar').set('shutter_open').sfx('door').hero('e15.open').solve(15);
+    case 'bar>cellar.hatch':
+      c.remove('bar').set('hatch_open').sfx('door').hero('e15.open').solve(15);
       return;
   }
   c.wrong();
 }
 
-function repairShower(c: Ctx): void {
-  if (c.is('oring_fitted') && c.is('wrench_used') && !c.is('shower_repaired')) c.set('shower_repaired').hero('e08.done').solve(8);
+// E12: the lab door opens once both its lock (old key) and its keypad (code 2510) are done, in any order.
+function openLab(c: Ctx): void {
+  if (c.is('lab_lock') && c.is('lab_code') && !c.is('secret_open')) {
+    c.set('secret_open').sfx('secret');
+    c.cut('cut10', (k) => k.narrator('cut10'));
+    c.solve(12);
+  }
 }
 
 function combine(c: Ctx, a: ItemId, b: ItemId): void {
@@ -505,9 +658,8 @@ function combine(c: Ctx, a: ItemId, b: ItemId): void {
 }
 
 function keypad(c: Ctx, id: KeypadId, code: string): boolean {
-  const place: PlaceId = id === 'computer' ? 'office' : 'parents';
-  const open = id === 'computer' ? c.is('computer_read') : c.is('safe_open');
-  if (c.s.place !== place || open || !c.s.notes.includes(CODE_NOTE[id]) || !/^\d{4}$/.test(code)) return false;
+  const open = id === 'computer' ? c.is('computer_read') : id === 'safe' ? c.is('safe_open') : c.is('lab_code') || !c.is('door_revealed');
+  if (c.s.place !== KEYPAD_PLACE[id] || open || !c.s.notes.includes(CODE_NOTE[id]) || !/^\d{4}$/.test(code)) return false;
   if (code !== CODES[id]) {
     c.sfx('wrong').hero('line.codeWrong');
     return true;
@@ -517,10 +669,13 @@ function keypad(c: Ctx, id: KeypadId, code: string): boolean {
     c.set('computer_read');
     c.beats.push({ type: 'documents' });
     c.note('n09').note('n10').solve(7);
-  } else {
+  } else if (id === 'safe') {
     c.set('safe_open').narrator('e10.open');
     for (const item of ['oldkey', 'photo', 'scrap', 'note'] as const) c.give(item);
     c.note('n12').solve(10);
+  } else {
+    c.set('lab_code').hero('e12.code');
+    openLab(c);
   }
   return true;
 }

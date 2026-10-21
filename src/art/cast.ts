@@ -21,11 +21,16 @@ export const SPECS: Record<'hero' | CharacterId, PersonSpec> = {
 };
 
 export interface SpriteSet {
-  // Standing frames: [idle, blink], talk, and the two frames of the activity pose (arms raised / standing).
+  // Standing frames: [idle, blink], talk, and the two frames of the activity pose (arms raised / standing), from the
+  // front and from the back.
   idle: PixelBuffer[];
   talk: PixelBuffer;
   activity: PixelBuffer[];
+  activityBack: PixelBuffer[];
 }
+
+// Who does their activity with their back to the room (Florent at the drums).
+export const BACK_ACTIVITY: readonly CharacterId[] = ['florent'];
 
 // The hero's frames by direction: standing + 4 walk frames. Left is drawn mirrored from right.
 export interface WalkSet {
@@ -50,6 +55,7 @@ export function spriteSet(spec: PersonSpec): SpriteSet {
     idle: [idle, drawPerson(spec, { dir: 'down', frame: -2 })],
     talk: drawPerson(spec, { dir: 'down', frame: -1, talk: true }),
     activity: [drawPerson(spec, { dir: 'down', frame: -1, activity: true }), idle],
+    activityBack: [drawPerson(spec, { dir: 'up', frame: -1, activity: true }), drawPerson(spec, { dir: 'up', frame: -1 })],
   };
 }
 
@@ -65,7 +71,7 @@ export function heroFrame(set: WalkSet, facing: Facing, frame: number, talking: 
 export function personFrame(set: SpriteSet, id: CharacterId, opts: { talking: boolean; busy: boolean; clock: number }): PixelBuffer {
   const { talking, busy, clock } = opts;
   if (talking) return Math.floor(clock / 140) % 2 === 0 ? set.talk : set.idle[0];
-  if (busy) return set.activity[Math.floor(clock / 300) % 2];
+  if (busy) return (BACK_ACTIVITY.includes(id) ? set.activityBack : set.activity)[Math.floor(clock / 300) % 2];
   // Blink for 150 ms every 3.2 s (each person at a different phase).
   const phase = (clock + id.length * 700) % 3200;
   return phase < 150 ? set.idle[1] : set.idle[0];

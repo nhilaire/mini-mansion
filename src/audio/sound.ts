@@ -6,7 +6,7 @@ import { GameState, SfxName } from '../game/types';
 import { occupant } from '../game/world';
 
 export type SoundName = SfxName | 'step';
-export type LoopName = 'drums' | 'typing' | 'radio' | 'game' | 'cube' | 'humming' | 'machineLoop';
+export type LoopName = 'drums' | 'typing' | 'radio' | 'game' | 'cube' | 'humming' | 'machineLoop' | 'cooking';
 export type Track = 'house' | 'ending';
 
 const SFX: Record<SoundName, number> = {
@@ -25,6 +25,10 @@ const SFX: Record<SoundName, number> = {
   secret: require('../../assets/audio/secret.wav'),
   capture: require('../../assets/audio/capture.wav'),
   note: require('../../assets/audio/note.wav'),
+  breaker: require('../../assets/audio/breaker.wav'),
+  spray: require('../../assets/audio/spray.wav'),
+  robot: require('../../assets/audio/robot.wav'),
+  gag: require('../../assets/audio/gag.wav'),
 };
 
 const LOOPS: Record<LoopName, number> = {
@@ -35,6 +39,7 @@ const LOOPS: Record<LoopName, number> = {
   cube: require('../../assets/audio/loop_cube.wav'),
   humming: require('../../assets/audio/loop_humming.wav'),
   machineLoop: require('../../assets/audio/loop_machineLoop.wav'),
+  cooking: require('../../assets/audio/loop_cooking.wav'),
 };
 
 const TRACKS: Record<Track, number> = {
@@ -121,8 +126,9 @@ export interface AmbientLoop {
   volume: number;
 }
 
-// PRD: the activity sound of each occupied guarded room is heard from the corridor leading to it; the drums fill the
-// music corner (and are heard faintly next door) while Florent plays; the washing machine hums while it runs.
+// PRD: the activity sound of each occupied guarded room is heard from the corridor leading to it (Papa cooking from
+// the music corner, Maman humming in the garden from the football corner); the drums fill the music corner (and are
+// heard faintly next door) while Florent plays; the washing machine hums while it runs.
 export function ambienceFor(s: GameState): AmbientLoop[] {
   const out: AmbientLoop[] = [];
   if (s.finished) return out;
@@ -133,9 +139,11 @@ export function ambienceFor(s: GameState): AmbientLoop[] {
     if (occupant('theo', s.chars)) out.push({ loop: 'cube', volume: 0.35 });
     if (occupant('parents', s.chars)) out.push({ loop: 'humming', volume: 0.3 });
   }
+  if (s.place === 'music' && occupant('kitchen', s.chars)) out.push({ loop: 'cooking', volume: 0.4 });
+  if (s.place === 'football' && occupant('garden', s.chars)) out.push({ loop: 'humming', volume: 0.35 });
   if (s.chars.florent === 'drumming') {
     if (s.place === 'music') out.push({ loop: 'drums', volume: 0.7 });
-    else if (s.place === 'living' || s.place === 'dining') out.push({ loop: 'drums', volume: 0.25 });
+    else if (s.place === 'living' || s.place === 'kitchen') out.push({ loop: 'drums', volume: 0.25 });
   }
   if (s.flags.machine_running && (s.place === 'utility' || s.place === 'corridor0')) out.push({ loop: 'machineLoop', volume: s.place === 'utility' ? 0.5 : 0.2 });
   return out;

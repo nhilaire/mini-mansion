@@ -62,10 +62,20 @@ describe('activity sounds (AC-25)', () => {
     expect(ambienceFor(at('hall'))).toEqual([]);
   });
 
+  it('Papa cooking is heard from the music corner, Maman humming in the garden from the football corner', () => {
+    expect(ambienceFor(at('music', { dad: 'cooking' })).map((l) => l.loop)).toEqual(['cooking']);
+    expect(ambienceFor(at('music'))).toEqual([]);
+    expect(ambienceFor(at('football', { mom: 'gardening' })).map((l) => l.loop)).toEqual(['humming']);
+    expect(ambienceFor(at('football'))).toEqual([]);
+    expect(ambienceFor(at('corridor0', { dad: 'answering' })).map((l) => l.loop)).toEqual(['typing']);
+    expect(ambienceFor(at('corridor0', { dad: 'outside' }))).toEqual([]);
+  });
+
   it('the drums fill the music corner and are heard faintly next door; the washing machine hums while it runs', () => {
     expect(ambienceFor(at('music', { florent: 'drumming' }))).toEqual([{ loop: 'drums', volume: 0.7 }]);
     expect(ambienceFor(at('living', { florent: 'drumming' }))[0].volume).toBeLessThan(0.7);
-    expect(ambienceFor(at('kitchen', { florent: 'drumming' }))).toEqual([]);
+    expect(ambienceFor(at('kitchen', { florent: 'drumming' }))[0].volume).toBeLessThan(0.7);
+    expect(ambienceFor(at('hall', { florent: 'drumming' }))).toEqual([]);
     expect(ambienceFor(at('utility', {}, { machine_running: true })).map((l) => l.loop)).toEqual(['machineLoop']);
   });
 

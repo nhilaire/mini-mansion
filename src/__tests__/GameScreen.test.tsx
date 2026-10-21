@@ -126,13 +126,13 @@ describe('GameScreen', () => {
   });
 
   it('a conversation shows choices with "Au revoir", reopens after an answer and closes on "Au revoir" (AC-20)', async () => {
-    await mount({ ...newGame(), place: 'kitchen', flags: { door_unlocked: true }, chars: chars({ dad: 'cooking' }), tutorial: 3 });
-    await fireEvent.press(screen.getByTestId('hs-dad'));
+    await mount({ ...newGame(), place: 'football', flags: { door_unlocked: true }, chars: chars({ julien: 'football' }), tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('hs-julien'));
     await fireEvent.press(screen.getByTestId('verb-talk'));
-    expect(screen.getByLabelText(line(t, 'dad.q.rumour'))).toBeTruthy();
+    expect(screen.getByLabelText(line(t, 'julien.q.pool'))).toBeTruthy();
     expect(screen.getByLabelText('Au revoir')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('dlg-dad.cooking'));
-    expect(screen.getByText(line(t, 'dad.a.cooking'))).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('dlg-julien.pool'));
+    expect(screen.getByText(line(t, 'julien.a.pool1'))).toBeTruthy();
     await dismissLines();
     expect(screen.getByTestId('dialogue')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('dlg-bye'));
@@ -201,7 +201,7 @@ describe('GameScreen', () => {
     await fireEvent.press(screen.getByTestId('verb-use'));
     expect(screen.getByText(line(t, 'capture.julien'))).toBeTruthy();
     await dismissLines();
-    expect(screen.getByTestId('hs-cellar.shutter')).toBeTruthy();
+    expect(screen.getByTestId('hs-cellar.hatch')).toBeTruthy();
     expect(lastSaved(props).captures).toBe(1);
   });
 
@@ -236,6 +236,53 @@ describe('GameScreen', () => {
     await fireEvent.press(screen.getByTestId('pause-home'));
     expect(props.onHome).toHaveBeenCalled();
     AppState.addEventListener = original;
+  });
+
+  it('the doorbell: Papa answers, then the front door view plays with his line; the timers wait while paused (AC-51, AC-58)', async () => {
+    const props = await mount({ ...newGame(), place: 'front', flags: { door_unlocked: true }, tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('hs-front.bell'));
+    await fireEvent.press(screen.getByTestId('verb-use'));
+    expect(screen.getByText(line(t, 'line.dadAnswer'))).toBeTruthy();
+    await dismissLines();
+    expect(screen.queryByTestId('timers-idle')).toBeNull();
+    await fireEvent.press(screen.getByTestId('exit-front.toHall'));
+    await dismissLines();
+    // Paused: no timer moves (fast mode: 30 times faster than play time).
+    await fireEvent.press(screen.getByTestId('game-menu'));
+    await act(async () => {
+      jest.advanceTimersByTime(10_000);
+    });
+    expect(lastSaved(props).chars.dad).toBe('answering');
+    await fireEvent.press(screen.getByTestId('pause-resume'));
+    await act(async () => {
+      jest.advanceTimersByTime(4200);
+    });
+    expect(screen.getByTestId('view-door')).toBeTruthy();
+    expect(screen.getByText(line(t, 'line.dadAtDoor'))).toBeTruthy();
+    expect(lastSaved(props).chars.dad).toBe('outside');
+    expect(lastSaved(props).place).toBe('hall');
+    await dismissLines();
+    expect(screen.queryByTestId('view-door')).toBeNull();
+  });
+
+  it('the dough: Papa arrives in the kitchen view two minutes later and the timers are then idle (AC-52)', async () => {
+    const props = await mount({ ...newGame(), place: 'kitchen', inventory: ['ricemilk', 'chestnut', 'riceflour'], flags: { door_unlocked: true }, tutorial: 3 });
+    for (const item of ['ricemilk', 'chestnut', 'riceflour']) {
+      await fireEvent.press(screen.getByTestId(`inv-${item}`));
+      await fireEvent.press(screen.getByTestId('hs-kitchen.robot'));
+      await dismissLines();
+    }
+    expect(lastSaved(props).flags.dough_mixed).toBe(true);
+    await fireEvent.press(screen.getByTestId('exit-kitchen.toMusic'));
+    await dismissLines();
+    await act(async () => {
+      jest.advanceTimersByTime(4200);
+    });
+    expect(screen.getByTestId('view-kitchen')).toBeTruthy();
+    expect(screen.getByText(line(t, 'line.dadDough'))).toBeTruthy();
+    await dismissLines();
+    expect(lastSaved(props).chars.dad).toBe('cooking');
+    expect(screen.getByTestId('timers-idle')).toBeTruthy();
   });
 
   it('play time does not advance while paused (AC-38)', async () => {

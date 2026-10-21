@@ -83,7 +83,7 @@ describe('clue notebook (AC-29)', () => {
 describe('once-only cutscenes', () => {
   it('every cutscene of the solution plays exactly once', () => {
     const { state, outcomes } = playAll(newGame(), SOLUTION);
-    expect([...state.cuts].sort()).toEqual(['cut01', 'cut02', 'cut04', 'cut05', 'cut06', 'cut07', 'cut08', 'cut09', 'cut10', 'cut11']);
+    expect([...state.cuts].sort()).toEqual(['cut01', 'cut04', 'cut05', 'cut06', 'cut07', 'cut08', 'cut09', 'cut10', 'cut11', 'cut12']);
     const narratorKeys = outcomes.flatMap((o) => o.beats).filter((b) => b.type === 'say' && b.speaker === 'narrator').map((b) => (b as { key: string }).key);
     for (const k of ['cut01', 'cut04', 'cut05', 'cut06', 'cut08', 'cut09', 'cut10']) expect(narratorKeys.filter((x) => x === k)).toHaveLength(1);
   });

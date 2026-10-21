@@ -70,6 +70,14 @@ const sfx = {
   capture: () => render(SFX_RATE, 0.7, (t, p) => square(440 * 2 ** (-p * 1.5), t, 0.5) * (1 - p) * 0.8),
   // Notebook entry written: a soft chime.
   note: () => render(SFX_RATE, 0.3, (t, p) => triangle(p < 0.5 ? 1047 : 1568, t) * (1 - p) * 0.6),
+  // A heavy switch: a click then a short hum.
+  breaker: () => render(SFX_RATE, 0.4, (t, p) => (p < 0.08 ? noise() * (1 - p / 0.08) : square(100, t, 0.5) * 0.3 * (1 - p))),
+  // A spray of water: bright noise that fades.
+  spray: () => render(SFX_RATE, 0.8, (t, p) => noise() * (p < 0.1 ? p / 0.1 : 1 - p) * 0.8),
+  // A food processor: a rising motor whine.
+  robot: () => render(SFX_RATE, 1.0, (t, p) => square(110 + 220 * Math.min(1, p * 3), t, 0.4) * 0.35 * Math.sin(Math.PI * p) + noise() * 0.08),
+  // A small comic boing for the gags.
+  gag: () => render(SFX_RATE, 0.3, (t, p) => triangle(330 + 330 * Math.sin(p * 18) * (1 - p), t) * (1 - p) * 0.7),
 };
 
 // Drum kit pattern: kick, snare (noise), hi-hat ticks.
@@ -109,6 +117,8 @@ const loops = {
   humming: () => render(LOOP_RATE, 2.4, (t) => triangle([392, 440, 494, 440, 392, 330][Math.floor(t * 2.5) % 6], t) * 0.4),
   // The washing machine running.
   machineLoop: () => render(LOOP_RATE, 2, (t) => square(55, t, 0.5) * 0.3 * (0.7 + 0.3 * Math.sin(t * 6)) + noise() * 0.05),
+  // Cooking: pans clattering and a sizzle.
+  cooking: () => render(LOOP_RATE, 2.4, (t) => noise() * 0.2 * (0.6 + 0.4 * Math.sin(t * 31)) + ((t * 2.5) % 1 < 0.05 ? triangle(1760, t) * 0.4 : 0)),
 };
 
 // ---------- music (16 kHz) ----------

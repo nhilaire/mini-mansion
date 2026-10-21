@@ -8,7 +8,6 @@ export type PlaceId =
   | 'hall'
   | 'living'
   | 'music'
-  | 'dining'
   | 'kitchen'
   | 'corridor0'
   | 'wc0'
@@ -28,6 +27,7 @@ export type PlaceId =
 
 export type ItemId =
   | 'key'
+  | 'gatekey'
   | 'pole'
   | 'extension'
   | 'longpole'
@@ -43,7 +43,10 @@ export type ItemId =
   | 'photo'
   | 'scrap'
   | 'note'
-  | 'bar';
+  | 'bar'
+  | 'ricemilk'
+  | 'chestnut'
+  | 'riceflour';
 
 export type CharacterId = 'dad' | 'mom' | 'julien' | 'florent' | 'theo';
 
@@ -54,9 +57,12 @@ export type Verb = 'look' | 'take' | 'talk' | 'use';
 
 export type Facing = 'left' | 'right' | 'up' | 'down';
 
-// Character states (PRD "Character states"): changed only by story events, never by a timer.
+// Character states (PRD "Character states"): changed by story events and by the doorbell and dough timers.
+// Papa's doorbell phases: answering (still at his desk), outside (in front of the house), returning (on his way).
+export type DadState = 'at_desk' | 'answering' | 'outside' | 'returning' | 'cooking';
+
 export interface CharacterStates {
-  dad: 'at_desk' | 'cooking';
+  dad: DadState;
   mom: 'folding' | 'gardening';
   julien: 'in_room' | 'football';
   florent: 'in_room' | 'drumming';
@@ -65,6 +71,8 @@ export interface CharacterStates {
 
 export type Flag =
   | 'key_taken'
+  | 'gatekey_taken'
+  | 'gates_open'
   | 'door_unlocked'
   | 'pole_taken'
   | 'extension_taken'
@@ -78,6 +86,7 @@ export type Flag =
   | 'chess_solved'
   | 'computer_read'
   | 'detergent_taken'
+  | 'power_on'
   | 'machine_running'
   | 'machine_done'
   | 'oring_taken'
@@ -94,23 +103,32 @@ export type Flag =
   | 'pool_drained'
   | 'thinner_taken'
   | 'door_revealed'
+  | 'lab_code'
+  | 'lab_lock'
   | 'secret_open'
   | 'bar_taken'
-  | 'shutter_open'
-  | 'trap_locked'
+  | 'hatch_open'
   | 'bay_open'
+  | 'milk_taken'
+  | 'flours_taken'
+  | 'milk_in'
+  | 'chestnut_in'
+  | 'riceflour_in'
+  | 'dough_mixed'
+  | 'wc_wet'
   | 'ending';
 
 export type NoteId = 'n01' | 'n02' | 'n03' | 'n04' | 'n05' | 'n06' | 'n07' | 'n08' | 'n09' | 'n10' | 'n11' | 'n12';
 
-// Cutscenes that play once (PRD "Cutscenes").
-export type CutId = 'cut01' | 'cut02' | 'cut04' | 'cut05' | 'cut06' | 'cut07' | 'cut08' | 'cut09' | 'cut10' | 'cut11';
+// Cutscenes that play once (PRD "Cutscenes"; CUT02, the front door view, plays at each ring and is not recorded).
+export type CutId = 'cut01' | 'cut04' | 'cut05' | 'cut06' | 'cut07' | 'cut08' | 'cut09' | 'cut10' | 'cut11' | 'cut12';
 
-// Keypads: the father's computer and the safe of the parents' bedroom.
-export type KeypadId = 'computer' | 'safe';
+// Keypads: the father's computer, the safe of the parents' bedroom and the lab door in the attic.
+export type KeypadId = 'computer' | 'safe' | 'lab';
 
-// The rooms that can be guarded by their occupant (telemetry `capture.room`).
-export type GuardedRoom = 'office' | 'parents' | 'julien' | 'florent' | 'theo';
+// The places that can be guarded by their occupant (telemetry `capture.room`), and those entered through a door.
+export type GuardedRoom = 'office' | 'front' | 'kitchen' | 'parents' | 'garden' | 'julien' | 'florent' | 'theo';
+export type DoorRoom = 'office' | 'parents' | 'julien' | 'florent' | 'theo';
 
 export interface Point {
   x: number;
@@ -127,8 +145,14 @@ export interface Rect {
 // Tutorial step: 0 walk, 1 verbs, 2 inventory (shown once an item is held), 3 done.
 export type TutorialStep = 0 | 1 | 2 | 3;
 
+// Running timers, as deadlines on the timer clock (ms); null when not running.
+export interface Timers {
+  dad: number | null;
+  dough: number | null;
+}
+
 export interface GameState {
-  v: 1;
+  v: 2;
   place: PlaceId;
   pos: Point;
   facing: Facing;
@@ -139,13 +163,16 @@ export interface GameState {
   notes: NoteId[];
   unread: NoteId[];
   cuts: CutId[];
-  // Puzzles solved (E01-E17 as 1-17), in order.
+  // Puzzles solved (E01-E19 as 1-19), in order.
   solved: number[];
   captures: number;
   // Dialogue options already chosen (greyed but readable).
   seen: string[];
   tutorial: TutorialStep;
   playMs: number;
+  // The timer clock: advances with play time (30 times faster in the testing fast mode).
+  clock: number;
+  timers: Timers;
   finished: boolean;
   // Rotation index of the generic "wrong combination" lines.
   wrongIdx: number;
@@ -165,7 +192,11 @@ export type SfxName =
   | 'beep'
   | 'secret'
   | 'capture'
-  | 'note';
+  | 'note'
+  | 'breaker'
+  | 'spray'
+  | 'robot'
+  | 'gag';
 
 // What the UI plays, in order, after an interaction.
 export type Beat =
@@ -177,6 +208,8 @@ export type Beat =
   | { type: 'note'; note: NoteId }
   | { type: 'room'; place: PlaceId }
   | { type: 'capture' }
+  // A view of another place without control (the front door view, Papa arriving in the kitchen).
+  | { type: 'view'; view: 'door' | 'kitchen' }
   | { type: 'sfx'; sfx: SfxName }
   | { type: 'ending' };
 
@@ -195,7 +228,11 @@ export type Input =
   | { kind: 'dialogue'; character: CharacterId; option: string }
   | { kind: 'keypad'; keypad: KeypadId; code: string }
   // The moves played on Théo's chess problem, as "e2e4" squares (white moves only).
-  | { kind: 'chess'; moves: string[] };
+  | { kind: 'chess'; moves: string[] }
+  // Play time passing: advances the timer clock and resolves the timers that end.
+  | { kind: 'tick'; ms: number }
+  // Waiting until the next timer ends (tests and the solver).
+  | { kind: 'wait' };
 
 export interface Outcome {
   state: GameState;

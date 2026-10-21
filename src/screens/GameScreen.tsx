@@ -1,6 +1,7 @@
 // The adventure: Skia scene + touch overlays. Taps make Sam walk, hotspots open the verb menu, inventory items are
 // used on hotspots, characters or other items. Engine outcomes are played as beats (lines, dialogues, keypads, the
-// chess board, documents, captures). Rules live in src/game.
+// chess board, documents, captures, views of another place). Play time feeds the engine's timers (doorbell, dough)
+// through tick inputs, sent only while nothing is being shown or walked. Rules live in src/game.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, BackHandler, GestureResponderEvent, Pressable, StatusBar, StyleSheet, useWindowDimensions, View } from 'react-native';
 
@@ -9,7 +10,7 @@ import { exitName, hotspotName, itemName, line } from '../content/index';
 import { dialogueOptions } from '../game/dialogue';
 import { findPath } from '../game/geometry';
 import { addPlayTime, advanceTutorial, TutorialSignal, tutorialBubble, tutorialDone } from '../game/progress';
-import { interact, readNotes } from '../game/rules';
+import { interact, nextDeadline, readNotes } from '../game/rules';
 import { Beat, CharacterId, Facing, GameState, Input, ItemId, KeypadId, Point, Speaker, Verb } from '../game/types';
 import { poseAt } from '../game/walker';
 import {
@@ -31,7 +32,7 @@ import { useI18n } from '../i18n/I18nProvider';
 import { HeroPose, Scene } from '../render/Scene';
 import { eventsFor } from '../telemetry/gameTelemetry';
 import { track } from '../telemetry/telemetry';
-import { isFastMode, lineDurationMs } from '../testing/fastMode';
+import { isFastMode, lineDurationMs, timerScale } from '../testing/fastMode';
 import {
   ActionMenu,
   CaptureFade,
@@ -76,7 +77,11 @@ interface Props {
 
 const TICK_MS = 33;
 const CAPTURE_MS = 900;
+type PlaceView = 'door' | 'kitchen';
 const TOAST_MS = 1800;
+
+// The hero is not part of a view of another place.
+const OFFSCREEN: HeroPose = { pos: { x: -100, y: -100 }, facing: 'down', frame: -1 };
 
 export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding, onHome, onSettings }: Props) {
   const { t } = useI18n();
@@ -101,6 +106,11 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   const [clock, setClock] = useState(0);
   const [walking, setWalking] = useState(false);
   const endedRef = useRef(false);
+  // Another place shown without control while its lines play (Papa at the front door, Papa arriving in the kitchen).
+  const [view, setView] = useState<PlaceView | null>(null);
+  // Play time not yet given to the engine's timers (held while a line, a walk or the notebook is on).
+  const pendingRef = useRef(0);
+  const notebookRef = useRef(false);
 
   const commit = useCallback(
     (s: GameState) => {
@@ -132,6 +142,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
     for (;;) {
       const b = queue.current.shift();
       if (!b) {
+        setView(null);
         show(null);
         return;
       }
@@ -155,8 +166,12 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           show({ kind: 'documents' });
           return;
         case 'capture':
+          setView(null);
           show({ kind: 'capture', until: now + (isFastMode() ? 200 : CAPTURE_MS) });
           return;
+        case 'view':
+          setView(b.view);
+          break;
         case 'sfx':
           sounds.play(b.sfx);
           break;
@@ -202,6 +217,8 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
     },
     [commit, play, signal],
   );
+  const applyRef = useRef(apply);
+  applyRef.current = apply;
 
   // Walks to `target` along the floor; `then` runs on arrival, facing `face`.
   const walkTo = useCallback(
@@ -241,6 +258,15 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       if (pausedRef.current) return;
       setClock((c) => c + dt);
       gameRef.current = addPlayTime(gameRef.current, dt, true);
+      pendingRef.current += dt * timerScale();
+      if (!presentRef.current && !walkRef.current && !notebookRef.current && !gameRef.current.finished) {
+        const g = gameRef.current;
+        const next = nextDeadline(g);
+        const ms = pendingRef.current;
+        pendingRef.current = 0;
+        if (next !== null && g.clock + ms >= next) applyRef.current({ kind: 'tick', ms });
+        else gameRef.current = { ...g, clock: g.clock + ms };
+      }
       const w = walkRef.current;
       if (w) {
         const p = poseAt(w.from, w.path, now - w.start, w.facing);
@@ -282,6 +308,10 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
     });
     return () => sub.remove();
   }, [pause]);
+
+  useEffect(() => {
+    notebookRef.current = notebook;
+  }, [notebook]);
 
   const closeNotebook = useCallback(() => {
     setNotebook(false);
@@ -453,6 +483,24 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       {toast && <NoteToast text={t.game.newNote} />}
       {/* Marker for the e2e flows: nothing is moving or being said. collapsable=false keeps it in the native tree. */}
       {idle && <View testID="scene-idle" collapsable={false} pointerEvents="none" style={styles.idle} />}
+      {nextDeadline(game) === null && <View testID="timers-idle" collapsable={false} pointerEvents="none" style={styles.timersIdle} />}
+
+      {view && (
+        <View testID={`view-${view}`} style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Scene
+            state={{ ...game, place: view === 'door' ? 'front' : 'kitchen' }}
+            hero={OFFSCREEN}
+            transform={transform}
+            width={width}
+            height={height}
+            speaker={speaker}
+            selected={null}
+            page={0}
+            unread={false}
+            clock={clock}
+          />
+        </View>
+      )}
 
       {menu && (
         <ActionMenu
@@ -508,4 +556,5 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#000000' },
   abs: { position: 'absolute' },
   idle: { position: 'absolute', right: 0, bottom: 0, width: 2, height: 2 },
+  timersIdle: { position: 'absolute', left: 0, bottom: 0, width: 2, height: 2 },
 });

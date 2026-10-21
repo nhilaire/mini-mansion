@@ -4,12 +4,12 @@ import { deserialize, SaveError, serialize } from '../game/save';
 import { SOLUTION } from '../game/solution';
 import { GameState } from '../game/types';
 
-describe('save format v1 (AC-35)', () => {
+describe('save format v2 (AC-35, AC-58)', () => {
   it('restores every state of the walkthrough identically', () => {
     let s: GameState = newGame();
     for (const input of SOLUTION) {
       s = playAll(s, [input]).state;
-      const saved = { ...s, playMs: 123456, tutorial: 3 as const, captures: 2, seen: ['dad.rumour'], wrongIdx: 4 };
+      const saved = { ...s, playMs: 123456, clock: 234567, tutorial: 3 as const, captures: 2, seen: ['julien.ball'], wrongIdx: 4 };
       expect(deserialize(serialize(saved))).toEqual(saved);
     }
   });
@@ -28,11 +28,16 @@ describe('save format v1 (AC-35)', () => {
     expect(back.captures).toBe(s.captures);
   });
 
+  it('keeps the running timers and the timer clock', () => {
+    const s = { ...newGame(), clock: 5000, timers: { dad: 125000, dough: 65000 }, chars: { ...newGame().chars, dad: 'answering' as const } };
+    expect(deserialize(serialize(s))).toEqual(s);
+  });
+
   const valid = JSON.parse(serialize(newGame()));
   const broken: [string, unknown][] = [
     ['not JSON', '{'],
     ['an array', '[]'],
-    ['an unknown version', JSON.stringify({ ...valid, v: 2 })],
+    ['an unknown version', JSON.stringify({ ...valid, v: 1 })],
     ['an unknown place', JSON.stringify({ ...valid, place: 'tower' })],
     ['an unknown item', JSON.stringify({ ...valid, inventory: ['lantern'] })],
     ['a duplicated item', JSON.stringify({ ...valid, inventory: ['pole', 'pole'] })],
@@ -42,7 +47,9 @@ describe('save format v1 (AC-35)', () => {
     ['an unknown note', JSON.stringify({ ...valid, notes: ['n99'] })],
     ['an unread note not learnt', JSON.stringify({ ...valid, notes: [], unread: ['n01'] })],
     ['an unknown cutscene', JSON.stringify({ ...valid, cuts: ['cut99'] })],
-    ['an out-of-range puzzle', JSON.stringify({ ...valid, solved: [18] })],
+    ['an out-of-range puzzle', JSON.stringify({ ...valid, solved: [20] })],
+    ['a bad timer', JSON.stringify({ ...valid, timers: { dad: -5, dough: null } })],
+    ['a missing timer clock', JSON.stringify({ ...valid, clock: undefined })],
     ['negative captures', JSON.stringify({ ...valid, captures: -1 })],
     ['a bad play time', JSON.stringify({ ...valid, playMs: 'long' })],
   ];

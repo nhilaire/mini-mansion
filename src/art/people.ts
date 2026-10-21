@@ -1,6 +1,6 @@
 // Character sprites (24x48 px), built from a few parameters per person so that everyone shares one style.
 // Poses: front (down), back (up) and side (right; left is the mirror), idle / blink / talk, a 4-frame walk and an
-// activity frame (arms raised: drumming, cooking, gardening, cheering).
+// activity frame (arms raised: drumming, cooking, gardening, cheering), from the front or from the back.
 import { C } from './palette';
 import { Color, PixelBuffer } from './pixels';
 
@@ -37,7 +37,7 @@ export interface Pose {
   // 0-3 walk frames, -1 standing, -2 standing with eyes closed (blink).
   frame: number;
   talk?: boolean;
-  // Arms raised (front view only).
+  // Arms raised (front or back view).
   activity?: boolean;
 }
 
@@ -87,7 +87,7 @@ function drawFront(b: PixelBuffer, s: PersonSpec, pose: Pose, y0: number, ty: nu
     [tx - 2, swing],
     [tx + tw, -swing],
   ] as const) {
-    if (pose.activity && !back) {
+    if (pose.activity) {
       // Arms raised above the shoulders, hands up.
       b.rect(ax, ty - 6, 2, 8, s.top);
       b.rect(ax, ty - 8, 2, 2, s.skin);

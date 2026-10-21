@@ -1,4 +1,4 @@
-// T-03: the 24 places, the canonical exits of the PRD, lock rules, hotspots and tap sizes.
+// T-03 / T-29: the 23 places, the canonical exits of the PRD, lock rules, hotspots and tap sizes.
 import { pointInPolygon } from '../game/geometry';
 import { interact, newGame } from '../game/rules';
 import { GameState, PlaceId } from '../game/types';
@@ -29,15 +29,14 @@ const CANONICAL: Record<PlaceId, PlaceId[]> = {
   garden: ['football'],
   hall: ['front', 'living', 'corridor0', 'landing'],
   living: ['hall', 'music', 'pool'],
-  music: ['living', 'dining'],
-  dining: ['music', 'kitchen'],
-  kitchen: ['dining'],
+  music: ['living', 'kitchen'],
+  kitchen: ['music'],
   corridor0: ['hall', 'wc0', 'utility', 'garage'],
   wc0: ['corridor0'],
   office: ['corridor0'],
   utility: ['corridor0'],
   garage: ['corridor0', 'attic', 'cellar'],
-  cellar: ['garage', 'front'],
+  cellar: ['garage'],
   attic: ['garage', 'laundry'],
   laundry: ['attic'],
   landing: ['hall', 'wc1', 'bathroom'],
@@ -61,9 +60,10 @@ const withFlags = (s: GameState, ...flags: (keyof GameState['flags'])[]): GameSt
 const at = (place: PlaceId, ...flags: (keyof GameState['flags'])[]): GameState => withFlags({ ...newGame(), place }, ...flags);
 
 describe('places and exits (AC-15)', () => {
-  it('has the 24 places of the plan', () => {
-    expect(PLACES).toHaveLength(24);
-    expect(new Set(PLACES).size).toBe(24);
+  it('has the 23 places of the plan (the music corner and the dining room are one place)', () => {
+    expect(PLACES).toHaveLength(23);
+    expect(new Set(PLACES).size).toBe(23);
+    expect(PLACES).not.toContain('dining');
   });
 
   it('exits lead exactly where the canonical table says', () => {
@@ -90,7 +90,7 @@ describe('places and exits (AC-15)', () => {
     expect([...cx].sort((a, b) => a - b)).toEqual(cx);
   });
 
-  it('the front door opens only after E01, the bay window only from the living room, the shutter once opened', () => {
+  it('the front door opens only after E01, the bay window only from the living room, the hatch from below once unblocked', () => {
     const ids = (s: GameState) => exitsIn(s).map((e) => e.id);
     expect(ids(at('front'))).not.toContain('front.toHall');
     expect(ids(at('front', 'door_unlocked'))).toContain('front.toHall');
@@ -102,8 +102,19 @@ describe('places and exits (AC-15)', () => {
     const opened = interact(at('living'), { kind: 'verb', verb: 'use', target: 'living.bay' }).state;
     expect(ids(opened)).toContain('living.toPool');
     expect(ids({ ...opened, place: 'pool' })).toContain('pool.toLiving');
-    expect(ids(at('cellar'))).not.toContain('cellar.toFront');
-    expect(ids(at('cellar', 'shutter_open'))).toContain('cellar.toFront');
+    expect(ids(at('cellar'))).not.toContain('cellar.toGarage');
+    expect(ids(at('cellar', 'hatch_open'))).toContain('cellar.toGarage');
+    expect(ids(at('garage'))).toContain('garage.toCellar');
+  });
+
+  it('the side gates close the garden side until the gate key opens them, for good (AC-53)', () => {
+    const ids = (s: GameState) => exitsIn(s).map((e) => e.id);
+    for (const [place, exit] of [['front', 'front.toFootball'], ['front', 'front.toPool'], ['football', 'football.toFront'], ['pool', 'pool.toFront']] as const) {
+      expect(ids(at(place))).not.toContain(exit);
+      expect(ids(at(place, 'gates_open'))).toContain(exit);
+    }
+    // From inside, the bay window still leads to the garden side.
+    expect(ids(at('living', 'bay_open'))).toContain('living.toPool');
   });
 
   it('the secret laundry is reachable only from the attic, once the secret door is open', () => {
@@ -137,11 +148,13 @@ describe('hotspots and tap sizes (AC-19)', () => {
     expect(NOTEBOOK_BUTTON.x + NOTEBOOK_BUTTON.w).toBeLessThanOrEqual(MENU_BUTTON.x);
   });
 
-  it('every place has at least 2 look-only hotspots; places without a puzzle have at least 3', () => {
+  it('richer rooms: at least 5 hotspots, 2 of them more than a look line; corridors 3; the attic 8', () => {
     for (const place of PLACES) {
-      const looks = HOTSPOTS.filter((h) => h.place === place && h.verbs.length === 1 && h.verbs[0] === 'look').length;
-      const min = ['wc0', 'wc1', 'bathroom', 'kitchen', 'garden'].includes(place) ? 3 : 2;
-      expect([place, looks >= min]).toEqual([place, true]);
+      const here = HOTSPOTS.filter((h) => h.place === place);
+      const active = here.filter((h) => h.door || h.verbs.some((v) => v === 'take' || v === 'use')).length;
+      const min = place === 'attic' ? 8 : place === 'corridor0' || place === 'landing' ? 3 : 5;
+      expect([place, here.length >= min]).toEqual([place, true]);
+      if (min === 5) expect([place, active >= 2]).toEqual([place, true]);
     }
   });
 

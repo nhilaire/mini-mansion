@@ -1,6 +1,6 @@
 // T-04: verbs per hotspot, using / giving / combining items, wrong lines in rotation, looking at items, line timing.
 import { WRONG_LINES } from '../game/ctx';
-import { interact, newGame, USE_RULES } from '../game/rules';
+import { GAGS, interact, newGame, USE_RULES } from '../game/rules';
 import { GameState, ItemId, PlaceId } from '../game/types';
 import { findHotspot, hotspotsIn, HOTSPOTS, ITEMS } from '../game/world';
 import { applyTestingLink, lineDurationMs, resetFastModeForTests } from '../testing/fastMode';
@@ -22,7 +22,7 @@ describe('action menu verbs (AC-17)', () => {
     expect(findHotspot(at('front'), 'front.hedge')?.verbs).toEqual(['look']);
     expect(findHotspot(at('front'), 'front.doormat')?.verbs).toEqual(['look', 'take']);
     expect(findHotspot(at('front'), 'front.bell')?.verbs).toEqual(['look', 'use']);
-    expect(findHotspot(at('kitchen', [], { chars: { ...newGame().chars, dad: 'cooking' } }), 'dad')?.verbs).toEqual(['look', 'talk']);
+    expect(findHotspot(at('football', [], { chars: { ...newGame().chars, julien: 'football' } }), 'julien')?.verbs).toEqual(['look', 'talk']);
   });
 
   it('talk is offered on the door of an occupied room only', () => {
@@ -85,7 +85,7 @@ describe('items (AC-18)', () => {
   it('every item pair without a rule only answers a wrong line (the search relies on it)', () => {
     // Every hotspot and character, in a state where every hotspot is visible enough to be tried.
     for (const h of HOTSPOTS) {
-      const s = at(h.place, [...ITEMS], { flags: { door_unlocked: true, cover_open: true, safe_found: true, door_revealed: true } });
+      const s = at(h.place, [...ITEMS], { flags: { door_unlocked: true, cover_open: true, safe_found: true, door_revealed: true }, chars: { ...newGame().chars, julien: 'football' } });
       if (!hotspotsIn(s).some((x) => x.id === h.id)) continue;
       for (const item of ITEMS) {
         if (USE_RULES.includes(`${item}>${h.id}`)) continue;
@@ -100,6 +100,30 @@ describe('items (AC-18)', () => {
       const o = interact(at('hall', [item]), { kind: 'lookItem', item });
       expect(o.beats).toEqual([{ type: 'say', speaker: 'hero', key: `item.${item}.look` }]);
     }
+  });
+});
+
+const heroSays = (line: string) => ({ type: 'say', speaker: 'hero', key: line });
+
+describe('gags (AC-54)', () => {
+  it('the Japanese toilet sprays and wets the floor for good; the other gags only answer a line', () => {
+    const wc = interact(at('wc0'), { kind: 'verb', verb: 'use', target: 'wc0.toilet' });
+    expect(wc.beats).toEqual([
+      { type: 'sfx', sfx: 'spray' },
+      heroSays('wc0.toilet.use'),
+    ]);
+    expect(wc.state.flags.wc_wet).toBe(true);
+    expect(interact(wc.state, { kind: 'verb', verb: 'look', target: 'wc0.toilet' }).beats).toEqual([heroSays('wc0.toilet.lookWet')]);
+    expect(interact(wc.state, { kind: 'verb', verb: 'use', target: 'wc0.toilet' }).beats).toContainEqual(heroSays('wc0.toilet.useAgain'));
+    for (const id of Object.keys(GAGS)) {
+      if (id === 'wc0.toilet' || id === 'theo.cube') continue;
+      const h = HOTSPOTS.find((x) => x.id === id)!;
+      const s = at(h.place);
+      const o = interact(s, { kind: 'verb', verb: 'use', target: id });
+      expect([id, o.beats]).toEqual([id, [{ type: 'sfx', sfx: GAGS[id] }, { type: 'say', speaker: 'hero', key: `${id}.use` }]]);
+      expect(story(o.state)).toBe(story(s));
+    }
+    for (const id of ['music.piano', 'living.tv', 'landing.lamp', 'bathroom.duck']) expect(GAGS[id]).toBeDefined();
   });
 });
 

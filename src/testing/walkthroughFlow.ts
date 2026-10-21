@@ -1,7 +1,8 @@
 // Builds the Maestro walkthrough flow from the engine's solution (src/game/solution.ts), so that the flow cannot drift
 // from the rules: a Jest test compares it with .maestro/06-walkthrough.yaml (UPDATE_FLOWS=1 rewrites the file).
 // The inventory band pages like the game screen does (page reset on every place change), so items beyond the
-// first page are reached with the "more" slot.
+// first page are reached with the "more" slot. Waiting for a timer (the dough) waits until the screen shows that no
+// timer runs any more (fast mode: timers 30 times faster).
 import { interact, newGame } from '../game/rules';
 import { SOLUTION } from '../game/solution';
 import { GameState, Input, ItemId } from '../game/types';
@@ -42,7 +43,7 @@ function stepFor(input: Input, state: GameState, band: Band): string[] {
     case 'verb': {
       const head = [tap(`hs-${input.target}`), tap(`verb-${input.verb}`)];
       if (input.verb === 'use' && input.target === 'living.chess') return [...head, waitFor('chess')];
-      if (input.verb === 'use' && (input.target === 'office.computer' || input.target === 'parents.safe')) return [...head, waitFor('keypad')];
+      if (input.verb === 'use' && (input.target === 'office.computer' || input.target === 'parents.safe' || input.target === 'attic.door')) return [...head, waitFor('keypad')];
       return [...head, idle()];
     }
     case 'item': {
@@ -62,7 +63,10 @@ function stepFor(input: Input, state: GameState, band: Band): string[] {
       return input.moves.flatMap((m) => [tap(`chess-sq-${m.slice(0, 2)}`), tap(`chess-sq-${m.slice(2, 4)}`)]).concat(idle());
     case 'dialogue':
       return [tap(`dlg-${input.option}`), waitFor('dialogue'), tap('dlg-bye'), idle()];
+    case 'wait':
+      return [waitFor('timers-idle', 60000), idle()];
     case 'lookItem':
+    case 'tick':
       return [];
   }
 }

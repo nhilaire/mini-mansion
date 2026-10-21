@@ -215,6 +215,13 @@ const ICONS: Record<ItemId, string[]> = {
     '.ii.............',
     E,
   ],
+  // A small silver key with a paper tag.
+  gatekey: [E, E, '.....iii........', '....iIIIi.......', '....iI.Ii.......', '....iIIIi..pp...', '.....iii..pppp..', '......i....pp...', '......i.........', '......ii........', '......i.........', '......ii........', E, E, E, E],
+  // A carton of rice milk.
+  ricemilk: [E, '......ww........', '.....wwww.......', '....wwwwww......', '....wqqqqw......', '....wqccqw......', '....wqccqw......', '....wqqqqw......', '....wwwwww......', '....wwwwww......', '....wwwwww......', '....wwwwww......', '....wwwwww......', E, E, E],
+  // Two bags of flour: chestnut (brown), rice (white).
+  chestnut: [E, E, '....BBBBBB......', '...BBBBBBBB.....', '...BttttttB.....', '...BtccccBB.....', '...BtcttcBB.....', '...BtccccBB.....', '...BttttttB.....', '...BBBBBBBB.....', '...BBBBBBBB.....', '...BBBBBBBB.....', E, E, E, E],
+  riceflour: [E, E, '....pppppp......', '...pppppppp.....', '...pwwwwwwp.....', '...pwqqqqwp.....', '...pwqwwqwp.....', '...pwqqqqwp.....', '...pwwwwwwp.....', '...pppppppp.....', '...pppppppp.....', '...pppppppp.....', E, E, E, E],
 };
 
 export function itemIcon(item: ItemId): PixelBuffer {

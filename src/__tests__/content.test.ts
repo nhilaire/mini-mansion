@@ -82,10 +82,19 @@ describe('clues, no hint system (AC-30)', () => {
   it('along the walkthrough, at least one clue of each puzzle is reachable before or at its step', () => {
     for (const [puzzle, clues] of Object.entries(CLUES)) {
       const n = Number(puzzle);
-      if (n === 15) continue; // optional, not on the walkthrough
       const heard = heardBefore.get(n);
+      if (n === 15 || n === 16) continue; // not on the walkthrough (the cellar, the doorbell): checked by the explorer below
       expect([n, heard !== undefined && clues.some((k) => heard.has(k))]).toEqual([n, true]);
     }
+  });
+});
+
+describe('the rumour comes from school (AC-56)', () => {
+  it.each(LANGUAGES)('in %s, the intro and N01 name nobody of the family and Sam is not a friend of the boys', (language) => {
+    const t = DICTIONARIES[language];
+    const texts = [...t.intro.cards, t.story.notes.n01].join(' ');
+    expect(texts).toMatch(language === 'fr' ? /école/ : /school/);
+    expect(texts).not.toMatch(/Papa|Maman|Julien|Florent|Théo|copain|friend/);
   });
 });
 
@@ -112,9 +121,9 @@ describe('French typography and tone (AC-45)', () => {
     expect([fr.home.continue, fr.home.newGame, fr.home.settings, fr.home.about]).toEqual(['Continuer', 'Nouvelle partie', 'Paramètres', 'À propos']);
     expect(fr.home.confirmNew).toBe(`Effacer ta partie en cours${N}?`);
     expect([fr.common.yes, fr.common.no, fr.intro.skip]).toEqual(['Oui', 'Non', 'Passer']);
-    expect(fr.intro.cards[0]).toBe(`Une rumeur court dans le quartier${N}: Papa aurait inventé une recette secrète aux pouvoirs extraordinaires…`);
+    expect(fr.intro.cards[0]).toBe(`Une rumeur court à l'école${N}: dans une maison du quartier, quelqu'un aurait inventé une recette secrète aux pouvoirs extraordinaires…`);
     expect(fr.intro.cards[1]).toBe(`Certains disent qu'elle pourrait provoquer une catastrophe dans toute la ville${N}!`);
-    expect(fr.intro.cards[2]).toBe("Sam, copain des garçons de la maison, décide d'enquêter. Discrètement.");
+    expect(fr.intro.cards[2]).toBe("Sam l'a entendue dans la cour de récré et a décidé de mener l'enquête. Discrètement.");
     expect(fr.tutorial).toEqual({
       walk: 'Touche le sol pour faire marcher Sam.',
       verbs: 'Touche un objet ou une personne pour voir ce que tu peux faire.',
@@ -131,6 +140,14 @@ describe('French typography and tone (AC-45)', () => {
     expect([fr.chess.reset, fr.chess.close]).toEqual(['Recommencer', 'Fermer']);
     expect(line(DICTIONARIES.fr, 'line.captureAgain')).toBe(`Encore toi${N}?! Allez, à la cave${N}!`);
     expect(line(DICTIONARIES.fr, 'line.codeUnknown')).toBe('Je ne connais pas le code. Inutile de taper au hasard.');
+    expect(fr.keypad.lab).toBe('La porte du labo');
+    expect(line(DICTIONARIES.fr, 'line.dadAnswer')).toBe(`Qui sonne à cette heure-là${N}? Oui, deux minutes, j'arrive${N}!`);
+    expect(line(DICTIONARIES.fr, 'line.dadAtDoor')).toBe(`Il y a quelqu'un${N}? Qui est là${N}? Je dois vous chercher${N}?`);
+    expect(line(DICTIONARIES.fr, 'line.dadGoingBack')).toBe('Bon, je ne vois personne, je rentre.');
+    expect(line(DICTIONARIES.fr, 'line.showerLoose')).toBe(`Le joint n'est pas serré${N}: ça fuit de partout.`);
+    expect(line(DICTIONARIES.fr, 'parents.shower.look')).toBe('Il manque un joint.');
+    expect(line(DICTIONARIES.fr, 'line.theoMono1')).toBe(`Comment se fait-il que mon Rubik's Cube se soit résolu tout seul${N}? Il y en a, des mystères ici.`);
+    expect(line(DICTIONARIES.fr, 'line.theoMono2')).toBe(`C'est comme ce passage secret du grenier${N}: je suis sûr qu'il existe, mais je n'ai jamais réussi à le découvrir…`);
     expect([fr.pause.resume, fr.pause.settings, fr.pause.home]).toEqual(['Reprendre', 'Paramètres', 'Menu principal']);
     expect(fr.ending.title).toBe('Fin');
     expect(fr.ending.time(3, '12')).toBe(`Temps de jeu${N}: 3${N}h${N}12`);
@@ -151,6 +168,7 @@ describe('French typography and tone (AC-45)', () => {
     );
     expect(Object.values(fr.story.names.items)).toEqual([
       'Clé de la maison',
+      'Clé du portail',
       'Perche',
       'Rallonge',
       'Perche rallongée',
@@ -167,6 +185,9 @@ describe('French typography and tone (AC-45)', () => {
       'Fragment de recette',
       'Mot de Papa',
       'Barre de fer',
+      'Lait de riz',
+      'Farine de châtaigne',
+      'Farine de riz',
     ]);
   });
 
@@ -177,6 +198,7 @@ describe('French typography and tone (AC-45)', () => {
     expect(en.chess.title).toBe("Théo's problem: White to play and mate in 2");
     expect(Object.values(en.story.names.items)).toEqual([
       'House key',
+      'Gate key',
       'Pole',
       'Extension',
       'Extended pole',
@@ -193,6 +215,11 @@ describe('French typography and tone (AC-45)', () => {
       'Recipe scrap',
       "Papa's note",
       'Iron bar',
+      'Rice milk',
+      'Chestnut flour',
+      'Rice flour',
     ]);
+    expect(en.intro.cards[2]).toBe('Sam heard it in the playground and decided to investigate. Quietly.');
+    expect(en.keypad.lab).toBe('The lab door');
   });
 });

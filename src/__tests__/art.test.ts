@@ -76,8 +76,11 @@ describe('characters (AC-14)', () => {
   it('inhabitants talk, blink and play their activity over time', () => {
     const set = spriteSet(SPECS.florent);
     expect(personFrame(set, 'florent', { talking: true, busy: true, clock: 0 })).toBe(set.talk);
-    expect(personFrame(set, 'florent', { talking: false, busy: true, clock: 0 })).toBe(set.activity[0]);
-    expect(personFrame(set, 'florent', { talking: false, busy: true, clock: 300 })).toBe(set.activity[1]);
+    // Florent drums with his back to the room; the others do their activity facing it.
+    expect(personFrame(set, 'florent', { talking: false, busy: true, clock: 0 })).toBe(set.activityBack[0]);
+    expect(personFrame(set, 'florent', { talking: false, busy: true, clock: 300 })).toBe(set.activityBack[1]);
+    expect(personFrame(set, 'julien', { talking: false, busy: true, clock: 0 })).toBe(set.activity[0]);
+    expect(set.activityBack[0].data.every((v, i) => v === set.activity[0].data[i])).toBe(false);
     const frames = new Set(Array.from({ length: 64 }, (_, i) => personFrame(set, 'florent', { talking: false, busy: false, clock: i * 50 })));
     expect(frames.has(set.idle[0])).toBe(true);
   });

@@ -33,6 +33,24 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-26 Maestro flows: consent/home, new game/tutorial/notebook, continue/new game, pause/background, settings/about/language, walkthrough, telemetry consent (AC-01, AC-02, AC-04, AC-08, AC-10, AC-11, AC-16, AC-33, AC-34, AC-36, AC-37, AC-39, AC-41, AC-42, AC-44) - proof: e2e
 - [x] T-27 Device checks prepared for verify/release: launcher name per language, landscape fullscreen, cold start, no crash, feel test on the phone (AC-05, AC-46, AC-47, AC-48) - proof: device
 
+### Amendment after the phone test (PRD of 2026-10-21)
+
+- [x] T-28 Engine timers: play clock, doorbell phases of Papa, dough timer, tick and wait inputs, fast-mode scale, save v2 (AC-35, AC-38, AC-51, AC-52, AC-58) - proof: unit
+- [x] T-29 World rework: 23 places (music corner + dining room), side gates, cellar hatch, breaker, richer rooms (>= 5 hotspots), gags, Julien's ball (AC-15, AC-19, AC-24, AC-53, AC-54) - proof: unit
+- [x] T-30 Puzzle rework: E02 extension at the football corner, E08 shower states, E12 lab code + old key, E16 ring again, E17 breaker, E18 gates, E19 dough (AC-21, AC-27, AC-28, AC-55) - proof: unit
+- [x] T-31 Captures at the front door, in the kitchen and in the garden, occupant arrivals, announcements (AC-22, AC-23, AC-25) - proof: unit
+- [x] T-32 Dialogues: only Julien talks, his options and conditions (AC-20) - proof: unit
+- [x] T-33 Notebook and clues: N01 rumour, N07 attic passage, N10 lab code, clue map for E18/E19 and the new steps (AC-29, AC-30, AC-56) - proof: unit
+- [x] T-34 Story content in French and English: intro, new lines, Théo's monologue, electronic chess, vous only for Papa at the door (AC-03, AC-45, AC-56) - proof: unit
+- [x] T-35 Solver and walkthrough: timers in the exhaustive search, new dependencies, solution, generated Maestro walkthrough (AC-31, AC-32, AC-41) - proof: unit
+- [x] T-36 Game screen: timer ticks while playing, front door view and kitchen view, timers frozen in pause (AC-38, AC-49, AC-50, AC-51, AC-52, AC-58) - proof: unit
+- [x] T-37 Telemetry: puzzle 1-19 and the new capture places (AC-06, AC-07, AC-08) - proof: unit
+- [x] T-38 Audio: breaker, toilet spray, food processor; activity sounds for the kitchen and the garden (AC-25, AC-43) - proof: unit
+- [x] T-39 Art: rooms redrawn after the author's photos, front-facing stairs in a doorway, gates, hatch, cluttered attic, wet toilet floor (AC-15, AC-57) - proof: unit
+- [x] T-40 Art: Florent drumming from the back, Julien's ball on the grass, electronic chess set, Papa at the front door (AC-14, AC-57) - proof: unit
+- [ ] T-41 Maestro flows updated and rerun on the emulator, walkthrough included (AC-11, AC-16, AC-33, AC-34, AC-36, AC-41) - proof: e2e
+- [ ] T-42 Device checks of the amended build prepared for verify/release (AC-05, AC-46, AC-47, AC-48, AC-57) - proof: device
+
 ## Notes
 
 - Base: the POC engine (`midnight-mansion`) is ported, not copied blindly: new ids (24 places, 17 items, 5 inhabitants
