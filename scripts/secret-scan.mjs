@@ -71,7 +71,8 @@ export const PII_PATTERNS = [
     re: /(?:^|[\s"'(=:])\/(?:Users|home)\/([A-Za-z0-9._-]+)/g,
     keep: (m) => !/^(runner|user|username|me|shared|node)$/i.test(m[1]),
   },
-  { id: 'french-mobile-number', re: /(?<![\d.])(?:\+33\s?|0)[67](?:[\s.-]?\d{2}){4}(?![\d])/g, keep: () => true },
+  // Not inside a word or a hex hash (SHA-256 of an APK in evidence reports): no letter or digit right before or after.
+  { id: 'french-mobile-number', re: /(?<![\w.])(?:\+33\s?|0)[67](?:[\s.-]?\d{2}){4}(?!\w)/g, keep: () => true },
 ];
 
 const SKIP_CONTENT = /(^|\/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb)$/i;
