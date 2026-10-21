@@ -220,6 +220,23 @@ describe('App', () => {
     expect(await screen.findByText(fr.settings.title)).toBeTruthy();
   });
 
+  it('after a language change, the game itself speaks the new language: places, lines and notebook (AC-04)', async () => {
+    await denied();
+    await render(<App />);
+    await fireEvent.press(await screen.findByTestId('home-settings'));
+    await fireEvent.press(screen.getByTestId('settings-language-en'));
+    await fireEvent.press(await screen.findByTestId('settings-back'));
+    await fireEvent.press(await screen.findByTestId('home-new-game'));
+    await fireEvent.press(await screen.findByTestId('intro-skip'));
+    expect(await screen.findByLabelText(en.story.names.hotspots['front.doormat'])).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('hs-front.doormat'));
+    await fireEvent.press(screen.getByTestId('verb-look'));
+    expect(await screen.findByText(en.story.lines['front.doormat.look'])).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('line-banner'));
+    await fireEvent.press(screen.getByTestId('game-notebook'));
+    expect(screen.getByText(`• ${en.story.notes.n01}`)).toBeTruthy();
+  });
+
   it.each(['fr', 'en'] as const)('shows the About screen in %s: story, word from the author, data, version (AC-44)', async (language) => {
     jest.mocked(deviceLanguageTags).mockReturnValue([language === 'fr' ? 'fr-FR' : 'en-GB']);
     const t = DICTIONARIES[language];

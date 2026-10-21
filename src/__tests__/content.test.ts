@@ -3,7 +3,7 @@ import { CLUES } from '../content/clues';
 import { hasLine, hotspotName, itemName, line } from '../content/index';
 import { allDialogueOptions } from '../game/dialogue';
 import { allInputs } from '../game/explore';
-import { interact, newGame } from '../game/rules';
+import { interact, newGame, playAll } from '../game/rules';
 import { SOLUTION } from '../game/solution';
 import { EXITS, HOTSPOTS, ITEMS } from '../game/world';
 import { DICTIONARIES, LANGUAGES } from '../i18n';
@@ -89,6 +89,31 @@ describe('clues, no hint system (AC-30)', () => {
   });
 });
 
+describe('clues of the puzzles off the walkthrough (AC-30)', () => {
+  const said = (s: Parameters<typeof interact>[0], input: Parameters<typeof interact>[1]) =>
+    interact(s, input).beats.flatMap((b) => (b.type === 'say' ? [b.key] : []));
+
+  it('E16: right after E01, Papa says through his door that he opens when someone rings; the doorbell says so too', () => {
+    const inside = playAll(newGame(), SOLUTION.slice(0, 2)).state;
+    const corridor = interact(inside, { kind: 'exit', exit: 'hall.toCorridor' }).state;
+    expect(said(corridor, { kind: 'verb', verb: 'talk', target: 'corridor0.officeDoor' })).toContain('dad.door');
+    expect(said({ ...corridor, place: 'front' }, { kind: 'verb', verb: 'look', target: 'front.bell' })).toContain('front.bell.look');
+    expect(CLUES[16]).toEqual(expect.arrayContaining(['dad.door', 'front.bell.look']));
+  });
+
+  it('E15: in the cellar, the hatch and the wine rack tell about the iron bar before it is needed', () => {
+    const inside = playAll(newGame(), SOLUTION.slice(0, 2)).state;
+    const cellar = playAll(inside, [
+      { kind: 'exit', exit: 'hall.toCorridor' },
+      { kind: 'exit', exit: 'corridor0.toGarage' },
+      { kind: 'exit', exit: 'garage.toCellar' },
+    ]).state;
+    expect(cellar.place).toBe('cellar');
+    expect(said(cellar, { kind: 'verb', verb: 'look', target: 'cellar.hatch' })).toContain('cellar.hatch.look');
+    expect(said(cellar, { kind: 'verb', verb: 'look', target: 'cellar.rack' })).toContain('cellar.rack.look');
+  });
+});
+
 describe('the rumour comes from school (AC-56)', () => {
   it.each(LANGUAGES)('in %s, the intro and N01 name nobody of the family and Sam is not a friend of the boys', (language) => {
     const t = DICTIONARIES[language];
@@ -114,6 +139,16 @@ describe('French typography and tone (AC-45)', () => {
   it('speaks to the player with "tu" in the interface', () => {
     const { story: _story, ...ui } = DICTIONARIES.fr;
     for (const s of texts(ui)) expect([s, /\b(vous|votre|vos)\b/i.test(s)]).toEqual([s, false]);
+  });
+
+  it('speaks to the player with "tu" in the story too (vous only for Papa calling an unknown visitor, and the mail)', () => {
+    const story = DICTIONARIES.fr.story;
+    const allowed = ['line.dadAtDoor'];
+    const lines = Object.entries(story.lines).filter(([k, s]) => !allowed.includes(k) && /\b(vous|votre|vos)\b/i.test(s));
+    expect(lines).toEqual([]);
+    expect(Object.values(story.notes).filter((s) => /\b(vous|votre|vos)\b/i.test(s))).toEqual([]);
+    // The documents are Papa's papers: only the town hall's mail, written to him, says "votre".
+    expect(story.docs.filter((s, i) => i !== 1 && /\b(vous|votre|vos)\b/i.test(s))).toEqual([]);
   });
 
   it('matches the Player copy table of the PRD', () => {
@@ -220,6 +255,43 @@ describe('French typography and tone (AC-45)', () => {
       'Rice flour',
     ]);
     expect(en.intro.cards[2]).toBe('Sam heard it in the playground and decided to investigate. Quietly.');
+    expect([en.home.continue, en.home.settings, en.home.about, en.common.yes, en.common.no, en.intro.skip]).toEqual(['Continue', 'Settings', 'About', 'Yes', 'No', 'Skip']);
+    expect(en.intro.cards[0]).toBe('A rumour is going around the school: in a house of the neighbourhood, someone has invented a secret recipe with extraordinary powers…');
+    expect(en.intro.cards[1]).toBe('Some say it could cause a disaster in the whole town!');
+    expect(en.tutorial).toEqual({
+      walk: 'Tap the ground to make Sam walk.',
+      verbs: 'Tap an object or a person to see what you can do.',
+      inventory: 'Your items are here. Tap one, then tap what to use it on.',
+    });
+    expect(en.verbs).toEqual({ look: 'Look', take: 'Take', talk: 'Talk', use: 'Use' });
+    expect(en.game.useWith('Pole')).toBe('Use Pole with…');
+    expect(line(en, 'dialogue.bye')).toBe('Goodbye');
+    expect([en.notebook.title, en.notebook.empty, en.notebook.close]).toEqual(['Clue notebook', 'Nothing noted yet.', 'Close']);
+    expect([en.keypad.ok, en.keypad.clear, en.keypad.close]).toEqual(['OK', 'Clear', 'Close']);
+    expect([en.chess.wrong, en.chess.solved, en.chess.reset, en.chess.close]).toEqual(['Missed, Black escapes. Try again!', 'Checkmate!', 'Restart', 'Close']);
+    expect(line(en, 'line.captureAgain')).toBe('You again?! Off to the cellar!');
+    expect(line(en, 'line.codeUnknown')).toBe("I don't know the code. No point typing at random.");
+    expect(line(en, 'line.dadAnswer')).toBe("Who's ringing at this hour? Yes, two minutes, I'm coming!");
+    expect(line(en, 'line.dadAtDoor')).toBe('Anybody there? Who is it? Do I have to come and look for you?');
+    expect(line(en, 'line.dadGoingBack')).toBe("Well, I can't see anybody, I'm going back in.");
+    expect(line(en, 'line.showerLoose')).toBe("The seal isn't tightened: it leaks everywhere.");
+    expect(line(en, 'parents.shower.look')).toBe('A seal is missing.');
+    expect(line(en, 'line.theoMono1')).toBe("How come my Rubik's Cube solved itself? There are mysteries in this house.");
+    expect(line(en, 'line.theoMono2')).toBe("Like that secret passage in the attic: I'm sure it exists, but I've never managed to find it…");
+    expect([en.pause.resume, en.pause.settings, en.pause.home, en.ending.home]).toEqual(['Resume', 'Settings', 'Main menu', 'Main menu']);
+    expect([en.settings.sfx, en.settings.music, en.settings.telemetry, en.settings.language, en.settings.languageAuto, en.settings.erase]).toEqual([
+      'Sound effects',
+      'Music',
+      'Share anonymous statistics',
+      'Language',
+      'Automatic (phone language)',
+      'Erase the game',
+    ]);
+    expect(en.settings.confirmErase).toBe('Erase your game? You will start again from the beginning.');
+    expect([en.about.storyTitle, en.about.authorTitle, en.about.dataTitle]).toEqual(['The story of this game', 'A word from the author', 'Your data']);
+    expect(en.about.story[0]).toBe(
+      'As a child, I spent hours searching every room of the Maniac Mansion manor, home to a completely crazy family. This time, I wanted the mansion to be a real house: mine, turned into pixel art, with its zany inhabitants and a well-kept secret.',
+    );
     expect(en.keypad.lab).toBe('The lab door');
   });
 });

@@ -259,6 +259,12 @@ describe('GameScreen', () => {
     });
     expect(screen.getByTestId('view-door')).toBeTruthy();
     expect(screen.getByText(line(t, 'line.dadAtDoor'))).toBeTruthy();
+    // No control during the view (AC-49): floor and hotspot taps do nothing.
+    const before = lastSaved(props).pos;
+    await fireEvent.press(screen.getByTestId('scene-floor'), { nativeEvent: { locationX: 900, locationY: 600 } });
+    await fireEvent.press(screen.getByTestId('hs-hall.coats'));
+    expect(screen.queryByTestId('action-menu')).toBeNull();
+    expect(lastSaved(props).pos).toEqual(before);
     expect(lastSaved(props).chars.dad).toBe('outside');
     expect(lastSaved(props).place).toBe('hall');
     await dismissLines();
@@ -279,6 +285,8 @@ describe('GameScreen', () => {
       jest.advanceTimersByTime(4200);
     });
     expect(screen.getByTestId('view-kitchen')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('hs-music.piano'));
+    expect(screen.queryByTestId('action-menu')).toBeNull();
     expect(screen.getByText(line(t, 'line.dadDough'))).toBeTruthy();
     await dismissLines();
     expect(lastSaved(props).chars.dad).toBe('cooking');
