@@ -7,7 +7,6 @@ import { AppState, BackHandler, GestureResponderEvent, Pressable, StatusBar, Sty
 
 import { ambience, ambienceFor, sounds } from '../audio/sound';
 import { exitName, hotspotName, itemName, line } from '../content/index';
-import { dialogueOptions } from '../game/dialogue';
 import { findPath } from '../game/geometry';
 import { addPlayTime, advanceTutorial, TutorialSignal, tutorialBubble, tutorialDone } from '../game/progress';
 import { interact, nextDeadline, readNotes } from '../game/rules';
@@ -37,7 +36,6 @@ import {
   ActionMenu,
   CaptureFade,
   ChessBoard,
-  DialogueChoices,
   DocumentsOverlay,
   Keypad,
   LineBanner,
@@ -50,7 +48,6 @@ import {
 
 type Presentation =
   | { kind: 'line'; speaker: Speaker; text: string; until: number }
-  | { kind: 'dialogue'; character: CharacterId }
   | { kind: 'keypad'; keypad: KeypadId }
   | { kind: 'chess' }
   | { kind: 'documents' }
@@ -167,9 +164,6 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           show({ kind: 'line', speaker: b.speaker, text, until: now + lineDurationMs(text) });
           return;
         }
-        case 'dialogue':
-          show({ kind: 'dialogue', character: b.character });
-          return;
         case 'keypad':
           show({ kind: 'keypad', keypad: b.keypad });
           return;
@@ -543,15 +537,6 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
         />
       )}
       {present?.kind === 'line' && <LineBanner speaker={present.speaker} text={present.text} onPress={cinematic ? () => {} : runNext} />}
-      {present?.kind === 'dialogue' && (
-        <DialogueChoices
-          choices={dialogueOptions(game, present.character)}
-          onChoose={(id) => {
-            show(null);
-            apply({ kind: 'dialogue', character: present.character, option: id });
-          }}
-        />
-      )}
       {present?.kind === 'keypad' && (
         <Keypad
           title={t.keypad[present.keypad]}

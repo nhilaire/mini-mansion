@@ -45,7 +45,7 @@ provoquer une catastrophe. Glisse-toi à l'intérieur, déjoue la famille et per
 ## Core loop
 
 1. Explore a place: tap the floor to walk, tap hotspots to see the possible actions, listen at closed doors.
-2. Gather clues: look at things, talk to Julien, read the clue notebook.
+2. Gather clues: look at things, listen at doors, read the clue notebook.
 3. Take items, combine them, use them on hotspots or characters; try the small gags of each room.
 4. Lure an inhabitant away (a distraction, sometimes a timed window) to enter a guarded place safely.
 5. A puzzle is solved: a new item, place, clue or character move opens; "what does this unlock?" pulls the player on.
@@ -57,7 +57,7 @@ provoquer une catastrophe. Glisse-toi à l'intérieur, déjoue la famille et per
 | UC-01 | choose whether to share anonymous statistics at first launch, in my phone's language | my privacy is respected |
 | UC-02 | start a new game with a short intro and a guided first scene | I understand the story and the controls |
 | UC-03 | walk Sam around places and between places | I can explore the house and its garden |
-| UC-04 | look at, take, use and combine objects, and talk to characters | I can investigate and solve puzzles |
+| UC-04 | look at, take, use and combine objects, and listen at the doors of occupied rooms | I can investigate and solve puzzles |
 | UC-05 | learn where each inhabitant is and lure them away, sometimes against the clock | I can sneak into guarded places |
 | UC-06 | be caught without losing anything and get out of the wine cellar | a mistake is funny, not punishing |
 | UC-07 | read my clue notebook | I remember codes and facts I learnt |
@@ -93,7 +93,7 @@ flowchart LR
   starts in `front` (in front of the house) with the first tutorial bubble.
 - **Game:** the place scene (fills the screen height, landscape), Sam and the characters present, a text banner for
   spoken lines (also lines heard from another place, e.g. Papa at the front door), the inventory bar along the
-  bottom (one row, pages), a notebook button and a menu button. Overlays: action menu, dialogue choices, digit
+  bottom (one row, pages), a notebook button and a menu button. Overlays: action menu, digit
   keypad (computer, safe, lab door), chess board, documents, capture fade, and the "front door view" transition of
   the doorbell sequence (Papa in front of the house, no control).
 - **Clue notebook:** the list of entries learnt so far (see "Clue notebook"), newest first, `notebook.empty` when
@@ -197,8 +197,8 @@ means the front of the house (`front`).
 ### Interaction
 
 - Tapping a hotspot opens the action menu next to it with only the verbs that apply: `verb.look` (always),
-  `verb.take` (takeable items), `verb.talk` (characters, and closed doors of occupied rooms: Sam listens and the
-  occupant answers through the door), `verb.use` (operable objects). Tapping elsewhere closes it.
+  `verb.take` (takeable items), `verb.listen` (closed doors of occupied rooms only: Sam puts an ear to the door and
+  overhears the occupant talking to themself), `verb.use` (operable objects). Inhabitants can only be looked at. Tapping elsewhere closes it.
 - Choosing a verb makes Sam walk to the hotspot's interaction point, face it, then the engine runs the action and
   shows the response line.
 - Inventory: tapping an item selects it (highlight + banner `game.useWith`); the next tap on a hotspot, a character
@@ -211,19 +211,12 @@ means the front of the house (`front`).
   Input on the scene is ignored while a line, a cutscene or the front door view is playing.
 - An item is removed from the inventory only when it is used up by its puzzle and is no longer needed.
 
-### Dialogues
+### No conversation
 
-- Julien (at the football corner) is the only inhabitant Sam can chat with: 2-4 lines to choose from, each plays a
-  short exchange; `dialogue.bye` always ends it. Options never block progress; chosen ones are greyed but stay
-  readable. Options (all after E02, since Julien is at the football corner only then):
-  - `dialogue.julien.ball`: thanks for the ball (always);
-  - `dialogue.julien.family`: who lives here and what each one does all day (always; repeats N05 and N06);
-  - `dialogue.julien.pool`: the pool pump, whose plug is bent: « il faudrait une pince » (until E14; E14 clue);
-  - `dialogue.julien.attic`: the attic is full of junk nobody tidies (after CUT07).
-- Busy characters answer one line and no menu: Florent drumming (`line.florentBusy`), Théo playing chess
-  (`line.theoBusy`).
-- Papa (kitchen, front door) and Maman (garden) catch Sam instead of talking (see Guarded places).
-- Talking through a closed door of an occupied room gives the occupant's door line (see Clues); no menu.
+- Sam never talks with the inhabitants: there is no dialogue menu and no conversation line. A character tapped in a
+  scene offers only `verb.look`. Papa (kitchen, front door) and Maman (garden) catch Sam (see Guarded places).
+- Listening at the closed door of an occupied room plays the occupant's door line, a monologue overheard through
+  the door (see Clues). While Papa answers the doorbell, his office door gives `dad.doorComing`.
 
 ### Timers
 
@@ -265,7 +258,7 @@ means the front of the house (`front`).
   `kitchen` (dad cooking), `parents` (mom folding), `garden` (mom gardening), `julien` (julien in_room), `florent`
   (florent in_room), `theo` (theo in_room).
 - Announcement: next to a guarded room (corridor0 or landing) the occupant's activity sound plays and looking at its
-  door gives a line saying who is inside; talking at the door gives the occupant's door line. Upstairs the sounds
+  door gives a line saying who is inside; listening at the door gives the occupant's door line. Upstairs the sounds
   of the occupied rooms stay faint, in the background, even when all four play at once. The music corner hears
   Papa cooking in the kitchen; the football corner hears Maman humming in the garden. Entering is never blocked.
 - Capture: entering a guarded place, or being in a place when its occupant arrives there (Papa coming out of the front
@@ -381,7 +374,7 @@ Entries are added once, when their trigger happens, and never reveal a solution 
 
 ### Clues (no hint system)
 
-Every step has at least one in-world clue (look line, door line or dialogue), listed in `src/content/clues.ts` and
+Every step has at least one in-world clue (look line or door line), listed in `src/content/clues.ts` and
 checked by a unit test:
 
 - E01: doormat look (bulging in the middle). E18: gate look (a padlock); shoes look (something shines in a trainer).
@@ -390,7 +383,7 @@ checked by a unit test:
   English line keeps the joke: "drumsticks... but no chicken").
 - E04: chess set look; Théo's door line (Julien took the queen for a trophy); trophy look.
 - E05: cube look; booklet look. E06: chess set look after CUT07 (Théo's problem and note).
-- E16: Papa's door line (« Je n'ouvre à personne… sauf si on sonne »); doorbell look. E19: fridge look (rice milk),
+- E16: Papa's door line (« Rien ne me fera sortir de ce bureau… sauf la sonnette »); doorbell look. E19: fridge look (rice milk),
   utility flours look, the kitchen bowl look (Papa's dough is too hard, it needs something softer), food processor
   look.
 - E07: computer look (post-it: the code is in Théo's chess problem).
@@ -398,7 +391,8 @@ checked by a unit test:
   switch is down).
 - E08: shower look (« Il manque un joint. »); modding kit look; `line.showerLoose`; workbench look (wrench).
 - E09: the hot water itself (CUT08); mirror look. E10: painting look (crooked).
-- E14: pool look after opening the cover (a bottle at the bottom); pump look (bent plug); Julien's dialogue (pliers).
+- E14: pool look after opening the cover (a bottle at the bottom); pump look (bent plug, « Avec une pince, je la redresserais »); garage drawer
+  look (the pliers went up to the office); office shelf look (Papa's toolbox, pliers sticking out).
 - E11: stain look; garage paint look (the same white as the attic wall). E12: N10, N12; door look (lock + keypad).
 - E13: N12; recipe notebook look. E15: hatch look from below; wine rack look.
 
@@ -410,7 +404,7 @@ an item was selected. Then the tutorial is complete. No hint system afterwards.
 
 ### Persistence
 
-- Autosave (local storage) after every completed action, place change, dialogue end, cutscene end and timer event,
+- Autosave (local storage) after every completed action, place change, cutscene end and timer event,
   and when the app goes to the background: place, Sam's position, inventory, flags, character states, timers,
   notebook (with unread marks), played cutscenes, captures, tutorial state, play time, finished flag, save version.
 - Play time counts only while the Game screen is displayed and not paused or in background.
@@ -530,16 +524,15 @@ Movement and interaction
   their lock rules; the laundry is reachable only from the attic).
 - AC-16 [e2e] Given `front` after E01, when the player taps the floor, then Sam walks there; when the front door is
   tapped, then the hall is displayed.
-- AC-17 [unit] Given a hotspot, then the action menu offers only its applicable verbs (look always; take, talk, use
-  when applicable; talk on the door of an occupied room).
+- AC-17 [unit] Given a hotspot, then the action menu offers only its applicable verbs (look always; take, use
+  when applicable; listen on the door of an occupied room only; look only on a character).
 - AC-18 [unit] Given an item selected and a target (hotspot, character or item), then a valid combination runs its
   effect and a wrong one shows a generic line in rotation without changing inventory or flags.
 - AC-19 [unit] Given every place's hotspots and exits, then each tap area is at least 22x22 logical px, every place
   has the minimum number of hotspots of the rules (5 with at least 2 beyond a look line, corridors 3, attic 8), and the
   scale rule gives >= 2 dp per logical px on a 360 dp-high screen.
-- AC-20 [unit] Given Julien at the football corner, then the dialogue choices shown are those of the Dialogues list
-  under their conditions,
-  `dialogue.bye` is always present, busy characters answer their busy line, and no choice blocks progress.
+- AC-20 [unit] Given any inhabitant in a scene, then the action menu offers only `verb.look` (no talk, no dialogue
+  menu); given the door of an occupied room, then `verb.listen` ("Écouter" / "Listen") plays the occupant's door line.
 - AC-54 [unit] Given the optional gags, then the Japanese toilet sprays and wets the wc0 floor for good, the piano,
   TV, landing lamp and rubber duck answer their gag lines, and none of them changes the story.
 
@@ -578,7 +571,7 @@ Puzzles, characters, captures, timers
   survive a save and reload, and the fast mode makes them 30 times faster without changing the saved deadlines'
   format.
 - AC-25 [unit] Given Sam next to a guarded place (corridor0, landing, music corner for the kitchen, football corner
-  for the garden), then the occupant's activity sound is requested and the door's look and talk lines name the
+  for the garden), then the occupant's activity sound is requested and the door's look and listen lines name the
   occupant.
 - AC-26 [unit] Given the chess problem, then only legal moves are accepted, Qg8+ is answered by Rxg8, Nf7 mates and
   writes code 7867 in the notebook, any other move shows `chess.wrong` and resets, and a legal-move generator proves
@@ -652,7 +645,7 @@ Technical and feel
 
 ## Player copy
 
-Key player-facing strings (French tone: tu). Dialogue, look lines, door lines, documents and notebook entries live in
+Key player-facing strings (French tone: tu). Look lines, door lines, documents and notebook entries live in
 the per-language content files (French reference, English translation); their keys are listed in the rules above.
 French typography (no-break space before `: ; ! ?`, inside « ») is applied in code.
 
@@ -676,9 +669,8 @@ Final app name: fr "Mini Mansion", en "Mini Mansion". Language-specific assets: 
 | tutorial.walk | Touche le sol pour faire marcher Sam. | Tap the ground to make Sam walk. |
 | tutorial.verbs | Touche un objet ou une personne pour voir ce que tu peux faire. | Tap an object or a person to see what you can do. |
 | tutorial.inventory | Tes objets sont ici. Touche-en un, puis touche ce sur quoi l'utiliser. | Your items are here. Tap one, then tap what to use it on. |
-| verb.look / verb.take / verb.talk / verb.use | Regarder / Prendre / Parler / Utiliser | Look / Take / Talk / Use |
+| verb.look / verb.take / verb.listen / verb.use | Regarder / Prendre / Écouter / Utiliser | Look / Take / Listen / Use |
 | game.useWith | Utiliser {objet} avec… | Use {item} with… |
-| dialogue.bye | Au revoir | Goodbye |
 | notebook.title | Carnet d'indices | Clue notebook |
 | notebook.empty | Rien noté pour l'instant. | Nothing noted yet. |
 | notebook.close | Fermer | Close |

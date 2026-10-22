@@ -377,21 +377,21 @@ describe('the cellar hatch (AC-24)', () => {
 });
 
 describe('announcements (AC-25)', () => {
-  it.each(ROOMS)('the door of %s names its occupant (look and talk) and says when the room is free', (room) => {
+  it.each(ROOMS)('the door of %s names its occupant (look and listen) and says when the room is free', (room) => {
     const { from, door } = DOOR_SPAWN[room];
     const who = OCCUPANT[room];
     const s = base(from);
     expect(occupant(room, s.chars)).toBe(who);
     expect(interact(s, { kind: 'verb', verb: 'look', target: door }).beats).toEqual([said('hero', `door.${room}.occupied`)]);
-    const talk = interact(s, { kind: 'verb', verb: 'talk', target: door });
-    expect(talk.beats[0]).toEqual(said(who, `${who}.door`));
+    const listen = interact(s, { kind: 'verb', verb: 'listen', target: door });
+    expect(listen.beats[0]).toEqual(said(who, `${who}.door`));
     const free = base(from, { chars: chars(AWAY[room]) });
     expect(interact(free, { kind: 'verb', verb: 'look', target: door }).beats).toEqual([said('hero', `door.${room}.empty`)]);
-    expect(interact(free, { kind: 'verb', verb: 'talk', target: door }).accepted).toBe(false);
+    expect(interact(free, { kind: 'verb', verb: 'listen', target: door }).accepted).toBe(false);
   });
 
   it('Papa answering the bell says he is coming through his door', () => {
     const s = base('corridor0', { chars: chars({ dad: 'answering' }) });
-    expect(interact(s, { kind: 'verb', verb: 'talk', target: 'corridor0.officeDoor' }).beats).toEqual([said('dad', 'dad.doorComing')]);
+    expect(interact(s, { kind: 'verb', verb: 'listen', target: 'corridor0.officeDoor' }).beats).toEqual([said('dad', 'dad.doorComing')]);
   });
 });

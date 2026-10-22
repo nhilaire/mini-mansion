@@ -10,7 +10,7 @@ describe('save format v2 (AC-35, AC-58)', () => {
     let s: GameState = newGame();
     for (const input of SOLUTION) {
       s = playAll(s, [input]).state;
-      const saved = { ...s, playMs: 123456, clock: 234567, tutorial: 3 as const, captures: 2, seen: ['julien.ball'], wrongIdx: 4 };
+      const saved = { ...s, playMs: 123456, clock: 234567, tutorial: 3 as const, captures: 2, wrongIdx: 4 };
       expect(deserialize(serialize(saved))).toEqual(saved);
     }
   });

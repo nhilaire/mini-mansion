@@ -60,8 +60,6 @@ export function deserialize(json: string): GameState {
     raw.solved.every((n) => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= 19) &&
     new Set(raw.solved).size === raw.solved.length &&
     isNat(raw.captures) &&
-    Array.isArray(raw.seen) &&
-    raw.seen.every((id) => typeof id === 'string' && CHARACTERS.some((c) => id.startsWith(`${c}.`))) &&
     (raw.tutorial === 0 || raw.tutorial === 1 || raw.tutorial === 2 || raw.tutorial === 3) &&
     isNum(raw.playMs) &&
     raw.playMs >= 0 &&
@@ -89,7 +87,6 @@ export function deserialize(json: string): GameState {
     cuts: [...(raw.cuts as CutId[])],
     solved: [...(raw.solved as number[])],
     captures: raw.captures as number,
-    seen: [...(raw.seen as string[])],
     tutorial: raw.tutorial as GameState['tutorial'],
     playMs: raw.playMs as number,
     clock: raw.clock as number,

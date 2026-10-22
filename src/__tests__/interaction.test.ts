@@ -17,17 +17,17 @@ const at = (place: PlaceId, inventory: ItemId[] = [], extra: Partial<GameState> 
 const story = (s: GameState) => JSON.stringify({ ...s, wrongIdx: 0 });
 
 describe('action menu verbs (AC-17)', () => {
-  it('look is always offered; take, talk and use only where they apply', () => {
+  it('look is always offered; take, listen and use only where they apply; inhabitants can only be looked at', () => {
     for (const h of HOTSPOTS) expect([h.id, h.verbs.includes('look')]).toEqual([h.id, true]);
     expect(findHotspot(at('front'), 'front.hedge')?.verbs).toEqual(['look']);
     expect(findHotspot(at('front'), 'front.doormat')?.verbs).toEqual(['look', 'take']);
     expect(findHotspot(at('front'), 'front.bell')?.verbs).toEqual(['look', 'use']);
-    expect(findHotspot(at('football', [], { chars: { ...newGame().chars, julien: 'football' } }), 'julien')?.verbs).toEqual(['look', 'talk']);
+    expect(findHotspot(at('football', [], { chars: { ...newGame().chars, julien: 'football' } }), 'julien')?.verbs).toEqual(['look']);
   });
 
-  it('talk is offered on the door of an occupied room only', () => {
+  it('listen is offered on the door of an occupied room only', () => {
     const s = at('landing');
-    expect(findHotspot(s, 'landing.julienDoor')?.verbs).toEqual(['look', 'use', 'talk']);
+    expect(findHotspot(s, 'landing.julienDoor')?.verbs).toEqual(['look', 'use', 'listen']);
     const away = { ...s, chars: { ...s.chars, julien: 'football' as const } };
     expect(findHotspot(away, 'landing.julienDoor')?.verbs).toEqual(['look', 'use']);
   });

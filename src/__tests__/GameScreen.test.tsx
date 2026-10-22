@@ -132,17 +132,20 @@ describe('GameScreen', () => {
     expect(screen.queryByText(text)).toBeNull();
   });
 
-  it('a conversation shows choices with "Au revoir", reopens after an answer and closes on "Au revoir" (AC-20)', async () => {
+  it('an inhabitant can only be looked at; "Écouter" at an occupied door plays the overheard line (AC-20)', async () => {
     await mount({ ...newGame(), place: 'football', flags: { door_unlocked: true }, chars: chars({ julien: 'football' }), tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-julien'));
-    await fireEvent.press(screen.getByTestId('verb-talk'));
-    expect(screen.getByLabelText(line(t, 'julien.q.pool'))).toBeTruthy();
-    expect(screen.getByLabelText('Au revoir')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('dlg-julien.pool'));
-    expect(screen.getByText(line(t, 'julien.a.pool1'))).toBeTruthy();
+    expect(screen.getByTestId('verb-look')).toBeTruthy();
+    expect(screen.queryByTestId('verb-talk')).toBeNull();
+    expect(screen.queryByTestId('verb-listen')).toBeNull();
+    await fireEvent.press(screen.getByTestId('verb-look'));
     await dismissLines();
-    expect(screen.getByTestId('dialogue')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('dlg-bye'));
+    await mount({ ...newGame(), place: 'landing', flags: { door_unlocked: true }, tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('hs-landing.julienDoor'));
+    expect(screen.getByText('Écouter')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('verb-listen'));
+    expect(screen.getByText(line(t, 'julien.door'))).toBeTruthy();
+    await dismissLines();
     expect(screen.queryByTestId('dialogue')).toBeNull();
     expect(screen.getByTestId('scene-idle')).toBeTruthy();
   });

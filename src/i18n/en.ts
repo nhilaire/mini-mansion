@@ -38,7 +38,7 @@ export const en: Strings = {
     verbs: 'Tap an object or a person to see what you can do.',
     inventory: 'Your items are here. Tap one, then tap what to use it on.',
   },
-  verbs: { look: 'Look', take: 'Take', talk: 'Talk', use: 'Use' },
+  verbs: { look: 'Look', take: 'Take', listen: 'Listen', use: 'Use' },
   game: {
     useWith: (item: string) => `Use ${item} with…`,
     menu: 'Menu',

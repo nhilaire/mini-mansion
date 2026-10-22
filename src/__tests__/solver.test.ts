@@ -119,7 +119,7 @@ describe('story graph (AC-31)', () => {
   describe('pruning and reduction claims, checked on a sample of the explored states', () => {
     const live = () => samples.filter((s) => !s.finished);
 
-    it('looks (except the painting), talking, dialogues, gags, item looks and item pairs without a rule never change the story', () => {
+    it('looks (except the painting), listening at doors, gags, item looks and item pairs without a rule never change the story', () => {
       const pruned: string[] = [];
       expect(samples.length).toBeGreaterThan(1000);
       for (const s of samples) {

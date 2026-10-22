@@ -25,13 +25,13 @@ describe('clue notebook (AC-29)', () => {
 
   it('adds each entry once, marked unread until the notebook is opened', () => {
     let s = at('landing');
-    const talk: Input = { kind: 'verb', verb: 'talk', target: 'landing.julienDoor' };
-    s = interact(s, talk).state;
+    const listen: Input = { kind: 'verb', verb: 'listen', target: 'landing.julienDoor' };
+    s = interact(s, listen).state;
     expect(s.notes).toEqual(['n01', 'n02']);
     expect(s.unread).toEqual(['n01', 'n02']);
     s = readNotes(s);
     expect(s.unread).toEqual([]);
-    const again = interact(s, talk);
+    const again = interact(s, listen);
     expect(again.state.notes).toEqual(['n01', 'n02']);
     expect(again.state.unread).toEqual([]);
     expect(again.beats.some((b) => b.type === 'note')).toBe(false);
@@ -47,7 +47,7 @@ describe('clue notebook (AC-29)', () => {
       ['corridor0.officeDoor', 'n06', 'corridor0'],
     ];
     for (const [door, note, place] of doors) {
-      const o = interact(at(place), { kind: 'verb', verb: 'talk', target: door });
+      const o = interact(at(place), { kind: 'verb', verb: 'listen', target: door });
       expect([door, o.state.notes]).toEqual([door, ['n01', note]]);
     }
   });

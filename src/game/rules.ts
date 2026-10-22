@@ -3,10 +3,8 @@
 // beats to play and the telemetry facts.
 import { isSolution } from './chess';
 import { cloneState, Ctx } from './ctx';
-import { BUSY_LINE, BYE, findOption } from './dialogue';
 import {
   CELLAR_SPAWN,
-  characterPlacement,
   DOOR_SPAWN,
   findExit,
   findHotspot,
@@ -40,7 +38,6 @@ export function newGame(): GameState {
     cuts: [],
     solved: [],
     captures: 0,
-    seen: [],
     tutorial: 0,
     playMs: 0,
     clock: 0,
@@ -60,7 +57,7 @@ export function interact(state: GameState, input: Input): Outcome {
     case 'verb': {
       const h = findHotspot(state, input.target);
       if (!h || !h.verbs.includes(input.verb)) return rejected(state);
-      if (h.character) character(c, h.character, input.verb);
+      if (h.character) character(c, h.character);
       else if (h.door) doorVerb(c, h, input.verb);
       else hotspotVerb(c, input.target, input.verb);
       return done(c);
@@ -86,17 +83,6 @@ export function interact(state: GameState, input: Input): Outcome {
       if (!e) return rejected(state);
       c.sfx('door');
       goTo(c, e.to, e.spawn, e.spawnFace);
-      return done(c);
-    }
-    case 'dialogue': {
-      const present = characterPlacement(input.character, state);
-      if (!present || present.place !== state.place) return rejected(state);
-      if (input.option === BYE) return done(c);
-      const option = findOption(state, input.character, input.option);
-      if (!option) return rejected(state);
-      if (!c.s.seen.includes(option.id)) c.s.seen.push(option.id);
-      option.run(c);
-      c.beats.push({ type: 'dialogue', character: input.character });
       return done(c);
     }
     case 'keypad':
@@ -241,13 +227,8 @@ function capture(c: Ctx, room: GuardedRoom, who: CharacterId): void {
   c.narrator(open ? 'capture.cellarOpen' : 'capture.cellar');
 }
 
-function character(c: Ctx, id: CharacterId, verb: Verb): void {
-  if (verb === 'talk') {
-    const busy = BUSY_LINE[id];
-    if (busy) c.say(id, busy);
-    else c.beats.push({ type: 'dialogue', character: id });
-    return;
-  }
+// Nobody can be talked to: an inhabitant can only be looked at.
+function character(c: Ctx, id: CharacterId): void {
   c.hero(`${id}.look`);
 }
 
@@ -260,7 +241,8 @@ function doorVerb(c: Ctx, h: HotspotDef, verb: Verb): void {
     c.hero(who ? `door.${room}.occupied` : `door.${room}.empty`);
     return;
   }
-  if (verb === 'talk') {
+  // listen: Sam puts an ear to the door and hears the occupant talking to themself.
+  if (verb === 'listen') {
     if (!who) return;
     if (who === 'dad' && c.state('dad') === 'answering') c.say('dad', 'dad.doorComing');
     else c.say(who, `${who}.door`).note(DOOR_NOTE[who]);

@@ -15,7 +15,7 @@ export const CLUES: Record<number, readonly string[]> = {
   11: ['attic.stain.look', 'line.theoMono2', 'garage.paint.look'],
   12: ['line.doorLocked', 'attic.door.look', 'item.oldkey.look'],
   13: ['laundry.notebook.look', 'item.note.look'],
-  14: ['pool.cover.lookOpen', 'pool.pump.look', 'julien.a.pool1', 'julien.a.pool2'],
+  14: ['pool.cover.lookOpen', 'pool.pump.look', 'garage.drawer.look', 'office.shelf.look'],
   15: ['cellar.hatch.look', 'cellar.rack.look'],
   16: ['dad.door', 'front.bell.look'],
   17: ['mom.door', 'utility.machine.look', 'garage.breaker.look'],

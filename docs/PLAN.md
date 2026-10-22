@@ -62,6 +62,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-49 Florent and Théo heard going back once Sam is out of their room; the white chess move stays 1.5 s before Black answers; the whole family gathers in the lab at the end (AC-22, AC-26, AC-32) - proof: unit
 - [x] T-50 Papa outside 60 s and back at his desk 30 s later; the upstairs room sounds stay faint in the background (AC-25, AC-51) - proof: unit
 - [x] T-51 Intro in 5 cards: the goal (find the recipe and what it really is) and the rule (lure the family away, the cellar if caught) (AC-11, AC-45, AC-56) - proof: unit, e2e
+- [x] T-52 No conversation: the dialogue system is removed, characters offer only look, occupied doors offer « Écouter » / Listen (overheard monologues, same notebook entries); the E14 pliers clue moves to the pump, garage drawer and office shelf looks (AC-17, AC-20, AC-25, AC-29) - proof: unit
 
 ## Notes
 

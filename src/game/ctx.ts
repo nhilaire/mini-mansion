@@ -18,7 +18,6 @@ export function cloneState(s: GameState): GameState {
     unread: [...s.unread],
     cuts: [...s.cuts],
     solved: [...s.solved],
-    seen: [...s.seen],
     timers: { ...s.timers },
   };
 }

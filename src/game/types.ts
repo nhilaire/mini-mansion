@@ -53,7 +53,7 @@ export type CharacterId = 'dad' | 'mom' | 'julien' | 'florent' | 'theo';
 // Who says a line: the hero (Sam), the narrator (cutscene descriptions) or an inhabitant.
 export type Speaker = 'hero' | 'narrator' | CharacterId;
 
-export type Verb = 'look' | 'take' | 'talk' | 'use';
+export type Verb = 'look' | 'take' | 'listen' | 'use';
 
 export type Facing = 'left' | 'right' | 'up' | 'down';
 
@@ -167,8 +167,6 @@ export interface GameState {
   // Puzzles solved (E01-E19 as 1-19), in order.
   solved: number[];
   captures: number;
-  // Dialogue options already chosen (greyed but readable).
-  seen: string[];
   tutorial: TutorialStep;
   playMs: number;
   // The timer clock: advances with play time (30 times faster in the testing fast mode).
@@ -202,7 +200,6 @@ export type SfxName =
 // What the UI plays, in order, after an interaction.
 export type Beat =
   | { type: 'say'; speaker: Speaker; key: string }
-  | { type: 'dialogue'; character: CharacterId }
   | { type: 'keypad'; keypad: KeypadId }
   | { type: 'chess' }
   | { type: 'documents' }
@@ -235,7 +232,6 @@ export type Input =
   | { kind: 'item'; item: ItemId; target: string }
   | { kind: 'lookItem'; item: ItemId }
   | { kind: 'exit'; exit: string }
-  | { kind: 'dialogue'; character: CharacterId; option: string }
   | { kind: 'keypad'; keypad: KeypadId; code: string }
   // The moves played on Théo's chess problem, as "e2e4" squares (white moves only).
   | { kind: 'chess'; moves: string[] }

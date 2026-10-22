@@ -4,7 +4,7 @@
 // up items). The search is therefore done on story nodes, with a sound reduction:
 // - the story part of a state is everything that can change what happens next: inventory, flags, character states
 //   (Papa's doorbell phases included), whether the dough timer runs, the notebook entries that gate something (the
-//   three codes), cutscenes, solved puzzles and the end. Position, the timer clock and deadlines, dialogue history,
+//   three codes), cutscenes, solved puzzles and the end. Position, the timer clock and deadlines,
 //   the capture count, the wrong-line rotation, the tutorial, play time and the purely informative notebook entries
 //   are left out;
 // - two side systems are reduced, each claim being checked by tests on the sampled states:
@@ -34,7 +34,6 @@
 //   transitions.
 // So every reachable concrete state belongs to exactly one explored node and every input from it is tried.
 import { SOLUTION_MOVES } from './chess';
-import { BYE, dialogueOptions } from './dialogue';
 import { CODES, GAGS, interact, newGame, playAll, USE_RULES } from './rules';
 import { Beat, Flag, GameState, Input, ItemId, KeypadId, NoteId } from './types';
 import { exitsIn, hotspotsIn } from './world';
@@ -107,7 +106,6 @@ export function allInputs(s: GameState): Input[] {
   for (const h of hotspotsIn(s)) {
     for (const verb of h.verbs) out.push({ kind: 'verb', verb, target: h.id });
     for (const item of s.inventory) out.push({ kind: 'item', item, target: h.id });
-    if (h.character) for (const o of dialogueOptions(s, h.character)) if (o.id !== BYE) out.push({ kind: 'dialogue', character: h.character, option: o.id });
   }
   for (const a of s.inventory) for (const b of s.inventory) if (a !== b) out.push({ kind: 'item', item: a, target: `item:${b}` });
   for (const e of exitsIn(s)) out.push({ kind: 'exit', exit: e.id });
@@ -125,7 +123,7 @@ export function isSideInput(input: Input): boolean {
 }
 
 // The non-move inputs the search tries. Pruned (each pruning is proven by a test on every sample state): item pairs
-// without a rule only answer a wrong line, looking at an item, talking and the gags only say lines; the combination
+// without a rule only answer a wrong line, looking at an item, listening at a door and the gags only say lines; the combination
 // of the pole and its extension is the only item-on-item rule; the side systems are explored by sideSteps.
 // Looking only says a line, except at the painting, which reveals the safe.
 export const STORY_LOOKS: readonly string[] = ['parents.painting'];
@@ -135,7 +133,7 @@ export function actionInputs(s: GameState): Input[] {
   for (const h of hotspotsIn(s)) {
     for (const verb of h.verbs) {
       if (h.door && verb === 'use') continue;
-      if (h.character && verb === 'talk') continue;
+      if (verb === 'listen') continue;
       if (verb === 'look' && !STORY_LOOKS.includes(h.id)) continue;
       if (verb === 'use' && GAGS[h.id]) continue;
       const input: Input = { kind: 'verb', verb, target: h.id };

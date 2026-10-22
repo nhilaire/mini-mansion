@@ -4,9 +4,8 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import { line, noteText, speakerName } from '../../content/index';
+import { noteText, speakerName } from '../../content/index';
 import { applyMove, Board, ChessSession, coords, legalFrom, newSession, playWhite, square } from '../../game/chess';
-import { DialogueChoice } from '../../game/dialogue';
 import { NoteId, Rect, Speaker, Verb } from '../../game/types';
 import { useI18n } from '../../i18n/I18nProvider';
 import { isFastMode } from '../../testing/fastMode';
@@ -63,28 +62,6 @@ export function LineBanner({ speaker, text, onPress }: { speaker: Speaker; text:
         <Text style={[styles.lineText, { color: speakerColors[speaker] }, speaker === 'narrator' && styles.italic]}>{text}</Text>
       </View>
     </Pressable>
-  );
-}
-
-export function DialogueChoices({ choices, onChoose }: { choices: DialogueChoice[]; onChoose: (id: string) => void }) {
-  const { t } = useI18n();
-  return (
-    <View style={StyleSheet.absoluteFill}>
-      <View testID="dialogue" style={[styles.panel, styles.dialogue]}>
-        {choices.map((c) => (
-          <Pressable
-            key={c.id}
-            testID={`dlg-${c.id}`}
-            accessibilityRole="button"
-            accessibilityLabel={line(t, c.label)}
-            onPress={() => onChoose(c.id)}
-            style={({ pressed }) => [styles.choice, pressed && styles.pressed]}
-          >
-            <Text style={[styles.choiceText, c.seen && styles.seen]}>› {line(t, c.label)}</Text>
-          </Pressable>
-        ))}
-      </View>
-    </View>
   );
 }
 
@@ -345,10 +322,6 @@ const styles = StyleSheet.create({
   speaker: { fontFamily: font.family, fontSize: font.small, fontWeight: '700' },
   lineText: { fontFamily: font.family, fontSize: font.body, lineHeight: 22 },
   italic: { fontStyle: 'italic' },
-  dialogue: { position: 'absolute', bottom: spacing.sm, left: '10%', right: '10%' },
-  choice: { minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.sm },
-  choiceText: { color: colors.text, fontFamily: font.family, fontSize: font.body },
-  seen: { color: colors.muted },
   keypad: { alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.lg },
   display: { color: colors.accent, fontFamily: font.family, fontSize: 28, fontWeight: '700', letterSpacing: 2 },
   keyRows: { gap: spacing.xs },

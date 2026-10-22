@@ -431,19 +431,19 @@ export function charactersIn(s: GameState): CharacterPlacement[] {
   return CHARACTERS.map((c) => characterPlacement(c, s)).filter((c): c is CharacterPlacement => c !== null && c.place === s.place);
 }
 
-// Every tappable thing of the current place: static hotspots (doors get "talk" while occupied), then characters.
+// Every tappable thing of the current place: static hotspots (doors get "listen" while occupied), then characters.
 export function hotspotsIn(s: GameState): HotspotDef[] {
   const statics = HOTSPOTS.filter((h) => h.place === s.place && (!h.visible || h.visible(s))).map((h) =>
-    h.door && occupant(h.door, s.chars) ? { ...h, verbs: [...h.verbs, 'talk' as Verb] } : h,
+    h.door && occupant(h.door, s.chars) ? { ...h, verbs: [...h.verbs, 'listen' as Verb] } : h,
   );
-  // Papa and Maman catch the hero instead of talking: only the boys can be talked to.
+  // Nobody can be talked to: the inhabitants can only be looked at.
   const people = charactersIn(s).map<HotspotDef>((c) => ({
     id: c.id,
     place: c.place,
     rect: c.rect,
     at: c.at,
     face: c.face,
-    verbs: c.id === 'dad' || c.id === 'mom' ? ['look'] : ['look', 'talk'],
+    verbs: ['look'],
     character: c.id,
   }));
   return [...statics, ...people];

@@ -1,7 +1,6 @@
 // T-13: the story content in French and English (AC-03, AC-30, AC-45).
 import { CLUES } from '../content/clues';
 import { hasLine, hotspotName, itemName, line } from '../content/index';
-import { allDialogueOptions } from '../game/dialogue';
 import { allInputs } from '../game/explore';
 import { interact, newGame, playAll } from '../game/rules';
 import { SOLUTION } from '../game/solution';
@@ -43,10 +42,9 @@ describe('story content in every language', () => {
     expect(keys.size).toBeGreaterThan(200);
   });
 
-  it.each(LANGUAGES)('%s has every line the engine says along the walkthrough and every dialogue line', (language) => {
+  it.each(LANGUAGES)('%s has every line the engine says along the walkthrough', (language) => {
     const t = DICTIONARIES[language];
-    const dialogue = allDialogueOptions().map((d) => d.option.label);
-    const missing = [...keys, ...dialogue, 'dialogue.bye'].filter((k) => !hasLine(t, k));
+    const missing = [...keys].filter((k) => !hasLine(t, k));
     expect(missing).toEqual([]);
   });
 
@@ -96,7 +94,7 @@ describe('clues of the puzzles off the walkthrough (AC-30)', () => {
   it('E16: right after E01, Papa says through his door that he opens when someone rings; the doorbell says so too', () => {
     const inside = playAll(newGame(), SOLUTION.slice(0, 2)).state;
     const corridor = interact(inside, { kind: 'exit', exit: 'hall.toCorridor' }).state;
-    expect(said(corridor, { kind: 'verb', verb: 'talk', target: 'corridor0.officeDoor' })).toContain('dad.door');
+    expect(said(corridor, { kind: 'verb', verb: 'listen', target: 'corridor0.officeDoor' })).toContain('dad.door');
     expect(said({ ...corridor, place: 'front' }, { kind: 'verb', verb: 'look', target: 'front.bell' })).toContain('front.bell.look');
     expect(CLUES[16]).toEqual(expect.arrayContaining(['dad.door', 'front.bell.look']));
   });
@@ -166,9 +164,9 @@ describe('French typography and tone (AC-45)', () => {
       verbs: 'Touche un objet ou une personne pour voir ce que tu peux faire.',
       inventory: "Tes objets sont ici. Touche-en un, puis touche ce sur quoi l'utiliser.",
     });
-    expect(fr.verbs).toEqual({ look: 'Regarder', take: 'Prendre', talk: 'Parler', use: 'Utiliser' });
+    expect(fr.verbs).toEqual({ look: 'Regarder', take: 'Prendre', listen: 'Écouter', use: 'Utiliser' });
     expect(fr.game.useWith('Perche')).toBe('Utiliser Perche avec…');
-    expect(line(DICTIONARIES.fr, 'dialogue.bye')).toBe('Au revoir');
+    expect(hasLine(DICTIONARIES.fr, 'dialogue.bye')).toBe(false);
     expect([fr.notebook.title, fr.notebook.empty, fr.notebook.close]).toEqual(["Carnet d'indices", "Rien noté pour l'instant.", 'Fermer']);
     expect([fr.keypad.ok, fr.keypad.clear, fr.keypad.close]).toEqual(['Valider', 'Effacer', 'Fermer']);
     expect(fr.chess.title).toBe(`Problème de Théo${N}: les Blancs jouent et font mat en 2 coups`);
@@ -268,9 +266,8 @@ describe('French typography and tone (AC-45)', () => {
       verbs: 'Tap an object or a person to see what you can do.',
       inventory: 'Your items are here. Tap one, then tap what to use it on.',
     });
-    expect(en.verbs).toEqual({ look: 'Look', take: 'Take', talk: 'Talk', use: 'Use' });
+    expect(en.verbs).toEqual({ look: 'Look', take: 'Take', listen: 'Listen', use: 'Use' });
     expect(en.game.useWith('Pole')).toBe('Use Pole with…');
-    expect(line(en, 'dialogue.bye')).toBe('Goodbye');
     expect([en.notebook.title, en.notebook.empty, en.notebook.close]).toEqual(['Clue notebook', 'Nothing noted yet.', 'Close']);
     expect([en.keypad.ok, en.keypad.clear, en.keypad.close]).toEqual(['OK', 'Clear', 'Close']);
     expect([en.chess.wrong, en.chess.solved, en.chess.reset, en.chess.close]).toEqual(['Missed, Black escapes. Try again!', 'Checkmate!', 'Restart', 'Close']);

@@ -53,9 +53,9 @@ const lines = typoAll({
   'door.florent.empty': 'La chambre de Florent. La batterie résonne en bas : la voie est libre.',
   'door.theo.occupied': "Clic-clic-clic… Le bruit d'un Rubik's Cube. Théo est dans sa chambre.",
   'door.theo.empty': "La chambre de Théo. Il joue sur l'échiquier électronique du salon.",
-  'dad.door': "Je n'ouvre à personne, je travaille ! … Sauf si on sonne à la porte, évidemment.",
+  'dad.door': "Allez, au travail. Rien ne me fera sortir de ce bureau… sauf la sonnette, évidemment !",
   'dad.doorComing': "Oui, oui, j'arrive ! Deux minutes !",
-  'mom.door': "Florent, c'est toi ? Si tu veux m'aider, lance donc la machine à laver ! Je descendrai étendre le linge dès qu'elle aura fini.",
+  'mom.door': "Si seulement quelqu'un lançait la machine à laver… Je descendrais étendre le linge dès qu'elle aurait fini.",
   'julien.door': "Si seulement mon ballon n'était pas coincé sur le volet de la piscine, je serais déjà dehors !",
   'florent.door': "Si je retrouvais mes baguettes, je ferais un solo de batterie d'enfer !",
   'theo.door': "Sans ma dame blanche, l'échiquier refuse de démarrer ! Je parie que Julien l'a encore prise pour décorer un de ses trophées…",
@@ -83,8 +83,6 @@ const lines = typoAll({
 
   // Inhabitants moving.
   'florent.back': 'En bas, la batterie se tait. Des pas dans l\'escalier : Florent remonte dans sa chambre et rallume sa console.',
-  'line.florentBusy': 'Pas maintenant, je suis en plein solo !',
-  'line.theoBusy': 'Chut ! Le bot réfléchit, et moi aussi.',
   'line.theoBack': "Bon, j'ai battu le bot. Je remonte.",
   'line.theoMono1': "Comment se fait-il que mon Rubik's Cube se soit résolu tout seul ? Il y en a, des mystères ici.",
   'line.theoMono2': "C'est comme ce passage secret du grenier : je suis sûr qu'il existe, mais je n'ai jamais réussi à le découvrir…",
@@ -142,7 +140,7 @@ const lines = typoAll({
   'line.coverBall': "Si j'ouvre le volet maintenant, le ballon de Julien va finir à l'eau.",
   'pool.switch.open': "Le volet s'enroule en ronronnant. Au fond de l'eau, il y a un flacon !",
   'pool.switch.already': 'Le volet est déjà ouvert.',
-  'pool.pump.look': 'La pompe de la piscine. Le câble est débranché et la fiche est toute tordue.',
+  'pool.pump.look': 'La pompe de la piscine. Le câble est débranché et la fiche est toute tordue. Avec une pince, je la redresserais.',
   'pool.pump.lookFixed': 'La pompe de la piscine, branchée. Prête à vider la piscine.',
   'pool.pump.fix': 'Avec la pince, je redresse la fiche et je la rebranche.',
   'line.pumpPlug': 'La fiche est tordue : impossible de la brancher comme ça.',
@@ -410,19 +408,6 @@ const lines = typoAll({
   'line.final8': "Trop bon ! Papa, tu vas gagner, c'est sûr !",
 
   // Dialogue choices (what Sam says) and answers.
-  'dialogue.bye': 'Au revoir',
-  'julien.q.ball': 'Joli ballon !',
-  'julien.a.ball1': "Merci ! Il était coincé sur le volet de la piscine. Je ne sais même pas qui l'a délivré. Toi, peut-être ?",
-  'julien.a.ball2': 'Julien jongle trois fois, puis shoote droit dans les fleurs de Maman.',
-  'julien.a.ball3': "Oups. On dira que c'est le vent.",
-  'julien.q.family': 'Ils font quoi, les autres, dans la maison ?',
-  'julien.a.family1': "Papa ne quitte jamais son bureau, sauf quand on sonne. Maman plie le linge en attendant que quelqu'un lance une machine.",
-  'julien.a.family2': "Florent fait du bruit, Théo réfléchit. Et toi, tu n'es pas de l'école de Théo, toi ?",
-  'julien.q.pool': 'Et la pompe de la piscine ?',
-  'julien.a.pool1': "Papa l'a débranchée en tirant sur le câble. La fiche est toute tordue.",
-  'julien.a.pool2': 'Avec une pince, tu la redresserais en deux secondes. Papa garde la sienne dans sa boîte à outils, au bureau.',
-  'julien.q.attic': 'Tu montes souvent au grenier ?',
-  'julien.a.attic': "Jamais ! C'est plein de bazar. Et Papa dit qu'il y a des araignées géantes. Il y monte tout le temps, pourtant…",
 });
 
 export const story = {

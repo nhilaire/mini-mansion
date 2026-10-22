@@ -40,7 +40,7 @@ export const fr = {
     verbs: 'Touche un objet ou une personne pour voir ce que tu peux faire.',
     inventory: "Tes objets sont ici. Touche-en un, puis touche ce sur quoi l'utiliser.",
   },
-  verbs: { look: 'Regarder', take: 'Prendre', talk: 'Parler', use: 'Utiliser' },
+  verbs: { look: 'Regarder', take: 'Prendre', listen: 'Écouter', use: 'Utiliser' },
   game: {
     useWith: (item: string) => `Utiliser ${item} avec…`,
     menu: 'Menu',
