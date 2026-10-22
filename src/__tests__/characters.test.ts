@@ -99,7 +99,7 @@ describe('the doorbell sequence (AC-51)', () => {
     expect(later.chars.dad).toBe('answering');
   });
 
-  it('then the front door view: Papa outside 90 s (office free, front guarded), then back 60 s after his line', () => {
+  it('then the front door view: Papa outside 60 s (office free, front guarded), then back 30 s after his line', () => {
     const s = { ...rung().state, place: 'hall' as const };
     const out = interact(s, tick(TIMER_MS.answer));
     expect(out.beats).toContainEqual({ type: 'view', view: 'door' });
@@ -185,9 +185,9 @@ describe('the dough (AC-52)', () => {
   });
 
   it('the dough cancels a doorbell sequence and the doorbell then finds nobody', () => {
-    // Mixed first, rung 10 s later: Papa comes out, then the dough calls him to the kitchen while he is outside.
+    // Mixed first, rung 50 s later: Papa comes out, then the dough calls him to the kitchen while he is outside.
     let s = interact(mixed().state, go('kitchen.toMusic')).state;
-    s = interact(s, tick(10_000)).state;
+    s = interact(s, tick(50_000)).state;
     s = interact({ ...s, place: 'front' }, { kind: 'verb', verb: 'use', target: 'front.bell' }).state;
     s = interact({ ...s, place: 'hall' }, tick(TIMER_MS.answer)).state;
     expect(s.chars.dad).toBe('outside');
@@ -326,8 +326,8 @@ describe('the capture scene (AC-23)', () => {
     expect(kitchen.beats.slice(k)).toContainEqual({ type: 'cinematic', on: false });
   });
 
-  it('the PRD durations: answer 30 s, outside 90 s, back 60 s, dough 120 s', () => {
-    expect(TIMER_MS).toEqual({ answer: 30_000, outside: 90_000, back: 60_000, dough: 120_000 });
+  it('the PRD durations: answer 30 s, outside 60 s, back 30 s, dough 120 s', () => {
+    expect(TIMER_MS).toEqual({ answer: 30_000, outside: 60_000, back: 30_000, dough: 120_000 });
   });
 });
 

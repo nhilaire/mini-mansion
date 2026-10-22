@@ -229,7 +229,7 @@ means the front of the house (`front`).
 
 - Timers count play time only (Game screen active, not paused, not in background), stored in the save as deadlines
   on the play-time clock.
-- Durations: doorbell answer 30 s, Papa outside 90 s, Papa coming back 60 s, dough 120 s.
+- Durations: doorbell answer 30 s, Papa outside 60 s, Papa coming back 30 s, dough 120 s.
 - The testing fast mode makes timers run 30 times faster (it changes no rule and no save format).
 
 ### Character states
@@ -237,9 +237,9 @@ means the front of the house (`front`).
 | Character | State | Place | Leaves it when | Next state |
 |---|---|---|---|---|
 | dad | at_desk | office | E16: Sam rings the doorbell (after E01) | answering |
-| dad | answering | office (still at his desk) | 120 s later: the front door view plays | outside |
-| dad | outside | front | 120 s later: `line.dadGoingBack` is heard | returning |
-| dad | returning | none (on his way back) | 60 s later | at_desk |
+| dad | answering | office (still at his desk) | 30 s later: the front door view plays | outside |
+| dad | outside | front | 60 s later: `line.dadGoingBack` is heard | returning |
+| dad | returning | none (on his way back) | 30 s later | at_desk |
 | dad | any but cooking | - | E19: 120 s after the dough is mixed, Papa comes to the kitchen | cooking (kitchen) for the rest of the game |
 | mom | folding | parents | E17: the washing machine's cycle ends (at the first place change after starting it) | gardening (garden) for the rest of the game |
 | julien | in_room | julien | E02: the ball rolls to the football corner | football (football) for the rest of the game |
@@ -250,8 +250,8 @@ means the front of the house (`front`).
 
 - The doorbell sequence: ringing shows `line.dadAnswer` (Papa heard from inside); Sam has 30 s to go away from the
   front door. Then the front door view plays (no control, cannot be skipped): Papa in front of the house says `line.dadAtDoor`; if Sam
-  is in `front` at that moment, Papa catches Sam. Papa stays 90 s in front of the house (the office is free, `front`
-  is guarded), then `line.dadGoingBack` is heard; 60 s later Papa is back at his desk, and if Sam is in the office
+  is in `front` at that moment, Papa catches Sam. Papa stays 60 s in front of the house (the office is free, `front`
+  is guarded), then `line.dadGoingBack` is heard; 30 s later Papa is back at his desk, and if Sam is in the office
   then, Papa catches Sam. The doorbell can be rung again once Papa is back at his desk (`line.bellBusy` meanwhile).
 - The dough (E19, optional): the Lait de riz (fridge), the Farine de châtaigne and the Farine de riz (utility room
   shelf) used on the food processor in any order; with all three, `line.doughMixed`, E19 is solved and the 120 s
@@ -265,7 +265,8 @@ means the front of the house (`front`).
   `kitchen` (dad cooking), `parents` (mom folding), `garden` (mom gardening), `julien` (julien in_room), `florent`
   (florent in_room), `theo` (theo in_room).
 - Announcement: next to a guarded room (corridor0 or landing) the occupant's activity sound plays and looking at its
-  door gives a line saying who is inside; talking at the door gives the occupant's door line. The music corner hears
+  door gives a line saying who is inside; talking at the door gives the occupant's door line. Upstairs the sounds
+  of the occupied rooms stay faint, in the background, even when all four play at once. The music corner hears
   Papa cooking in the kitchen; the football corner hears Maman humming in the garden. Entering is never blocked.
 - Capture: entering a guarded place, or being in a place when its occupant arrives there (Papa coming out of the front
   door, Papa back at his desk, Papa arriving in the kitchen). The capture is a short scene that cannot be skipped,
@@ -561,8 +562,8 @@ Puzzles, characters, captures, timers
   capture says the capture line (who are you, what are you doing here) and every later one `line.captureAgain`.
 - AC-51 [unit] Given the doorbell rung after E01 with Papa at his desk, then `line.dadAnswer` plays and Papa stays
   in the office (guarded) for 30 s of play time; then the front door view plays `line.dadAtDoor` and Sam is caught
-  if in `front`; then Papa stays outside 90 s (the office is free, `front` is guarded); then `line.dadGoingBack`
-  plays and 60 s later Papa is back at his desk, Sam being caught if in the office; meanwhile the doorbell answers
+  if in `front`; then Papa stays outside 60 s (the office is free, `front` is guarded); then `line.dadGoingBack`
+  plays and 30 s later Papa is back at his desk, Sam being caught if in the office; meanwhile the doorbell answers
   `line.bellBusy`, and it can be rung again once Papa is back.
 - AC-52 [unit] Given the Lait de riz, the Farine de châtaigne and the Farine de riz used on the food processor in any
   order, then `line.doughMixed` plays, E19 is solved, and 120 s later CUT12 shows Papa coming to the kitchen for good

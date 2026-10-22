@@ -24,7 +24,7 @@ export const CODE_NOTE: Record<KeypadId, NoteId> = { computer: 'n08', safe: 'n11
 const KEYPAD_PLACE: Record<KeypadId, PlaceId> = { computer: 'office', safe: 'parents', lab: 'attic' };
 
 // Timer durations in ms of the timer clock (PRD "Timers").
-export const TIMER_MS = { answer: 30_000, outside: 90_000, back: 60_000, dough: 120_000 } as const;
+export const TIMER_MS = { answer: 30_000, outside: 60_000, back: 30_000, dough: 120_000 } as const;
 
 export function newGame(): GameState {
   return {

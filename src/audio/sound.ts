@@ -49,6 +49,7 @@ const TRACKS: Record<Track, number> = {
 
 export const MUSIC_VOLUME = 0.3;
 export const STEP_VOLUME = 0.35;
+export const LANDING_VOLUME = 0.08;
 
 let modeSet = false;
 function ensureMode() {
@@ -133,11 +134,12 @@ export function ambienceFor(s: GameState): AmbientLoop[] {
   const out: AmbientLoop[] = [];
   if (s.finished) return out;
   if (s.place === 'corridor0' && occupant('office', s.chars)) out.push({ loop: 'typing', volume: 0.5 });
+  // Upstairs, up to four rooms are heard at once: each stays faint, in the background (not to sound like music).
   if (s.place === 'landing') {
-    if (occupant('julien', s.chars)) out.push({ loop: 'radio', volume: 0.3 });
-    if (occupant('florent', s.chars)) out.push({ loop: 'game', volume: 0.3 });
-    if (occupant('theo', s.chars)) out.push({ loop: 'cube', volume: 0.35 });
-    if (occupant('parents', s.chars)) out.push({ loop: 'humming', volume: 0.3 });
+    if (occupant('julien', s.chars)) out.push({ loop: 'radio', volume: LANDING_VOLUME });
+    if (occupant('florent', s.chars)) out.push({ loop: 'game', volume: LANDING_VOLUME });
+    if (occupant('theo', s.chars)) out.push({ loop: 'cube', volume: LANDING_VOLUME });
+    if (occupant('parents', s.chars)) out.push({ loop: 'humming', volume: LANDING_VOLUME });
   }
   if (s.place === 'music' && occupant('kitchen', s.chars)) out.push({ loop: 'cooking', volume: 0.4 });
   if (s.place === 'football' && occupant('garden', s.chars)) out.push({ loop: 'humming', volume: 0.35 });

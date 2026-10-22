@@ -62,6 +62,12 @@ describe('activity sounds (AC-25)', () => {
     expect(ambienceFor(at('hall'))).toEqual([]);
   });
 
+  it('upstairs, the rooms are heard faintly, in the background, even all four at once', () => {
+    const loops = ambienceFor(at('landing'));
+    expect(loops).toHaveLength(4);
+    for (const l of loops) expect(l.volume).toBeLessThanOrEqual(0.1);
+  });
+
   it('Papa cooking is heard from the music corner, Maman humming in the garden from the football corner', () => {
     expect(ambienceFor(at('music', { dad: 'cooking' })).map((l) => l.loop)).toEqual(['cooking']);
     expect(ambienceFor(at('music'))).toEqual([]);
