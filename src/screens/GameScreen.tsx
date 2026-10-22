@@ -202,10 +202,10 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           break;
         case 'room': {
           const s = gameRef.current;
-          setShown(s.place);
+          setShown(b.place);
           walkRef.current = null;
           setWalking(false);
-          setPose({ pos: s.pos, facing: s.facing, frame: -1 });
+          setPose(b.pos ? { pos: b.pos, facing: b.facing ?? 'right', frame: -1 } : { pos: s.pos, facing: s.facing, frame: -1 });
           setSelected(null);
           setPage(0);
           break;

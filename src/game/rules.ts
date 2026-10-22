@@ -201,6 +201,8 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
   if (isGuardedRoom(to)) {
     const who = occupant(to, c.s.chars);
     if (who) {
+      // Sam steps into the room first: the capture scene plays there.
+      c.beats.push({ type: 'room', place: to, pos: { ...spawn }, facing: face });
       capture(c, to, who);
       return;
     }

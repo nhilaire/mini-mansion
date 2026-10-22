@@ -203,6 +203,11 @@ describe('guarded places and captures (AC-23)', () => {
     expect(o.state.captures).toBe(1);
     expect(o.events).toEqual([{ type: 'capture', room, count: 1 }]);
     expect(o.beats).toContainEqual(said(OCCUPANT[room], `capture.${OCCUPANT[room]}`));
+    // The scene plays inside the room: Sam steps in first.
+    const stepIn = o.beats.findIndex((b) => b.type === 'room' && b.place === room);
+    const first = o.beats.findIndex((b) => b.type === 'say');
+    expect(stepIn).toBeGreaterThanOrEqual(0);
+    expect(stepIn).toBeLessThan(first);
     expect(o.state.inventory).toEqual(s.inventory);
     expect(o.state.notes).toEqual(s.notes);
     expect(o.state.solved).toEqual(s.solved);
@@ -248,9 +253,10 @@ describe('the capture scene (AC-23)', () => {
       ['narrator', 'capture.cellar'],
     ]);
     const kinds = o.beats.map((b) => (b.type === 'say' ? b.key : b.type === 'wait' ? `wait ${b.ms}` : b.type === 'captor' ? `captor ${b.character}` : b.type === 'cinematic' ? `cinematic ${b.on}` : b.type === 'room' ? `room ${b.place}` : b.type));
-    // The door, then the capture sting.
+    // The door, Sam steps into the room, then the capture sting.
     expect(kinds).toEqual([
       'sfx',
+      'room theo',
       'sfx',
       'cinematic true',
       'capture.theo',

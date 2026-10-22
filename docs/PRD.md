@@ -268,7 +268,8 @@ means the front of the house (`front`).
   door gives a line saying who is inside; talking at the door gives the occupant's door line. The music corner hears
   Papa cooking in the kitchen; the football corner hears Maman humming in the garden. Entering is never blocked.
 - Capture: entering a guarded place, or being in a place when its occupant arrives there (Papa coming out of the front
-  door, Papa back at his desk, Papa arriving in the kitchen). The capture is a short scene that cannot be skipped:
+  door, Papa back at his desk, Papa arriving in the kitchen). The capture is a short scene that cannot be skipped,
+  played in the guarded place itself (entering a room, Sam first steps inside, then the scene starts):
   - caught by a boy: he shouts for Papa (`capture.julien` / `capture.florent` / `capture.theo`); 2 s later Papa
     arrives next to Sam and says his capture line (`capture.dad`);
   - caught by Papa or Maman: they say their capture line (`capture.dad` / `capture.mom`);

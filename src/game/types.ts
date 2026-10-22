@@ -206,7 +206,8 @@ export type Beat =
   | { type: 'chess' }
   | { type: 'documents' }
   | { type: 'note'; note: NoteId }
-  | { type: 'room'; place: PlaceId }
+  // A place change; pos/facing are given when it is not the saved place (Sam steps into a room before a capture).
+  | { type: 'room'; place: PlaceId; pos?: Point; facing?: Facing }
   | { type: 'capture' }
   // A view of another place without control (the front door view, Papa arriving in the kitchen).
   | { type: 'view'; view: 'door' | 'kitchen' }
