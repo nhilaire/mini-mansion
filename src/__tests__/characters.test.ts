@@ -108,8 +108,10 @@ describe('the doorbell sequence (AC-51)', () => {
     expect(out.state.place).toBe('hall');
     expect(occupant('office', out.state.chars)).toBeNull();
     expect(occupant('front', out.state.chars)).toBe('dad');
+    expect(interact(out.state, tick(TIMER_MS.outside - 1)).state.chars.dad).toBe('outside');
     const back = interact(out.state, tick(TIMER_MS.outside));
     expect(back.beats).toContainEqual(said('dad', 'line.dadGoingBack'));
+    expect(interact(back.state, tick(TIMER_MS.back - 1)).state.chars.dad).toBe('returning');
     expect(back.state.chars.dad).toBe('returning');
     expect(occupant('front', back.state.chars)).toBeNull();
     expect(occupant('office', back.state.chars)).toBeNull();
@@ -209,7 +211,8 @@ describe('the timers and play time (AC-58)', () => {
 describe('guarded places and captures (AC-23)', () => {
   it.each(ROOMS)('entering %s with its occupant inside is a capture that keeps everything', (room) => {
     const from = DOOR_SPAWN[room].from;
-    const s = base(from, { inventory: ['pole', 'booklet'], notes: ['n01', 'n02'], solved: [1] });
+    // A dough timer is running: the capture keeps it as it is.
+    const s = base(from, { inventory: ['pole', 'booklet'], notes: ['n01', 'n02'], solved: [1, 19], timers: { dad: null, dough: 90_000 } });
     const o = interact(s, enter(room));
     expect(o.state.place).toBe('cellar');
     expect(o.state.captures).toBe(1);
@@ -235,12 +238,20 @@ describe('guarded places and captures (AC-23)', () => {
     expect(o.state.captures).toBe(0);
   });
 
-  it.each(OPEN)('walking into the %s while its occupant is there is a capture', (room, from, exit, patch, who) => {
-    const s = base(from, { chars: chars(patch), flags: { door_unlocked: true, gates_open: true } });
+  it.each(OPEN)('walking into the %s while its occupant is there is a capture that keeps everything', (room, from, exit, patch, who) => {
+    // Papa outside has his way-back timer running; it is kept by the capture.
+    const timers = patch.dad === 'outside' ? { dad: 40_000, dough: null } : { dad: null, dough: null };
+    const s = base(from, { chars: chars(patch), flags: { door_unlocked: true, gates_open: true }, inventory: ['pole', 'sticks'], notes: ['n01', 'n03'], solved: [1, 16], timers });
     const o = interact(s, go(exit));
     expect(o.state.place).toBe('cellar');
     expect(o.events).toEqual([{ type: 'capture', room, count: 1 }]);
     expect(o.beats).toContainEqual(said(who, `capture.${who}`));
+    expect(o.state.inventory).toEqual(s.inventory);
+    expect(o.state.notes).toEqual(s.notes);
+    expect(o.state.solved).toEqual(s.solved);
+    expect(o.state.chars).toEqual(s.chars);
+    expect(o.state.flags).toEqual(s.flags);
+    expect(o.state.timers).toEqual(s.timers);
     const free = interact({ ...s, chars: newGame().chars }, go(exit));
     expect(free.state.place).not.toBe('cellar');
   });
