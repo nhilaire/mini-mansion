@@ -61,6 +61,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-48 Design pass after the phone test: hose on the ground, no washing line or hammock at the pool, hall cabinet on the floor, bookshelf above the sofa, dining part left of the music corner, clearer drums, bowl and processor on the worktop, fridge to open, lamps on the desk and on the attic floor, contrasted shower head, Théo from the back, no lamp in his room (AC-15, AC-19, AC-57) - proof: unit
 - [x] T-49 Florent and Théo heard going back once Sam is out of their room; the white chess move stays 1.5 s before Black answers; the whole family gathers in the lab at the end (AC-22, AC-26, AC-32) - proof: unit
 - [x] T-50 Papa outside 60 s and back at his desk 30 s later; the upstairs room sounds stay faint in the background (AC-25, AC-51) - proof: unit
+- [x] T-51 Intro in 5 cards: the goal (find the recipe and what it really is) and the rule (lure the family away, the cellar if caught) (AC-11, AC-45, AC-56) - proof: unit, e2e
 
 ## Notes
 

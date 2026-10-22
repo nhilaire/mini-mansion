@@ -28,7 +28,9 @@ export const en: Strings = {
     cards: [
       'A rumour is going around the school: in a house of the neighbourhood, someone has invented a secret recipe with extraordinary powers…',
       'Some say it could cause a disaster in the whole town!',
-      'Sam heard it in the playground and decided to investigate. Quietly.',
+      'Sam heard it in the playground and decided to investigate.',
+      'Your goal: find where this famous recipe is hidden, and what it really is. It is somewhere in this house…',
+      "But the family doesn't like intruders. Watch, create distractions to lure the inhabitants away… and if you get caught, off to the cellar!",
     ],
   },
   tutorial: {

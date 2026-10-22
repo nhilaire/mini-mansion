@@ -1,4 +1,4 @@
-// Three story cards before a new game, over pixel pictures; tap to advance, "Skip" to skip.
+// Five story cards before a new game (the rumour, Sam's investigation, the goal, the rule), over pixel pictures; tap to advance, "Skip" to skip.
 import { useMemo, useState } from 'react';
 import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 

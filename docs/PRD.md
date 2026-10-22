@@ -89,7 +89,7 @@ flowchart LR
 - **Home:** title "Mini Mansion" in pixel style with the subtitle `home.subtitle` over a pixel view of the house at
   dusk; buttons `home.continue` (only when an unfinished save exists), `home.newGame`, `home.settings`,
   `home.about`. `home.newGame` with an unfinished save asks `home.confirmNew` first.
-- **Intro:** 3 text cards (`intro.cards`) over pixel illustrations, tap to advance, `intro.skip` button. The game then
+- **Intro:** 5 text cards (`intro.cards`: the rumour, the disaster, Sam's investigation, the goal, the rule) over pixel illustrations, tap to advance, `intro.skip` button. The game then
   starts in `front` (in front of the house) with the first tutorial bubble.
 - **Game:** the place scene (fills the screen height, landscape), Sam and the characters present, a text banner for
   spoken lines (also lines heard from another place, e.g. Papa at the front door), the inventory bar along the
@@ -511,7 +511,7 @@ Home, intro, tutorial
 
 - AC-10 [e2e] Given no save, then Home shows the title, the subtitle, new game, settings and about, and no continue;
   given an unfinished save, continue is shown too.
-- AC-11 [e2e] Given Home, when new game is tapped, then the 3 intro cards can be advanced (or skipped) and the game
+- AC-11 [e2e] Given Home, when new game is tapped, then the 5 intro cards can be advanced (or skipped) and the game
   starts in `front` with the first tutorial bubble.
 - AC-12 [unit] Given the tutorial, then the 3 steps appear in order under the rules' conditions, each once, and
   completion is recorded after the 3rd.
@@ -670,7 +670,9 @@ Final app name: fr "Mini Mansion", en "Mini Mansion". Language-specific assets: 
 | intro.skip | Passer | Skip |
 | intro.cards[0] | Une rumeur court à l'école : dans une maison du quartier, quelqu'un aurait inventé une recette secrète aux pouvoirs extraordinaires… | A rumour is going around the school: in a house of the neighbourhood, someone has invented a secret recipe with extraordinary powers… |
 | intro.cards[1] | Certains disent qu'elle pourrait provoquer une catastrophe dans toute la ville ! | Some say it could cause a disaster in the whole town! |
-| intro.cards[2] | Sam l'a entendue dans la cour de récré et a décidé de mener l'enquête. Discrètement. | Sam heard it in the playground and decided to investigate. Quietly. |
+| intro.cards[2] | Sam l'a entendue dans la cour de récré et a décidé de mener l'enquête. | Sam heard it in the playground and decided to investigate. |
+| intro.cards[3] | Ton objectif : trouver où se cache cette fameuse recette, et découvrir ce qu'elle est vraiment. Elle est quelque part dans cette maison… | Your goal: find where this famous recipe is hidden, and what it really is. It is somewhere in this house… |
+| intro.cards[4] | Mais la famille n'aime pas les intrus. Observe, fais diversion pour éloigner les habitants… et si tu te fais attraper, direction la cave ! | But the family doesn't like intruders. Watch, create distractions to lure the inhabitants away… and if you get caught, off to the cellar! |
 | tutorial.walk | Touche le sol pour faire marcher Sam. | Tap the ground to make Sam walk. |
 | tutorial.verbs | Touche un objet ou une personne pour voir ce que tu peux faire. | Tap an object or a person to see what you can do. |
 | tutorial.inventory | Tes objets sont ici. Touche-en un, puis touche ce sur quoi l'utiliser. | Your items are here. Tap one, then tap what to use it on. |

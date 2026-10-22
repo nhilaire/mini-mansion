@@ -106,16 +106,15 @@ describe('App', () => {
     expect(await screen.findByTestId('intro-screen')).toBeTruthy();
   });
 
-  it('new game: 3 intro cards, then the front of the house with the first tutorial bubble, saved at once (AC-11)', async () => {
+  it('new game: 5 intro cards, then the front of the house with the first tutorial bubble, saved at once (AC-11)', async () => {
     await denied();
     await render(<App />);
     await fireEvent.press(await screen.findByTestId('home-new-game'));
-    expect(screen.getByText(fr.intro.cards[0])).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('intro-next'));
-    expect(screen.getByText(fr.intro.cards[1])).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('intro-next'));
-    expect(screen.getByText(fr.intro.cards[2])).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('intro-next'));
+    expect(fr.intro.cards).toHaveLength(5);
+    for (const card of fr.intro.cards) {
+      expect(screen.getByText(card)).toBeTruthy();
+      await fireEvent.press(screen.getByTestId('intro-next'));
+    }
     expect(await screen.findByTestId('game-screen')).toBeTruthy();
     expect(screen.getByText(fr.tutorial.walk)).toBeTruthy();
     expect(screen.getByTestId('hs-front.doormat')).toBeTruthy();

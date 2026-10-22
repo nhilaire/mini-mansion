@@ -1,5 +1,5 @@
 appId: io.github.nhilaire.minimansion
-name: New game - intro cards, tutorial, the doormat key opens the door, the booklet, the notebook (AC-11, AC-16, AC-33, AC-34)
+name: New game - the 5 intro cards, tutorial, the doormat key opens the door, the booklet, the notebook (AC-11, AC-16, AC-33, AC-34)
 tags:
   - game
 ---
@@ -29,6 +29,14 @@ tags:
     id: "intro-next"
 - assertVisible:
     id: "intro-card-3"
+- tapOn:
+    id: "intro-next"
+- assertVisible:
+    id: "intro-card-4"
+- tapOn:
+    id: "intro-next"
+- assertVisible:
+    id: "intro-card-5"
 - tapOn:
     id: "intro-next"
 - extendedWaitUntil:

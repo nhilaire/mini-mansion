@@ -30,7 +30,9 @@ export const fr = {
     cards: [
       typo("Une rumeur court à l'école : dans une maison du quartier, quelqu'un aurait inventé une recette secrète aux pouvoirs extraordinaires…"),
       typo("Certains disent qu'elle pourrait provoquer une catastrophe dans toute la ville !"),
-      "Sam l'a entendue dans la cour de récré et a décidé de mener l'enquête. Discrètement.",
+      "Sam l'a entendue dans la cour de récré et a décidé de mener l'enquête.",
+      typo('Ton objectif : trouver où se cache cette fameuse recette, et découvrir ce qu\'elle est vraiment. Elle est quelque part dans cette maison…'),
+      typo("Mais la famille n'aime pas les intrus. Observe, fais diversion pour éloigner les habitants… et si tu te fais attraper, direction la cave !"),
     ],
   },
   tutorial: {
