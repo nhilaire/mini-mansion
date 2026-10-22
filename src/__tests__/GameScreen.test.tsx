@@ -31,10 +31,17 @@ async function mount(state: GameState, extra: { startPaused?: boolean } = {}) {
   return props;
 }
 
+// Taps the lines away; scenes that cannot be skipped (captures, views) are waited out, a little at a time.
 async function dismissLines() {
-  for (let i = 0; i < 30 && screen.queryByTestId('line-banner'); i++) await fireEvent.press(screen.getByTestId('line-banner'));
-  for (let i = 0; i < 5 && screen.queryByTestId('capture-fade'); i++) await fireEvent.press(screen.getByTestId('capture-fade'));
-  for (let i = 0; i < 30 && screen.queryByTestId('line-banner'); i++) await fireEvent.press(screen.getByTestId('line-banner'));
+  const busy = () => screen.queryByTestId('line-banner') || screen.queryByTestId('capture-fade') || screen.queryByTestId('scene-wait');
+  for (let i = 0; i < 80 && busy(); i++) {
+    if (screen.queryByTestId('line-banner')) await fireEvent.press(screen.getByTestId('line-banner'));
+    if (busy()) {
+      await act(async () => {
+        jest.advanceTimersByTime(100);
+      });
+    }
+  }
 }
 
 const lastSaved = (props: { onChange: jest.Mock }) => props.onChange.mock.calls[props.onChange.mock.calls.length - 1][0] as GameState;
@@ -195,11 +202,24 @@ describe('GameScreen', () => {
     expect(lastSaved(props).flags.chess_solved).toBe(true);
   });
 
-  it('entering an occupied room shows the capture and puts Sam in the wine cellar (AC-23)', async () => {
+  it('entering an occupied room plays the capture scene, which cannot be skipped, and puts Sam in the wine cellar (AC-23, AC-49)', async () => {
     const props = await mount({ ...newGame(), place: 'landing', flags: { door_unlocked: true }, tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-landing.julienDoor'));
     await fireEvent.press(screen.getByTestId('verb-use'));
+    // Julien shouts for Papa: a tap does not skip it.
     expect(screen.getByText(line(t, 'capture.julien'))).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('line-banner'));
+    expect(screen.getByText(line(t, 'capture.julien'))).toBeTruthy();
+    // Papa comes and says his line, then takes Sam to the cellar and tells Sam not to run away.
+    const seen: string[] = [];
+    for (let i = 0; i < 60; i++) {
+      for (const key of ['capture.dad', 'capture.keep', 'capture.cellar']) if (!seen.includes(key) && screen.queryByText(line(t, key))) seen.push(key);
+      if (screen.queryByTestId('line-banner')) await fireEvent.press(screen.getByTestId('line-banner'));
+      await act(async () => {
+        jest.advanceTimersByTime(100);
+      });
+    }
+    expect(seen).toEqual(['capture.dad', 'capture.keep', 'capture.cellar']);
     await dismissLines();
     expect(screen.getByTestId('hs-cellar.hatch')).toBeTruthy();
     expect(lastSaved(props).captures).toBe(1);
@@ -238,7 +258,7 @@ describe('GameScreen', () => {
     AppState.addEventListener = original;
   });
 
-  it('the doorbell: Papa answers, then the front door view plays with his line; the timers wait while paused (AC-51, AC-58)', async () => {
+  it('the doorbell: Papa answers, then the front door view plays with his line, unskippable; the timers wait while paused (AC-51, AC-58)', async () => {
     const props = await mount({ ...newGame(), place: 'front', flags: { door_unlocked: true }, tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-front.bell'));
     await fireEvent.press(screen.getByTestId('verb-use'));
@@ -254,11 +274,15 @@ describe('GameScreen', () => {
     });
     expect(lastSaved(props).chars.dad).toBe('answering');
     await fireEvent.press(screen.getByTestId('pause-resume'));
+    // 30 s of play time, 30 times faster in fast mode: about 1 s.
     await act(async () => {
-      jest.advanceTimersByTime(4200);
+      jest.advanceTimersByTime(1100);
     });
     expect(screen.getByTestId('view-door')).toBeTruthy();
     expect(screen.getByText(line(t, 'line.dadAtDoor'))).toBeTruthy();
+    // The view cannot be skipped by tapping its line.
+    await fireEvent.press(screen.getByTestId('line-banner'));
+    expect(screen.getByTestId('view-door')).toBeTruthy();
     // No control during the view (AC-49): floor and hotspot taps do nothing.
     const before = lastSaved(props).pos;
     await fireEvent.press(screen.getByTestId('scene-floor'), { nativeEvent: { locationX: 900, locationY: 600 } });
@@ -281,9 +305,12 @@ describe('GameScreen', () => {
     expect(lastSaved(props).flags.dough_mixed).toBe(true);
     await fireEvent.press(screen.getByTestId('exit-kitchen.toMusic'));
     await dismissLines();
-    await act(async () => {
-      jest.advanceTimersByTime(4200);
-    });
+    // 120 s of play time, 30 times faster in fast mode: about 4 s.
+    for (let i = 0; i < 60 && !screen.queryByTestId('view-kitchen'); i++) {
+      await act(async () => {
+        jest.advanceTimersByTime(100);
+      });
+    }
     expect(screen.getByTestId('view-kitchen')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('hs-music.piano'));
     expect(screen.queryByTestId('action-menu')).toBeNull();

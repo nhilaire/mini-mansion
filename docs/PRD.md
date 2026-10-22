@@ -5,15 +5,15 @@ Project slug: mini-mansion
 Final app name: Mini Mansion
 Android package: io.github.nhilaire.minimansion
 Version target: 0.1.0
-Last updated: 2026-10-21
+Last updated: 2026-10-22
 
 > Written in English. Player-facing text is quoted in the "Player copy" section, in every language of the game
 > (`factory-app.json` "languages"; French is the reference).
 > Status becomes `approved` only after the user explicitly approves this document.
 >
 > Sources: `docs/BRIEF.md` (discovery answers), which amends the user's local draft "Le Secret de la Maison" and its
-> navigation plan, and the user's phone test of 2026-10-21 (21 notes in `docs/evidence/v0.1.0/RELEASE.md`), which
-> amends this PRD: timed doorbell sequence, kitchen/garden/front captures, side gates, merged music corner and dining
+> navigation plan, and the user's phone tests (2026-10-21: 21 notes in `docs/evidence/v0.1.0/RELEASE.md`; 2026-10-22:
+> unskippable capture and front door scenes, Papa answers the doorbell after 30 s), which amend this PRD: timed doorbell sequence, kitchen/garden/front captures, side gates, merged music corner and dining
 > room, breaker, cellar hatch, lab door code, optional kitchen recipe, art from the author's room photos. Every rule
 > kept is restated here: this PRD is the only source of truth.
 
@@ -229,7 +229,7 @@ means the front of the house (`front`).
 
 - Timers count play time only (Game screen active, not paused, not in background), stored in the save as deadlines
   on the play-time clock.
-- Durations: doorbell answer 120 s, Papa outside 120 s, Papa coming back 60 s, dough 120 s.
+- Durations: doorbell answer 30 s, Papa outside 120 s, Papa coming back 60 s, dough 120 s.
 - The testing fast mode makes timers run 30 times faster (it changes no rule and no save format).
 
 ### Character states
@@ -248,8 +248,8 @@ means the front of the house (`front`).
 | theo | in_room | theo | E04: the white queen is put back on the chessboard | chess (living) |
 | theo | chess | living | the Rubik's Cube is solved and Sam leaves `theo` | in_room (theo) again, CUT07 plays |
 
-- The doorbell sequence: ringing shows `line.dadAnswer` (Papa heard from inside); Sam has 120 s to go away from the
-  front door. Then the front door view plays (no control): Papa in front of the house says `line.dadAtDoor`; if Sam
+- The doorbell sequence: ringing shows `line.dadAnswer` (Papa heard from inside); Sam has 30 s to go away from the
+  front door. Then the front door view plays (no control, cannot be skipped): Papa in front of the house says `line.dadAtDoor`; if Sam
   is in `front` at that moment, Papa catches Sam. Papa stays 120 s in front of the house (the office is free, `front`
   is guarded), then `line.dadGoingBack` is heard; 60 s later Papa is back at his desk, and if Sam is in the office
   then, Papa catches Sam. The doorbell can be rung again once Papa is back at his desk (`line.bellBusy` meanwhile).
@@ -268,8 +268,13 @@ means the front of the house (`front`).
   door gives a line saying who is inside; talking at the door gives the occupant's door line. The music corner hears
   Papa cooking in the kitchen; the football corner hears Maman humming in the garden. Entering is never blocked.
 - Capture: entering a guarded place, or being in a place when its occupant arrives there (Papa coming out of the front
-  door, Papa back at his desk, Papa arriving in the kitchen). The occupant catches Sam (capture line), the screen
-  fades and Sam is put in `cellar`. Inventory, flags, character states, timers, notebook and solved puzzles never
+  door, Papa back at his desk, Papa arriving in the kitchen). The capture is a short scene that cannot be skipped:
+  - caught by a boy: he shouts for Papa (`capture.julien` / `capture.florent` / `capture.theo`); 2 s later Papa
+    arrives next to Sam and says his capture line (`capture.dad`);
+  - caught by Papa or Maman: they say their capture line (`capture.dad` / `capture.mom`);
+  - a few seconds later, the screen fades and Sam is in `cellar` with the adult, who says `capture.keep`
+    (« Ne t'échappe pas ! ») and disappears 3 s later.
+  Sam is put in `cellar`. Inventory, flags, character states, timers, notebook and solved puzzles never
   change because of a capture. `captures` is incremented.
 - In the cellar the hatch is stuck from below until the Barre de fer is used on it (E15, once for good). After E15 a
   capture plays `line.captureAgain` and Sam can walk straight up to the garage.
@@ -545,13 +550,14 @@ Puzzles, characters, captures, timers
   conditions, and CUT07 plays exactly once.
 - AC-23 [unit] Given each guarded place with its occupant present (office, front, kitchen, parents, garden and the
   three bedrooms), when Sam enters it, then a capture happens (Sam in the cellar, `captures` + 1, `capture` event
-  with the place) and inventory, flags, notebook, timers and character states are unchanged; given the occupant away,
+  with the place; a boy shouts for Papa, who comes 2 s later and says his line; the adult takes Sam to the cellar,
+  says `capture.keep` and leaves 3 s later) and inventory, flags, notebook, timers and character states are unchanged; given the occupant away,
   then no capture happens.
 - AC-24 [unit] Given Sam in the cellar, then the hatch is stuck from below until the Barre de fer is used on it
   (E15), after which it leads up to the garage for good; going down from the garage is always possible; a capture
   after E15 plays `line.captureAgain`.
 - AC-51 [unit] Given the doorbell rung after E01 with Papa at his desk, then `line.dadAnswer` plays and Papa stays
-  in the office (guarded) for 120 s of play time; then the front door view plays `line.dadAtDoor` and Sam is caught
+  in the office (guarded) for 30 s of play time; then the front door view plays `line.dadAtDoor` and Sam is caught
   if in `front`; then Papa stays outside 120 s (the office is free, `front` is guarded); then `line.dadGoingBack`
   plays and 60 s later Papa is back at his desk, Sam being caught if in the office; meanwhile the doorbell answers
   `line.bellBusy`, and it can be rung again once Papa is back.
@@ -622,7 +628,8 @@ Persistence, pause, ending, settings, about
   may say vous to an unknown visitor, as `line.dadAtDoor`), the UI strings match the "Player
   copy" table, and French typography uses a no-break space before `: ; ! ?` and inside « ».
 - AC-49 [unit] Given a spoken line, then it stays until tapped or until max(2 s, 50 ms x length) has elapsed, and
-  scene input is ignored while a line, a cutscene or the front door or kitchen view plays.
+  scene input is ignored while a line, a cutscene or the front door or kitchen view plays; the capture scene and the
+  front door and kitchen views cannot be skipped by a tap (their lines play their full time).
 - AC-50 [unit] Given a save requested during a cutscene, then the stored state is the state after the cutscene;
   given the app going to the background, then the game is saved; given the app killed during CUT11 or the Ending
   screen, then the relaunch shows no continue and `game_complete` is not sent again.
@@ -675,6 +682,7 @@ Final app name: fr "Mini Mansion", en "Mini Mansion". Language-specific assets: 
 | chess.solved | Échec et mat ! | Checkmate! |
 | chess.reset / chess.close | Recommencer / Fermer | Restart / Close |
 | line.captureAgain | Encore toi ?! Allez, à la cave ! | You again?! Off to the cellar! |
+| capture.keep | Ne t'échappe pas ! | Don't you run away! |
 | line.codeUnknown | Je ne connais pas le code. Inutile de taper au hasard. | I don't know the code. No point typing at random. |
 | line.dadAnswer | Qui sonne à cette heure-là ? Oui, deux minutes, j'arrive ! | Who's ringing at this hour? Yes, two minutes, I'm coming! |
 | line.dadAtDoor | Il y a quelqu'un ? Qui est là ? Je dois vous chercher ? | Anybody there? Who is it? Do I have to come and look for you? |

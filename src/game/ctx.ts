@@ -45,6 +45,21 @@ export class Ctx {
     return this.say('narrator', key);
   }
 
+  wait(ms: number): this {
+    this.beats.push({ type: 'wait', ms });
+    return this;
+  }
+
+  cinematic(on: boolean): this {
+    this.beats.push({ type: 'cinematic', on });
+    return this;
+  }
+
+  captor(character: CharacterId | null): this {
+    this.beats.push({ type: 'captor', character });
+    return this;
+  }
+
   sfx(sfx: SfxName): this {
     this.beats.push({ type: 'sfx', sfx });
     return this;

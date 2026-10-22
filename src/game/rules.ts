@@ -24,7 +24,7 @@ export const CODE_NOTE: Record<KeypadId, NoteId> = { computer: 'n08', safe: 'n11
 const KEYPAD_PLACE: Record<KeypadId, PlaceId> = { computer: 'office', safe: 'parents', lab: 'attic' };
 
 // Timer durations in ms of the timer clock (PRD "Timers").
-export const TIMER_MS = { answer: 120_000, outside: 120_000, back: 60_000, dough: 120_000 } as const;
+export const TIMER_MS = { answer: 30_000, outside: 120_000, back: 60_000, dough: 120_000 } as const;
 
 export function newGame(): GameState {
   return {
@@ -146,8 +146,8 @@ function dadTimer(c: Ctx): void {
     case 'answering':
       c.move('dad', 'outside');
       c.s.timers.dad = now + TIMER_MS.outside;
-      c.sfx('door').beats.push({ type: 'view', view: 'door' });
-      c.say('dad', 'line.dadAtDoor');
+      c.sfx('door').cinematic(true).beats.push({ type: 'view', view: 'door' });
+      c.say('dad', 'line.dadAtDoor').wait(SCENE_MS.view).cinematic(false);
       arrival(c, 'front');
       return;
     case 'outside':
@@ -168,8 +168,8 @@ function doughReady(c: Ctx): void {
   c.s.timers.dad = null;
   c.move('dad', 'cooking');
   c.cut('cut12', (k) => {
-    k.beats.push({ type: 'view', view: 'kitchen' });
-    k.say('dad', 'line.dadDough');
+    k.cinematic(true).beats.push({ type: 'view', view: 'kitchen' });
+    k.say('dad', 'line.dadDough').wait(SCENE_MS.view).cinematic(false);
   });
   arrival(c, 'kitchen');
 }
@@ -211,9 +211,16 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
   c.beats.push({ type: 'room', place: to });
 }
 
+// The capture scene, which cannot be skipped (PRD "Guarded places and captures"): a boy shouts for Papa, who comes
+// 2 s later; the adult says the capture line, takes Sam to the cellar, says "don't run away" and leaves 3 s later.
+export const SCENE_MS = { call: 2000, beforeCellar: 1500, leave: 3000, view: 1500 } as const;
+
 function capture(c: Ctx, room: GuardedRoom, who: CharacterId): void {
   const again = c.is('hatch_open');
-  c.sfx('capture').say(who, again ? 'line.captureAgain' : `capture.${who}`);
+  const adult: CharacterId = who === 'mom' ? 'mom' : 'dad';
+  c.sfx('capture').cinematic(true);
+  if (who !== adult) c.say(who, `capture.${who}`).wait(SCENE_MS.call).captor(adult);
+  c.say(adult, again ? 'line.captureAgain' : `capture.${adult}`).wait(SCENE_MS.beforeCellar);
   c.s.captures += 1;
   c.events.push({ type: 'capture', room, count: c.s.captures });
   c.beats.push({ type: 'capture' });
@@ -221,6 +228,7 @@ function capture(c: Ctx, room: GuardedRoom, who: CharacterId): void {
   c.s.pos = { ...CELLAR_SPAWN };
   c.s.facing = 'down';
   c.beats.push({ type: 'room', place: 'cellar' });
+  c.captor(adult).say(adult, 'capture.keep').wait(SCENE_MS.leave).captor(null).cinematic(false);
   c.narrator(again ? 'capture.cellarOpen' : 'capture.cellar');
 }
 

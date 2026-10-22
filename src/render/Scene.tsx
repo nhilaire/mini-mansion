@@ -7,7 +7,7 @@ import { StyleSheet } from 'react-native';
 import { heroFrame, personFrame } from '../art/cast';
 import { C } from '../art/palette';
 import { PixelBuffer } from '../art/pixels';
-import { Facing, GameState, ItemId, Point, Speaker } from '../game/types';
+import { CharacterId, Facing, GameState, ItemId, Point, Speaker } from '../game/types';
 import { charactersIn, inventoryPage, MENU_BUTTON, NOTEBOOK_BUTTON, SceneTransform, slotRect, SLOTS } from '../game/world';
 import { flippedOf, heroSprites, imageOf, itemIconBuffer, personSprites, placeImage } from './images';
 
@@ -32,6 +32,8 @@ interface Props {
   unread: boolean;
   // Animation clock in ms (blinks, talking mouths, activities).
   clock: number;
+  // An inhabitant standing next to Sam for a scene (the adult of a capture).
+  guest?: CharacterId | null;
 }
 
 function Sprite({ buf, x, y }: { buf: PixelBuffer; x: number; y: number }) {
@@ -45,8 +47,9 @@ function Full({ image }: { image: SkImage | null }) {
   return <Image image={image} x={0} y={0} width={image.width()} height={image.height()} sampling={SAMPLING} />;
 }
 
-function SceneView({ state, hero, transform, width, height, speaker, selected, page, unread, clock }: Props) {
-  const people = charactersIn(state).map((c) => ({
+function SceneView({ state, hero, transform, width, height, speaker, selected, page, unread, clock, guest }: Props) {
+  const placed = charactersIn(state).filter((c) => c.id !== guest);
+  const people = placed.map((c) => ({
     key: c.id,
     y: c.pos.y,
     buf: personFrame(personSprites(c.id), c.id, { talking: speaker === c.id, busy: c.busy, clock }),
@@ -55,6 +58,11 @@ function SceneView({ state, hero, transform, width, height, speaker, selected, p
   }));
   const frame = heroFrame(heroSprites(), hero.facing, hero.frame, speaker === 'hero' && Math.floor(clock / 140) % 2 === 0);
   const heroBuf = frame.flip ? flippedOf(frame.image) : frame.image;
+  if (guest) {
+    // On the side of Sam with more room.
+    const gx = hero.pos.x > 160 ? hero.pos.x - 26 : hero.pos.x + 26;
+    people.push({ key: guest, y: hero.pos.y, buf: personFrame(personSprites(guest), guest, { talking: speaker === guest, busy: false, clock }), x: gx - 12, top: hero.pos.y - 48 });
+  }
   const drawables = [...people, { key: 'hero', y: hero.pos.y, buf: heroBuf, x: hero.pos.x - 12, top: hero.pos.y - 48 }].sort((a, b) => a.y - b.y);
   const inv = inventoryPage(state.inventory, page);
   const n = NOTEBOOK_BUTTON;

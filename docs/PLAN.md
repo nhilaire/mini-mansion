@@ -51,6 +51,11 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-41 Maestro flows updated and rerun on the emulator, walkthrough included (AC-11, AC-16, AC-33, AC-34, AC-36, AC-41) - proof: e2e
 - [x] T-42 Device checks of the amended build prepared for verify/release (AC-05, AC-46, AC-47, AC-48, AC-57) - proof: device
 
+### Second phone test (2026-10-22)
+
+- [x] T-43 Papa answers the doorbell after 30 s; the front door and kitchen views cannot be skipped (AC-49, AC-51) - proof: unit
+- [x] T-44 Capture scene that cannot be skipped: a boy shouts for Papa, Papa comes, takes Sam to the cellar, says "don't run away" and leaves (AC-23, AC-49) - proof: unit
+
 ## Notes
 
 - Base: the POC engine (`midnight-mansion`) is ported, not copied blindly: new ids (24 places, 17 items, 5 inhabitants

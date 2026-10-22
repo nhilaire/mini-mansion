@@ -1,6 +1,6 @@
 // The adventure: Skia scene + touch overlays. Taps make Sam walk, hotspots open the verb menu, inventory items are
 // used on hotspots, characters or other items. Engine outcomes are played as beats (lines, dialogues, keypads, the
-// chess board, documents, captures, views of another place). Play time feeds the engine's timers (doorbell, dough)
+// chess board, documents, captures, views of another place, unskippable scenes). Play time feeds the engine's timers (doorbell, dough)
 // through tick inputs, sent only while nothing is being shown or walked. Rules live in src/game.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, BackHandler, GestureResponderEvent, Pressable, StatusBar, StyleSheet, useWindowDimensions, View } from 'react-native';
@@ -11,7 +11,7 @@ import { dialogueOptions } from '../game/dialogue';
 import { findPath } from '../game/geometry';
 import { addPlayTime, advanceTutorial, TutorialSignal, tutorialBubble, tutorialDone } from '../game/progress';
 import { interact, nextDeadline, readNotes } from '../game/rules';
-import { Beat, CharacterId, Facing, GameState, Input, ItemId, KeypadId, Point, Speaker, Verb } from '../game/types';
+import { Beat, CharacterId, Facing, GameState, Input, ItemId, KeypadId, PlaceId, Point, Speaker, Verb } from '../game/types';
 import { poseAt } from '../game/walker';
 import {
   exitsIn,
@@ -54,7 +54,8 @@ type Presentation =
   | { kind: 'keypad'; keypad: KeypadId }
   | { kind: 'chess' }
   | { kind: 'documents' }
-  | { kind: 'capture'; until: number };
+  | { kind: 'capture'; until: number }
+  | { kind: 'wait'; until: number };
 
 interface Walk {
   from: Point;
@@ -111,6 +112,14 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   // Play time not yet given to the engine's timers (held while a line, a walk or the notebook is on).
   const pendingRef = useRef(0);
   const notebookRef = useRef(false);
+  // Scenes that cannot be skipped (captures, the front door and kitchen views): lines ignore taps meanwhile.
+  const cinematicRef = useRef(false);
+  const [cinematic, setCinematic] = useState(false);
+  // The adult shown next to Sam during a capture scene.
+  const [captor, setCaptor] = useState<CharacterId | null>(null);
+  // The place on screen: it changes on the place-change beat, so that a capture scene plays where Sam was caught
+  // even though the saved state is already in the cellar.
+  const [shown, setShown] = useState<PlaceId>(initialState.place);
 
   const commit = useCallback(
     (s: GameState) => {
@@ -143,6 +152,9 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       const b = queue.current.shift();
       if (!b) {
         setView(null);
+        setCaptor(null);
+        cinematicRef.current = false;
+        setCinematic(false);
         show(null);
         return;
       }
@@ -172,6 +184,16 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
         case 'view':
           setView(b.view);
           break;
+        case 'cinematic':
+          cinematicRef.current = b.on;
+          setCinematic(b.on);
+          break;
+        case 'captor':
+          setCaptor(b.character);
+          break;
+        case 'wait':
+          show({ kind: 'wait', until: now + (isFastMode() ? 100 : b.ms) });
+          return;
         case 'sfx':
           sounds.play(b.sfx);
           break;
@@ -180,6 +202,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           break;
         case 'room': {
           const s = gameRef.current;
+          setShown(s.place);
           walkRef.current = null;
           setWalking(false);
           setPose({ pos: s.pos, facing: s.facing, frame: -1 });
@@ -277,7 +300,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
         else setPose({ pos: p.pos, facing: p.facing, frame: p.frame });
       }
       const pr = presentRef.current;
-      if (pr && (pr.kind === 'line' || pr.kind === 'capture') && now >= pr.until) runNext();
+      if (pr && (pr.kind === 'line' || pr.kind === 'capture' || pr.kind === 'wait') && now >= pr.until) runNext();
     }, TICK_MS);
     return () => clearInterval(id);
   }, [runNext]);
@@ -392,8 +415,9 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
     <View testID="game-screen" style={styles.screen}>
       <StatusBar hidden />
       <Scene
-        state={game}
+        state={shown === game.place ? game : { ...game, place: shown }}
         hero={pose}
+        guest={captor}
         transform={transform}
         width={width}
         height={height}
@@ -513,7 +537,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           onClose={() => setMenu(null)}
         />
       )}
-      {present?.kind === 'line' && <LineBanner speaker={present.speaker} text={present.text} onPress={runNext} />}
+      {present?.kind === 'line' && <LineBanner speaker={present.speaker} text={present.text} onPress={cinematic ? () => {} : runNext} />}
       {present?.kind === 'dialogue' && (
         <DialogueChoices
           choices={dialogueOptions(game, present.character)}
@@ -544,7 +568,8 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
         />
       )}
       {present?.kind === 'documents' && <DocumentsOverlay onClose={runNext} />}
-      {present?.kind === 'capture' && <CaptureFade onPress={runNext} />}
+      {present?.kind === 'capture' && <CaptureFade onPress={() => {}} />}
+      {present?.kind === 'wait' && <View testID="scene-wait" collapsable={false} pointerEvents="none" style={styles.timersIdle} />}
       {notebook && <NotebookOverlay notes={game.notes} unread={game.unread} onClose={closeNotebook} />}
 
       {paused && <PauseMenu onResume={resume} onSettings={() => onSettings(gameRef.current)} onHome={() => onHome(gameRef.current)} />}

@@ -210,6 +210,12 @@ export type Beat =
   | { type: 'capture' }
   // A view of another place without control (the front door view, Papa arriving in the kitchen).
   | { type: 'view'; view: 'door' | 'kitchen' }
+  // Cinematic mode: while on, lines cannot be skipped by a tap and play their full time.
+  | { type: 'cinematic'; on: boolean }
+  // A pause in a scene (ms of real time).
+  | { type: 'wait'; ms: number }
+  // An inhabitant shown next to Sam for a scene (the adult taking Sam to the cellar), or nobody.
+  | { type: 'captor'; character: CharacterId | null }
   | { type: 'sfx'; sfx: SfxName }
   | { type: 'ending' };
 
