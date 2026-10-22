@@ -175,6 +175,7 @@ describe('French typography and tone (AC-45)', () => {
     expect([fr.chess.reset, fr.chess.close]).toEqual(['Recommencer', 'Fermer']);
     expect(line(DICTIONARIES.fr, 'line.captureAgain')).toBe(`Encore toi${N}?! Allez, à la cave${N}!`);
     expect(line(DICTIONARIES.fr, 'line.codeUnknown')).toBe('Je ne connais pas le code. Inutile de taper au hasard.');
+    expect(line(DICTIONARIES.fr, 'capture.keep')).toBe(`Ne t'échappe pas${N}!`);
     expect(fr.keypad.lab).toBe('La porte du labo');
     expect(line(DICTIONARIES.fr, 'line.dadAnswer')).toBe(`Qui sonne à cette heure-là${N}? Oui, deux minutes, j'arrive${N}!`);
     expect(line(DICTIONARIES.fr, 'line.dadAtDoor')).toBe(`Il y a quelqu'un${N}? Qui est là${N}? Je dois vous chercher${N}?`);
@@ -270,6 +271,7 @@ describe('French typography and tone (AC-45)', () => {
     expect([en.keypad.ok, en.keypad.clear, en.keypad.close]).toEqual(['OK', 'Clear', 'Close']);
     expect([en.chess.wrong, en.chess.solved, en.chess.reset, en.chess.close]).toEqual(['Missed, Black escapes. Try again!', 'Checkmate!', 'Restart', 'Close']);
     expect(line(en, 'line.captureAgain')).toBe('You again?! Off to the cellar!');
+    expect(line(en, 'capture.keep')).toBe("Don't you run away!");
     expect(line(en, 'line.codeUnknown')).toBe("I don't know the code. No point typing at random.");
     expect(line(en, 'line.dadAnswer')).toBe("Who's ringing at this hour? Yes, two minutes, I'm coming!");
     expect(line(en, 'line.dadAtDoor')).toBe('Anybody there? Who is it? Do I have to come and look for you?');

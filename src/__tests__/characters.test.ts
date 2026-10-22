@@ -289,7 +289,16 @@ describe('the capture scene (AC-23)', () => {
     const at = view.beats.findIndex((b) => b.type === 'view');
     expect(view.beats[at - 1]).toEqual({ type: 'cinematic', on: true });
     expect(view.beats.slice(at)).toContainEqual({ type: 'cinematic', on: false });
-    expect(TIMER_MS.answer).toBe(30_000);
+    const dough: GameState = { ...base('music'), flags: { door_unlocked: true, dough_mixed: true }, timers: { dad: null, dough: 1000 } };
+    const kitchen = interact(dough, tick(1000));
+    const k = kitchen.beats.findIndex((b) => b.type === 'view');
+    expect(kitchen.beats[k]).toEqual({ type: 'view', view: 'kitchen' });
+    expect(kitchen.beats[k - 1]).toEqual({ type: 'cinematic', on: true });
+    expect(kitchen.beats.slice(k)).toContainEqual({ type: 'cinematic', on: false });
+  });
+
+  it('the PRD durations: answer 30 s, outside 120 s, back 60 s, dough 120 s', () => {
+    expect(TIMER_MS).toEqual({ answer: 30_000, outside: 120_000, back: 60_000, dough: 120_000 });
   });
 });
 

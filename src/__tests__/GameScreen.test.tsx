@@ -315,6 +315,10 @@ describe('GameScreen', () => {
     await fireEvent.press(screen.getByTestId('hs-music.piano'));
     expect(screen.queryByTestId('action-menu')).toBeNull();
     expect(screen.getByText(line(t, 'line.dadDough'))).toBeTruthy();
+    // The kitchen view cannot be skipped by tapping its line either.
+    await fireEvent.press(screen.getByTestId('line-banner'));
+    expect(screen.getByTestId('view-kitchen')).toBeTruthy();
+    expect(screen.getByText(line(t, 'line.dadDough'))).toBeTruthy();
     await dismissLines();
     expect(lastSaved(props).chars.dad).toBe('cooking');
     expect(screen.getByTestId('timers-idle')).toBeTruthy();
