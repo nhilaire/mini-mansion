@@ -14,6 +14,7 @@ const APP_ID = 'io.github.nhilaire.minimansion';
 const tap = (id: string) => `- tapOn:\n    id: "${id}"`;
 const waitFor = (id: string, timeout = 15000) => `- extendedWaitUntil:\n    visible:\n      id: "${id}"\n    timeout: ${timeout}`;
 const idle = () => waitFor('scene-idle');
+const waitGone = (id: string, timeout = 15000) => `- extendedWaitUntil:\n    notVisible:\n      id: "${id}"\n    timeout: ${timeout}`;
 
 // A screenshot for the README, taken once the step at this index is done.
 const SCREENSHOTS: Record<number, string> = {
@@ -60,7 +61,8 @@ function stepFor(input: Input, state: GameState, band: Band): string[] {
       return input.keypad === 'computer' ? [...typed, waitFor('documents'), tap('documents-close'), idle()] : [...typed, idle()];
     }
     case 'chess':
-      return input.moves.flatMap((m) => [tap(`chess-sq-${m.slice(0, 2)}`), tap(`chess-sq-${m.slice(2, 4)}`)]).concat(idle());
+      // After each white move, wait until Black has answered (the move stays on show a moment).
+      return input.moves.flatMap((m) => [tap(`chess-sq-${m.slice(0, 2)}`), tap(`chess-sq-${m.slice(2, 4)}`), waitGone('chess-waiting')]).concat(idle());
     case 'dialogue':
       return [tap(`dlg-${input.option}`), waitFor('dialogue'), tap('dlg-bye'), idle()];
     case 'wait':

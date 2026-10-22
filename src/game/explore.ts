@@ -50,6 +50,7 @@ export const REDUCED_FLAGS: readonly Flag[] = [
   'gates_open',
   'gatekey_taken',
   'wc_wet',
+  'fridge_open',
   'milk_taken',
   'flours_taken',
   'milk_in',

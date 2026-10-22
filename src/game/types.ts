@@ -116,6 +116,7 @@ export type Flag =
   | 'riceflour_in'
   | 'dough_mixed'
   | 'wc_wet'
+  | 'fridge_open'
   | 'ending';
 
 export type NoteId = 'n01' | 'n02' | 'n03' | 'n04' | 'n05' | 'n06' | 'n07' | 'n08' | 'n09' | 'n10' | 'n11' | 'n12';
@@ -217,6 +218,8 @@ export type Beat =
   | { type: 'wait'; ms: number }
   // An inhabitant shown next to Sam for a scene (the adult taking Sam to the cellar), or nobody.
   | { type: 'captor'; character: CharacterId | null }
+  // The inhabitants gathered around Sam for the final scene, in the order they arrived.
+  | { type: 'cast'; characters: CharacterId[] }
   | { type: 'sfx'; sfx: SfxName }
   | { type: 'ending' };
 

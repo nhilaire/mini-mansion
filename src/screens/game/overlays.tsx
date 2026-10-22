@@ -5,10 +5,11 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { line, noteText, speakerName } from '../../content/index';
-import { Board, ChessSession, coords, legalFrom, newSession, playWhite, square } from '../../game/chess';
+import { applyMove, Board, ChessSession, coords, legalFrom, newSession, playWhite, square } from '../../game/chess';
 import { DialogueChoice } from '../../game/dialogue';
 import { NoteId, Rect, Speaker, Verb } from '../../game/types';
 import { useI18n } from '../../i18n/I18nProvider';
+import { isFastMode } from '../../testing/fastMode';
 import { Button } from '../../ui/Button';
 import { colors, font, spacing, speakerColors } from '../../ui/theme';
 
@@ -137,12 +138,17 @@ function Key({ label, testID, onPress, wide, disabled }: { label: string; testID
 const GLYPHS: Record<string, string> = { K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙', k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
 
 // Théo's chess problem: tap a white piece (its legal moves light up), then a destination. Black answers by itself.
+// How long the white move stays on the board before Black answers (time to see the effect of the move).
+export const CHESS_REPLY_MS = 1500;
+
 export function ChessBoard({ onSolved, onClose }: { onSolved: (moves: string[]) => void; onClose: () => void }) {
   const { t } = useI18n();
   const { height } = useWindowDimensions();
   const [session, setSession] = useState<ChessSession>(newSession);
   const [from, setFrom] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  // While set, the board shows the white move just played; Black answers (or the problem resets) afterwards.
+  const [shown, setShown] = useState<Board | null>(null);
   const size = Math.max(28, Math.min(40, Math.floor((height - 40) / 8)));
   const targets = from ? legalFrom(session.board, from) : [];
   const reset = () => {
@@ -150,18 +156,30 @@ export function ChessBoard({ onSolved, onClose }: { onSolved: (moves: string[]) 
     setFrom(null);
   };
 
+  const later = (then: () => void) => {
+    setTimeout(() => {
+      setShown(null);
+      then();
+    }, isFastMode() ? 100 : CHESS_REPLY_MS);
+  };
+
   const tap = (sq: string) => {
-    if (session.step >= 2) return;
+    if (session.step >= 2 || shown) return;
     const piece = session.board[sq];
     if (from && targets.includes(sq)) {
-      const result = playWhite(session, `${from}${sq}`);
+      const move = `${from}${sq}`;
+      const result = playWhite(session, move);
       setFrom(null);
       if (result.kind === 'wrong') {
-        setMessage(t.chess.wrong);
-        reset();
+        setShown(applyMove(session.board, move));
+        later(() => {
+          setMessage(t.chess.wrong);
+          reset();
+        });
       } else if (result.kind === 'progress') {
         setMessage(null);
-        setSession(result.session);
+        setShown(applyMove(session.board, move));
+        later(() => setSession(result.session));
       } else if (result.kind === 'solved') {
         setSession(result.session);
         setMessage(t.chess.solved);
@@ -179,13 +197,15 @@ export function ChessBoard({ onSolved, onClose }: { onSolved: (moves: string[]) 
 
   return (
     <View testID="chess" style={[StyleSheet.absoluteFill, styles.center, styles.dim]}>
+      {/* Marker for the e2e flows: the white move is on show, Black has not answered yet. */}
+      {shown && <View testID="chess-waiting" collapsable={false} pointerEvents="none" style={styles.marker} />}
       <View style={[styles.panel, styles.chessPanel]}>
         <View style={{ width: size * 8 }}>
           {[7, 6, 5, 4, 3, 2, 1, 0].map((rank) => (
             <View key={rank} style={styles.boardRow}>
               {[0, 1, 2, 3, 4, 5, 6, 7].map((file) => {
                 const sq = square(file, rank)!;
-                const piece = session.board[sq];
+                const piece = (shown ?? session.board)[sq];
                 const dark = (file + rank) % 2 === 0;
                 const [ff, rr] = coords(sq);
                 return (
@@ -193,7 +213,7 @@ export function ChessBoard({ onSolved, onClose }: { onSolved: (moves: string[]) 
                     key={sq}
                     testID={`chess-sq-${sq}`}
                     accessibilityRole="button"
-                    accessibilityLabel={label(session.board, sq)}
+                    accessibilityLabel={label(shown ?? session.board, sq)}
                     onPress={() => tap(sq)}
                     style={[
                       { width: size, height: size },
@@ -310,6 +330,7 @@ export function PauseMenu({ onResume, onSettings, onHome }: { onResume: () => vo
 }
 
 const styles = StyleSheet.create({
+  marker: { position: 'absolute', left: 0, top: 0, width: 2, height: 2 },
   panel: { backgroundColor: colors.panel, borderColor: colors.border, borderWidth: 2, borderRadius: 3, padding: spacing.sm },
   pressed: { opacity: 0.7 },
   disabled: { opacity: 0.4 },

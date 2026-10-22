@@ -44,6 +44,7 @@ describe('places drawn in code', () => {
       safe_open: { safe_found: true },
       secret_open: { door_revealed: true },
       lab_code: { door_revealed: true },
+      milk_taken: { fridge_open: true },
     };
     for (const place of PLACES) {
       for (const flag of VISUAL_FLAGS[place]) {

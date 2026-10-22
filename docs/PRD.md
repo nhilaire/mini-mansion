@@ -122,7 +122,7 @@ TypeScript engine. The "Ending" shows play time and captures.
   main furniture, same colours and characteristic objects, simplified to pixel art. The photos never enter the
   repository (`photos/` is git-ignored); no photo pixel is copied. The other places stay drawn from imagination.
 - The stairs up (hall) and the stairs down to the garage are drawn seen from the front, in a doorway. The attic is
-  cluttered (boxes, chairs, a trunk, an old lamp, a dressmaker's dummy...). Florent drums seen from the back. Julien's
+  cluttered (boxes, chairs, a trunk, an old lamp, a dressmaker's dummy...). Florent drums and Théo plays chess seen from the back. Julien's
   ball lies on the grass next to him. Théo's chess set is electronic (a board with a small screen).
 - Each place has a walkable area (polygons). A tap on the floor makes Sam walk along the shortest path inside the
   walkable area to the tapped point, or to the nearest walkable point if the tap is outside. Speed 60 logical px/s.
@@ -161,8 +161,8 @@ means the front of the house (`front`).
 | garden | Jardin (flowers, swing) | right -> football |
 | hall | Entrée (stairs up in a doorway, coat rack, shoes) | front door -> front; left -> living; right -> corridor0; stairs -> landing |
 | living | Salon (electronic chess set, sofa, bookshelf, TV) | right -> hall; left -> music; bay window -> pool |
-| music | Coin musique et salle à manger (piano, guitar, xylophone, drums, dining table, bread basket, sideboard) | right -> living; left -> kitchen |
-| kitchen | Cuisine (food processor, fridge, oven, Papa's bowl of hard dough; dead end) | right -> music |
+| music | Coin musique et salle à manger (dining part on the left, next to the kitchen: sideboard, dining table, bread basket; music part on the right: piano, guitar, drums, xylophone) | right -> living; left -> kitchen |
+| kitchen | Cuisine (food processor and Papa's bowl of hard dough on the worktop, a fridge to open before taking anything, oven; dead end) | right -> music |
 | corridor0 | Couloir du rez-de-chaussée | back -> hall; door 1 -> wc0; door 2 -> office; door 3 -> utility; stairs down (in a doorway) -> garage |
 | wc0 | WC du rez-de-chaussée (Japanese toilet) | door -> corridor0 |
 | office | Bureau de Papa (computer, shelves with Papa's toolbox) | door -> corridor0 |
@@ -331,7 +331,8 @@ recette, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de
 - Position (white to move, mate in 2): White Kg1, Qc4, Nh6, pawns f2, g2, h2. Black Kh8, Rd8, pawns g7, h7.
 - Reference solution: 1. Qg8+ Rxg8 (forced, played automatically) 2. Nf7# (smothered mate).
 - Board overlay: 8x8 with coordinates. The player taps a white piece (its legal destinations are highlighted), then
-  a destination; only legal moves are accepted. Black answers automatically with its only legal reply.
+  a destination; only legal moves are accepted. The white move stays on the board 1.5 s, then Black answers automatically
+  with its only legal reply (a wrong move also stays 1.5 s before the reset).
 - A wrong move shows `chess.wrong` and resets the position. Unlimited tries; `chess.reset` and `chess.close`.
 - On mate: `chess.solved` with Théo's note: "a=1 ... h=8: the squares of the solution give the code" -> g8 f7 ->
   7 8 6 7 -> code 7867, written in the notebook (N08).
@@ -356,7 +357,7 @@ state after it.
 | CUT09 | E11 | the stain dissolves, a door with a lock and a keypad appears |
 | CUT10 | E12 | the secret door opens |
 | CUT12 | dough timer ends (E19) | the kitchen view: Papa walks in delighted, `line.dadDough`; he starts cooking |
-| CUT11 | E13 | Papa climbs into his lab (`line.final1-8`): the "disaster" is a gluten-free, lactose-free chocolate cake for the town baking contest; the family gathers and tastes it |
+| CUT11 | E13 | Papa climbs into his lab (`line.final1-8`), then Maman, Théo, Julien and Florent join one after the other until the whole family stands around Sam: the "disaster" is a gluten-free, lactose-free chocolate cake for the town baking contest; the family gathers and tastes it |
 
 ### Clue notebook
 
@@ -549,7 +550,7 @@ Puzzles, characters, captures, timers
   doorbell sequence and emits nothing).
 - AC-22 [unit] Given the character states table, then each inhabitant changes state only on its listed event or
   timer, the moves of Florent and Théo back to their rooms happen when Sam leaves their room under the listed
-  conditions, and CUT07 plays exactly once.
+  conditions (and are heard once Sam is out of the room), and CUT07 plays exactly once.
 - AC-23 [unit] Given each guarded place with its occupant present (office, front, kitchen, parents, garden and the
   three bedrooms), when Sam enters it, then a capture happens (Sam in the cellar, `captures` + 1, `capture` event
   with the place; a boy shouts for Papa, who comes 2 s later and says his line; the adult takes Sam to the cellar,
@@ -645,7 +646,8 @@ Technical and feel
   the pixel art is readable and the humour works.
 - AC-57 [manual] Given the APK on the user's phone, then the photographed rooms are recognisable from the photos
   (layout, colours, characteristic objects), the stairs are seen from the front in a doorway, the attic is cluttered,
-  Florent drums seen from the back, Julien's ball lies on the grass and Théo's chess set is electronic.
+  Florent drums and Théo plays chess seen from the back, Julien's ball lies on the grass, Théo's chess set is electronic
+  and the whole family gathers in the lab at the end.
 
 ## Player copy
 

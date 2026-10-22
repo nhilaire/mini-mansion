@@ -187,12 +187,15 @@ function arrival(c: Ctx, place: GuardedRoom): void {
 // guarded by its occupant.
 function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
   const from = c.s.place;
+  // Florent and Théo go back to their room once Sam has left it: heard from the landing, after the place change.
+  const after: ((k: Ctx) => void)[] = [];
   if (from === 'florent' && c.state('florent') === 'drumming' && c.is('oring_taken')) {
-    c.move('florent', 'in_room').narrator('florent.back');
+    c.move('florent', 'in_room');
+    after.push((k) => k.narrator('florent.back'));
   }
   if (from === 'theo' && c.state('theo') === 'chess' && c.is('cube_solved')) {
     c.move('theo', 'in_room').set('theo_back');
-    c.cut('cut07', (k) => k.say('theo', 'line.theoBack').say('theo', 'line.theoMono1').say('theo', 'line.theoMono2').note('n07'));
+    after.push((k) => k.cut('cut07', (q) => q.say('theo', 'line.theoBack').say('theo', 'line.theoMono1').say('theo', 'line.theoMono2').note('n07')));
   }
   if (c.is('machine_running')) {
     c.clear('machine_running').set('machine_done').sfx('ding').narrator('line.machineDing').say('mom', 'mom.machine');
@@ -203,6 +206,7 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
     if (who) {
       // Sam steps into the room first: the capture scene plays there.
       c.beats.push({ type: 'room', place: to, pos: { ...spawn }, facing: face });
+      for (const run of after) run(c);
       capture(c, to, who);
       return;
     }
@@ -211,11 +215,12 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
   c.s.pos = { ...spawn };
   c.s.facing = face;
   c.beats.push({ type: 'room', place: to });
+  for (const run of after) run(c);
 }
 
 // The capture scene, which cannot be skipped (PRD "Guarded places and captures"): a boy shouts for Papa, who comes
 // 2 s later; the adult says the capture line, takes Sam to the cellar, says "don't run away" and leaves 3 s later.
-export const SCENE_MS = { call: 2000, beforeCellar: 1500, leave: 3000, view: 1500 } as const;
+export const SCENE_MS = { call: 2000, beforeCellar: 1500, leave: 3000, view: 1500, reunion: 2500 } as const;
 
 function capture(c: Ctx, room: GuardedRoom, who: CharacterId): void {
   // "Encore toi ?!" only from the second capture on; the narrator says whether the hatch opens from below.
@@ -299,7 +304,7 @@ export const GAGS: Readonly<Record<string, SfxName>> = {
   'bathroom.sink': 'water',
   'bathroom.scale': 'gag',
   'bathroom.duck': 'gag',
-  'theo.lamp': 'gag',
+  'theo.desk': 'gag',
   'theo.cube': 'gag',
   'florent.nerf': 'gag',
   'florent.console': 'gag',
@@ -326,6 +331,23 @@ const TAKES: Readonly<Record<string, readonly [Flag, ItemId, string]>> = {
 };
 
 function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
+  // The fridge opens and closes; the rice milk can only be taken while it is open.
+  if (id === 'kitchen.fridge') {
+    const open = c.is('fridge_open');
+    if (verb === 'use') {
+      if (open) c.clear('fridge_open').sfx('door').hero('kitchen.fridge.close');
+      else c.set('fridge_open').sfx('door').hero('kitchen.fridge.open');
+      return;
+    }
+    if (verb === 'look') {
+      c.hero(!open ? 'kitchen.fridge.lookClosed' : c.is('milk_taken') ? 'kitchen.fridge.lookEmpty' : 'kitchen.fridge.look');
+      return;
+    }
+    if (!open) {
+      c.hero('kitchen.fridge.closed');
+      return;
+    }
+  }
   const take = TAKES[id];
   if (take) {
     const [flag, item, line] = take;
@@ -631,17 +653,21 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
       return;
     case 'scrap>laundry.notebook':
       c.remove('scrap').solve(13).finish();
-      c.cut('cut11', (k) =>
-        k
-          .narrator('line.final1')
-          .say('dad', 'line.final2')
-          .hero('line.final3')
-          .say('dad', 'line.final4')
-          .say('mom', 'line.final5')
-          .say('theo', 'line.final6')
-          .say('julien', 'line.final7')
-          .say('florent', 'line.final8'),
-      );
+      // The whole family joins Sam in the lab, one after the other.
+      c.cut('cut11', (k) => {
+        const cast = (characters: CharacterId[]) => k.beats.push({ type: 'cast', characters });
+        k.narrator('line.final1');
+        cast(['dad']);
+        k.say('dad', 'line.final2').hero('line.final3').say('dad', 'line.final4');
+        cast(['dad', 'mom']);
+        k.say('mom', 'line.final5');
+        cast(['dad', 'mom', 'theo']);
+        k.say('theo', 'line.final6');
+        cast(['dad', 'mom', 'theo', 'julien']);
+        k.say('julien', 'line.final7');
+        cast(['dad', 'mom', 'theo', 'julien', 'florent']);
+        k.say('florent', 'line.final8').wait(SCENE_MS.reunion);
+      });
       c.beats.push({ type: 'ending' });
       return;
     case 'bar>cellar.hatch':

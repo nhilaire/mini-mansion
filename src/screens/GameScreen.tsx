@@ -117,6 +117,8 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   const [cinematic, setCinematic] = useState(false);
   // The adult shown next to Sam during a capture scene.
   const [captor, setCaptor] = useState<CharacterId | null>(null);
+  // The family gathered around Sam for the final scene.
+  const [cast, setCast] = useState<CharacterId[]>([]);
   // The place on screen: it changes on the place-change beat, so that a capture scene plays where Sam was caught
   // even though the saved state is already in the cellar.
   const [shown, setShown] = useState<PlaceId>(initialState.place);
@@ -190,6 +192,9 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           break;
         case 'captor':
           setCaptor(b.character);
+          break;
+        case 'cast':
+          setCast(b.characters);
           break;
         case 'wait':
           show({ kind: 'wait', until: now + (isFastMode() ? 100 : b.ms) });
@@ -417,7 +422,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       <Scene
         state={shown === game.place ? game : { ...game, place: shown }}
         hero={pose}
-        guest={captor}
+        guests={captor ? [captor] : cast}
         transform={transform}
         width={width}
         height={height}

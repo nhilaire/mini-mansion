@@ -32,8 +32,8 @@ interface Props {
   unread: boolean;
   // Animation clock in ms (blinks, talking mouths, activities).
   clock: number;
-  // An inhabitant standing next to Sam for a scene (the adult of a capture).
-  guest?: CharacterId | null;
+  // Inhabitants standing around Sam for a scene (the adult of a capture, the family at the end).
+  guests?: readonly CharacterId[];
 }
 
 function Sprite({ buf, x, y }: { buf: PixelBuffer; x: number; y: number }) {
@@ -47,8 +47,8 @@ function Full({ image }: { image: SkImage | null }) {
   return <Image image={image} x={0} y={0} width={image.width()} height={image.height()} sampling={SAMPLING} />;
 }
 
-function SceneView({ state, hero, transform, width, height, speaker, selected, page, unread, clock, guest }: Props) {
-  const placed = charactersIn(state).filter((c) => c.id !== guest);
+function SceneView({ state, hero, transform, width, height, speaker, selected, page, unread, clock, guests = [] }: Props) {
+  const placed = charactersIn(state).filter((c) => !guests.includes(c.id));
   const people = placed.map((c) => ({
     key: c.id,
     y: c.pos.y,
@@ -58,11 +58,15 @@ function SceneView({ state, hero, transform, width, height, speaker, selected, p
   }));
   const frame = heroFrame(heroSprites(), hero.facing, hero.frame, speaker === 'hero' && Math.floor(clock / 140) % 2 === 0);
   const heroBuf = frame.flip ? flippedOf(frame.image) : frame.image;
-  if (guest) {
-    // On the side of Sam with more room.
-    const gx = hero.pos.x > 160 ? hero.pos.x - 26 : hero.pos.x + 26;
-    people.push({ key: guest, y: hero.pos.y, buf: personFrame(personSprites(guest), guest, { talking: speaker === guest, busy: false, clock }), x: gx - 12, top: hero.pos.y - 48 });
-  }
+  // Guests stand on both sides of Sam, the first one on the side with more room.
+  const side = hero.pos.x > 160 ? -1 : 1;
+  guests.forEach((g, i) => {
+    const step = Math.floor(i / 2) + 1;
+    const dir = i % 2 === 0 ? side : -side;
+    const gx = Math.max(14, Math.min(306, hero.pos.x + dir * step * 26));
+    const gy = hero.pos.y + (i % 2 === 0 ? 0 : 3);
+    people.push({ key: g, y: gy, buf: personFrame(personSprites(g), g, { talking: speaker === g, busy: false, clock }), x: gx - 12, top: gy - 48 });
+  });
   const drawables = [...people, { key: 'hero', y: hero.pos.y, buf: heroBuf, x: hero.pos.x - 12, top: hero.pos.y - 48 }].sort((a, b) => a.y - b.y);
   const inv = inventoryPage(state.inventory, page);
   const n = NOTEBOOK_BUTTON;

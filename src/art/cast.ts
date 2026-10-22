@@ -29,8 +29,8 @@ export interface SpriteSet {
   activityBack: PixelBuffer[];
 }
 
-// Who does their activity with their back to the room (Florent at the drums).
-export const BACK_ACTIVITY: readonly CharacterId[] = ['florent'];
+// Who does their activity with their back to the room (Florent at the drums, Théo at the chessboard).
+export const BACK_ACTIVITY: readonly CharacterId[] = ['florent', 'theo'];
 
 // The hero's frames by direction: standing + 4 walk frames. Left is drawn mirrored from right.
 export interface WalkSet {

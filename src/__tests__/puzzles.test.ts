@@ -96,7 +96,10 @@ describe('E18: the side gates (AC-53)', () => {
 
 describe('E19: the dough', () => {
   it('the rice milk in the fridge, the two flours in the utility room; the processor waits for all three', () => {
-    const milk = interact(at('kitchen'), { kind: 'verb', verb: 'take', target: 'kitchen.fridge' });
+    expectRefusal(at('kitchen'), { kind: 'verb', verb: 'take', target: 'kitchen.fridge' }, 'kitchen.fridge.closed');
+    const opened = interact(at('kitchen'), use('kitchen.fridge')).state;
+    expect(opened.flags.fridge_open).toBe(true);
+    const milk = interact(opened, { kind: 'verb', verb: 'take', target: 'kitchen.fridge' });
     expect(milk.state.inventory).toEqual(['ricemilk']);
     const flours = interact(at('utility'), { kind: 'verb', verb: 'take', target: 'utility.flours' });
     expect(flours.state.inventory).toEqual(['chestnut', 'riceflour']);
@@ -311,6 +314,14 @@ describe('E11-E13: the attic, the lab door, the lab', () => {
     expect(o.events).toEqual([{ type: 'puzzle', puzzle: 13 }, { type: 'complete', captures: 2 }]);
     expect(o.state.finished).toBe(true);
     expect(o.beats[o.beats.length - 1]).toEqual({ type: 'ending' });
+    // The whole family joins Sam in the lab, each one before their line.
+    const casts = o.beats.filter((b) => b.type === 'cast');
+    expect(casts[casts.length - 1]).toEqual({ type: 'cast', characters: ['dad', 'mom', 'theo', 'julien', 'florent'] });
+    for (const [who, key] of [['dad', 'line.final2'], ['mom', 'line.final5'], ['theo', 'line.final6'], ['julien', 'line.final7'], ['florent', 'line.final8']] as const) {
+      const said = o.beats.findIndex((b) => b.type === 'say' && b.key === key);
+      const joined = o.beats.findIndex((b) => b.type === 'cast' && b.characters.includes(who));
+      expect([who, joined >= 0 && joined < said]).toEqual([who, true]);
+    }
   });
 });
 

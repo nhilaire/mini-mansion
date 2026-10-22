@@ -189,9 +189,19 @@ describe('GameScreen', () => {
     expect(screen.getByTestId('chess')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('chess-sq-c4'));
     await fireEvent.press(screen.getByTestId('chess-sq-c8'));
+    // The move stays on the board a moment before the problem resets.
+    expect(screen.getByLabelText(fr.chess.square(fr.chess.pieces.Q, 'c8'))).toBeTruthy();
+    await act(async () => {
+      jest.advanceTimersByTime(200);
+    });
     expect(screen.getByText(fr.chess.wrong)).toBeTruthy();
     await fireEvent.press(screen.getByTestId('chess-sq-c4'));
     await fireEvent.press(screen.getByTestId('chess-sq-g8'));
+    // The queen stands on g8 a moment, then Black's rook takes it.
+    expect(screen.getByLabelText(fr.chess.square(fr.chess.pieces.Q, 'g8'))).toBeTruthy();
+    await act(async () => {
+      jest.advanceTimersByTime(200);
+    });
     // Black took the queen: the rook now stands on g8.
     expect(screen.getByLabelText(fr.chess.square(fr.chess.pieces.r, 'g8'))).toBeTruthy();
     await fireEvent.press(screen.getByTestId('chess-sq-h6'));

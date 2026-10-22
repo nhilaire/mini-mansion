@@ -47,6 +47,18 @@ describe('character states (AC-22)', () => {
     expect(state.place).toBe('landing');
   });
 
+  it('Florent and Théo are heard going back once Sam is out of their room, not while Sam is still inside', () => {
+    const drumming = base('florent', { chars: chars({ florent: 'drumming' }), flags: { door_unlocked: true, oring_taken: true } });
+    const out = interact(drumming, go('florent.toLanding')).beats;
+    const room = out.findIndex((b) => b.type === 'room' && b.place === 'landing');
+    expect(room).toBeGreaterThanOrEqual(0);
+    expect(out.findIndex((b) => b.type === 'say' && b.key === 'florent.back')).toBeGreaterThan(room);
+    const playing = base('theo', { chars: chars({ theo: 'chess' }), flags: { door_unlocked: true, cube_solved: true } });
+    const back = interact(playing, go('theo.toLanding')).beats;
+    const landing = back.findIndex((b) => b.type === 'room' && b.place === 'landing');
+    expect(back.findIndex((b) => b.type === 'say' && b.key === 'line.theoBack')).toBeGreaterThan(landing);
+  });
+
   it('Théo goes back to his room once the cube is solved and the hero leaves his room; CUT07 plays once', () => {
     const playing = base('theo', { chars: chars({ theo: 'chess' }), inventory: ['booklet'] });
     expect(interact(playing, go('theo.toLanding')).state.chars.theo).toBe('chess');

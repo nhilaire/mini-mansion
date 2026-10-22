@@ -253,6 +253,14 @@ tags:
 - tapOn:
     id: "hs-kitchen.fridge"
 - tapOn:
+    id: "verb-use"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-kitchen.fridge"
+- tapOn:
     id: "verb-take"
 - extendedWaitUntil:
     visible:
@@ -437,10 +445,18 @@ tags:
     id: "chess-sq-c4"
 - tapOn:
     id: "chess-sq-g8"
+- extendedWaitUntil:
+    notVisible:
+      id: "chess-waiting"
+    timeout: 15000
 - tapOn:
     id: "chess-sq-h6"
 - tapOn:
     id: "chess-sq-f7"
+- extendedWaitUntil:
+    notVisible:
+      id: "chess-waiting"
+    timeout: 15000
 - extendedWaitUntil:
     visible:
       id: "scene-idle"

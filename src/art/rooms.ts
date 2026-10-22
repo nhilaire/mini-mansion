@@ -328,8 +328,10 @@ const PROPS: Record<string, Prop> = {
     b.rect(r.x + 8, r.y + 10, 7, 4, C.skin).rect(r.x + 8, r.y + 13, 7, 3, C.white).rect(r.x + 7, r.y + 16, 9, 6, C.blue);
   },
   'garden.hose': (b, r) => {
-    b.rect(r.x + 12, r.y + 4, 6, r.h - 4, C.green1);
-    for (let i = 0; i < 3; i++) b.frame(r.x + 4 + i * 2, r.y + 6 + i * 2, 22 - i * 4, 14 - i * 4, C.green3);
+    b.rect(r.x + 2, r.y + r.h - 3, r.w - 4, 3, C.wood1).vline(r.x + 4, r.y + 6, r.y + r.h - 1, C.wood1).vline(r.x + r.w - 5, r.y + 6, r.y + r.h - 1, C.wood1);
+    b.ellipse(r.x + r.w / 2, r.y + 12, 8, 8, C.green1);
+    for (let i = 0; i < 3; i++) b.ellipse(r.x + r.w / 2, r.y + 12, 7 - i * 2, 7 - i * 2, i % 2 === 0 ? C.green3 : C.green1);
+    b.ellipse(r.x + r.w / 2, r.y + 12, 1, 1, C.ink);
   },
   'garden.swing': (b, r) => {
     b.rect(r.x, r.y, r.w, 4, C.wood2).rect(r.x, r.y, 4, r.h, C.wood2).rect(r.x + r.w - 4, r.y, 4, r.h, C.wood2);
@@ -361,17 +363,17 @@ const PROPS: Record<string, Prop> = {
   // The living room (photo): stepped oak bookshelf, grey sofa with yellow cushions, mustard armchair, white TV unit
   // with the electronic chessboard, white paper floor lamp, bay window with a teal curtain.
   'living.bookshelf': (b, r, s) => {
-    // Stepped: each column a little taller than the previous one.
+    // Stepped, hung on the wall above the sofa: each column a little taller than the previous one.
     for (let i = 0; i < 4; i++) {
-      const top = r.y + 30 - i * 10;
-      const col = { x: r.x + i * 10, y: top, w: 10, h: r.y + r.h - top };
+      const top = r.y + 24 - i * 8;
+      const col = { x: r.x + i * 13, y: top, w: 13, h: r.y + r.h - top };
       b.rect(col.x, col.y, col.w, col.h, C.oak).frame(col.x, col.y, col.w, col.h, C.oakDark);
       for (let y = col.y + 2; y < col.y + col.h - 8; y += 10) {
         books(b, col.x + 1, col.x + col.w - 1, y, 8, i * 11 + y);
         b.hline(col.x + 1, col.x + col.w - 2, y + 8, C.oakDark);
       }
     }
-    if (!on(s, 'booklet_taken')) b.rect(r.x + 14, r.y + 44, 6, 8, C.yellow).set(r.x + 16, r.y + 47, C.red).set(r.x + 17, r.y + 48, C.blue);
+    if (!on(s, 'booklet_taken')) b.rect(r.x + 17, r.y + 30, 6, 8, C.yellow).set(r.x + 19, r.y + 33, C.red).set(r.x + 20, r.y + 34, C.blue);
   },
   'living.sofa': (b, r) => {
     b.rect(r.x - 40, r.y + 10, r.w + 40, r.h - 10, C.sofaGrey).rect(r.x - 40, r.y + 2, r.w + 40, 10, C.sofaShade).rect(r.x - 42, r.y + 4, 4, r.h - 4, C.sofaShade);
@@ -406,17 +408,22 @@ const PROPS: Record<string, Prop> = {
   },
   'music.guitar': (b, r) => b.ellipse(r.x + 11, r.y + 38, 8, 10, C.orange).rect(r.x + 10, r.y + 4, 3, 28, C.wood1).rect(r.x + 8, r.y, 7, 5, C.ink).ellipse(r.x + 11, r.y + 38, 3, 3, C.ink),
   'music.drums': (b, r) => {
-    // Black electronic pads on a rack.
-    b.rect(r.x + 4, r.y + 14, r.w - 8, 2, C.chrome).vline(r.x + 8, r.y + 14, r.y + r.h - 1, C.chrome).vline(r.x + r.w - 9, r.y + 14, r.y + r.h - 1, C.chrome);
-    for (const [dx, dy] of [
-      [8, 10],
-      [20, 6],
-      [32, 8],
-      [14, 20],
-      [28, 20],
+    const cx = r.x + r.w / 2;
+    // The chrome rack.
+    b.hline(r.x + 4, r.x + r.w - 5, r.y + 16, C.chrome).vline(r.x + 5, r.y + 16, r.y + r.h - 1, C.chrome).vline(r.x + r.w - 6, r.y + 16, r.y + r.h - 1, C.chrome);
+    // Cymbals (hi-hat on the left, crash on the right), with their stands.
+    b.vline(r.x + 4, r.y + 4, r.y + 16, C.chrome).ellipse(r.x + 5, r.y + 4, 6, 1, C.gold).ellipse(r.x + 5, r.y + 6, 6, 1, C.goldDark);
+    b.vline(r.x + r.w - 5, r.y + 1, r.y + 16, C.chrome).ellipse(r.x + r.w - 6, r.y + 2, 7, 2, C.gold);
+    // Toms and snare: black pads with a grey mesh.
+    for (const [dx, dy, rx] of [
+      [13, 12, 5],
+      [r.w - 13, 12, 5],
+      [10, 22, 6],
     ] as const)
-      b.ellipse(r.x + dx, r.y + dy, 5, 3, C.ink).ellipse(r.x + dx, r.y + dy - 1, 4, 2, C.stone1);
-    b.ellipse(r.x + r.w / 2, r.y + 32, 7, 6, C.ink);
+      b.ellipse(r.x + dx, r.y + dy, rx, 3, C.ink).ellipse(r.x + dx, r.y + dy - 1, rx - 1, 2, C.stone2);
+    // The kick drum with its logo, the floor tom and the stool.
+    b.ellipse(cx, r.y + 32, 9, 9, C.ink).ellipse(cx, r.y + 32, 6, 6, C.stone1).ellipse(cx, r.y + 32, 2, 2, C.red);
+    b.ellipse(r.x + r.w - 11, r.y + 30, 5, 3, C.ink).ellipse(r.x + r.w - 11, r.y + 29, 4, 2, C.stone2).vline(r.x + r.w - 11, r.y + 32, r.y + r.h - 1, C.chrome);
   },
   'music.xylo': (b, r) => {
     for (let i = 0; i < 6; i++) b.rect(r.x + 2 + i * 5, r.y + 4 + i, 4, 12 - i, [C.red, C.orange, C.yellow, C.green3, C.blue, C.purple][i]);
@@ -445,9 +452,17 @@ const PROPS: Record<string, Prop> = {
     b.rect(r.x - 2, r.y - 2, r.w + 4, 4, C.ink).ellipse(r.x + 10, r.y - 3, 4, 2, C.red);
   },
   'kitchen.fridge': (b, r, s) => {
-    b.rect(r.x, r.y, r.w, r.h, C.steel).frame(r.x, r.y, r.w, r.h, C.steelDark).hline(r.x, r.x + r.w - 1, r.y + 30, C.steelDark).rect(r.x + r.w - 6, r.y + 10, 2, 12, C.steelDark);
-    b.rect(r.x + 5, r.y + 36, 6, 6, C.yellow).rect(r.x + 14, r.y + 40, 7, 5, C.white).rect(r.x + 6, r.y + 48, 5, 5, C.red);
-    if (!on(s, 'milk_taken')) b.rect(r.x + 10, r.y - 9, 8, 9, C.white).rect(r.x + 11, r.y - 6, 6, 3, C.water1);
+    if (!on(s, 'fridge_open')) {
+      b.rect(r.x, r.y, r.w, r.h, C.steel).frame(r.x, r.y, r.w, r.h, C.steelDark).hline(r.x, r.x + r.w - 1, r.y + 30, C.steelDark).rect(r.x + r.w - 6, r.y + 10, 2, 12, C.steelDark);
+      b.rect(r.x + 5, r.y + 36, 6, 6, C.yellow).rect(r.x + 14, r.y + 40, 7, 5, C.white).rect(r.x + 6, r.y + 48, 5, 5, C.red);
+      return;
+    }
+    // Open: the lit inside with its shelves, the door swung to the left.
+    b.rect(r.x, r.y, r.w, r.h, C.steelDark).rect(r.x + 2, r.y + 2, r.w - 4, r.h - 4, C.white);
+    for (let y = r.y + 16; y < r.y + r.h - 4; y += 14) b.hline(r.x + 2, r.x + r.w - 3, y, C.glass);
+    b.rect(r.x + 4, r.y + 8, 5, 8, C.cream).rect(r.x + 12, r.y + 10, 5, 6, C.green3).rect(r.x + 5, r.y + 36, 8, 6, C.red).rect(r.x + 18, r.y + 34, 6, 8, C.yellow);
+    if (!on(s, 'milk_taken')) b.rect(r.x + 18, r.y + 20, 7, 10, C.white).rect(r.x + 19, r.y + 23, 5, 3, C.water1);
+    b.rect(r.x - 10, r.y, 10, r.h, C.steel).frame(r.x - 10, r.y, 10, r.h, C.steelDark);
   },
   'kitchen.sink': (b, r) => {
     b.rect(r.x, r.y + 6, r.w, r.h - 6, C.white).frame(r.x, r.y + 6, r.w, r.h - 6, C.stone3).vline(r.x + r.w / 2, r.y + 6, r.y + r.h - 1, C.stone3);
@@ -459,7 +474,7 @@ const PROPS: Record<string, Prop> = {
     if (on(s, 'dough_mixed')) b.rect(r.x + 7, r.y + 6, 10, 5, C.beech);
     else if (on(s, 'milk_in') || on(s, 'chestnut_in') || on(s, 'riceflour_in')) b.rect(r.x + 7, r.y + 9, 10, 2, C.cream);
   },
-  'kitchen.bowl': (b, r, s) => b.ellipse(r.x + 13, r.y + 14, 11, 5, C.chrome).ellipse(r.x + 13, r.y + 12, 9, 2, on(s, 'dough_mixed') ? C.chocHi : C.choc),
+  'kitchen.bowl': (b, r, s) => b.ellipse(r.x + 13, r.y + 17, 11, 5, C.chrome).ellipse(r.x + 13, r.y + 15, 9, 2, on(s, 'dough_mixed') ? C.chocHi : C.choc),
   // The ground-floor corridor.
   'corridor0.photos': (b, r) => {
     for (let i = 0; i < 2; i++) b.rect(r.x + 2 + i * 10, r.y + 4 + i * 4, 9, 11, C.gold).rect(r.x + 3 + i * 10, r.y + 5 + i * 4, 7, 9, C.sky).rect(r.x + 5 + i * 10, r.y + 9 + i * 4, 3, 4, C.choc);
@@ -667,11 +682,7 @@ const PROPS: Record<string, Prop> = {
   'bathroom.duck': (b, r) => b.ellipse(r.x + 11, r.y + 14, 7, 5, C.yellow).ellipse(r.x + 15, r.y + 8, 4, 4, C.yellow).set(r.x + 19, r.y + 8, C.orange).hline(r.x + 13, r.x + 17, r.y + 7, C.ink),
   // Théo's room (photo): bright turquoise walls, white cube bookcase, oak desk, pine bed with a pink blanket.
   'theo.poster': (b, r) => posterBox(b, r, C.blueDark, C.white),
-  'theo.lamp': (b, r) => {
-    // A knight-shaped lamp.
-    b.rect(r.x - 4, r.y + 28, r.w + 8, 2, C.white);
-    b.rect(r.x + 6, r.y + 24, 12, 4, C.white).rect(r.x + 8, r.y + 12, 7, 12, C.white).rect(r.x + 10, r.y + 6, 8, 7, C.white).set(r.x + 15, r.y + 8, C.ink);
-  },
+  'theo.bed': (b, r) => b.rect(r.x, r.y + 4, r.w, r.h - 4, C.beech).rect(r.x + 4, r.y, r.w - 8, 8, C.white).rect(r.x + 18, r.y + 2, r.w - 22, 8, C.coral).frame(r.x, r.y + 4, r.w, r.h - 4, C.wood2),
   'theo.cube': (b, r, s) => {
     const solved = on(s, 'cube_solved');
     const col = [C.red, C.green3, C.blue, C.yellow, C.orange, C.white];
@@ -741,7 +752,8 @@ const PROPS: Record<string, Prop> = {
   'parents.shower': (b, r, s) => {
     const tiles = [C.redTile, C.orangeTile, C.white, C.pink];
     for (let y = r.y; y < r.y + r.h; y += 8) for (let x = r.x; x < r.x + r.w; x += 8) b.rect(x, y, Math.min(8, r.x + r.w - x), Math.min(8, r.y + r.h - y), tiles[((x - r.x) / 8 + (y - r.y) / 8) % 4 | 0]);
-    b.rect(r.x + 30, r.y + 6, 3, 20, C.chrome).rect(r.x + 22, r.y + 6, 12, 4, C.chrome);
+    b.rect(r.x + 29, r.y + 4, 4, 24, C.ink).rect(r.x + 30, r.y + 5, 2, 22, C.steelDark);
+    b.rect(r.x + 19, r.y + 4, 14, 6, C.ink).rect(r.x + 20, r.y + 5, 12, 4, C.steelDark).hline(r.x + 21, r.x + 30, r.y + 9, C.white);
     if (on(s, 'oring_fitted')) b.rect(r.x + 24, r.y + 10, 4, 2, C.ink);
     if (!on(s, 'shower_repaired')) b.set(r.x + 24, r.y + 14, C.water2).set(r.x + 25, r.y + 18, C.water2).set(r.x + 23, r.y + 24, C.water2);
     if (on(s, 'mirror_code')) b.dither(r.x + 2, r.y + 10, r.w - 4, 30, C.white, C.stone4);
@@ -841,12 +853,9 @@ const STYLES: Record<PlaceId, Style> = {
       sky(b);
       hedgeLine(b, 58);
       renderWall(b, 0, 96, 16);
-      // The pergola post, the hammock chair, a neighbour's pool far away.
+      // The pergola post, a neighbour's pool far away.
       b.rect(126, 6, 6, FLOOR_Y - 6, C.ochre).rect(96, 6, 150, 4, C.ochre);
-      b.line(150, 10, 146, 40, C.wood1).line(164, 10, 168, 40, C.wood1).rect(144, 40, 26, 16, C.mustard).rect(146, 42, 22, 10, C.orange);
       b.rect(232, 54, 18, 4, C.water1);
-      // The orange washing line across the top.
-      b.line(96, 18, 320, 12, C.orange);
     },
     floor: (b) => tileFloor(b, C.beigeGrout, C.beigeTile, 18),
   },
@@ -871,23 +880,19 @@ const STYLES: Record<PlaceId, Style> = {
   },
   music: {
     bg: (b) => {
-      // Cool off-white walls; the big garden window, the palm, the foosball; the dining part on the right with its
-      // blue wall, the dancers painting, the wooden pendant lamp and the rainbow strip.
-      paint(b, C.coolWhite, C.stone3, 0, 200);
-      paint(b, C.coolWhite, C.stone3, 200, SCENE_W);
-      b.rect(282, 0, 38, FLOOR_Y - 2, C.dinerBlue);
-      windowPane(b, { x: 128, y: 14, w: 60, h: 44 }, 'garden', C.white);
-      palm(b, 118, FLOOR_Y);
-      b.rect(168, 62, 30, 12, C.beech).frame(168, 62, 30, 12, C.wood2).hline(166, 199, 66, C.chrome).hline(166, 199, 70, C.chrome);
-      for (let x = 172; x < 196; x += 6) b.set(x, 65, C.red).set(x + 3, 69, C.white);
-      b.rect(222, 10, 40, 30, C.wood1).rect(225, 13, 34, 24, C.mustard);
-      for (let i = 0; i < 3; i++) b.ellipse(232 + i * 10, 28, 3, 4, C.ink).vline(232 + i * 10, 18, 24, C.ink);
-      b.hline(214, 279, 4, C.wood2);
-      for (let i = 0; i < 4; i++) b.vline(220 + i * 16, 4, 12, C.ink).ellipse(220 + i * 16, 13, 2, 2, C.candle);
-      for (let x = 200; x < 282; x += 6) b.rect(x, 44, 6, 3, [C.red, C.orange, C.yellow, C.green3, C.blue, C.purple][(x / 6) % 6 | 0]);
-      // Children's drawings on a wire.
-      b.hline(4, 36, 10, C.stone2);
-      for (let i = 0; i < 3; i++) b.rect(6 + i * 10, 11, 8, 9, C.white).set(9 + i * 10, 15, [C.red, C.blue, C.green3][i]);
+      // The dining part on the left (blue wall, wooden pendant lamp, rainbow strip), the music part on the right (the
+      // dancers painting, the big garden window, the palm, children's drawings).
+      paint(b, C.coolWhite, C.stone3);
+      b.rect(0, 0, 36, FLOOR_Y - 2, C.dinerBlue);
+      b.rect(154, 6, 40, 30, C.wood1).rect(157, 9, 34, 24, C.mustard);
+      for (let i = 0; i < 3; i++) b.ellipse(164 + i * 10, 24, 3, 4, C.ink).vline(164 + i * 10, 14, 20, C.ink);
+      b.hline(70, 136, 2, C.wood2);
+      for (let i = 0; i < 4; i++) b.vline(76 + i * 16, 2, 46, C.ink).ellipse(76 + i * 16, 48, 2, 2, C.candle);
+      for (let x = 40; x < 146; x += 6) b.rect(x, 42, 6, 3, [C.red, C.orange, C.yellow, C.green3, C.blue, C.purple][(x / 6) % 6 | 0]);
+      windowPane(b, { x: 214, y: 8, w: 56, h: 40 }, 'garden', C.white);
+      palm(b, 148, FLOOR_Y);
+      b.hline(274, 316, 10, C.stone2);
+      for (let i = 0; i < 3; i++) b.rect(276 + i * 13, 11, 10, 10, C.white).set(280 + i * 13, 15, [C.red, C.blue, C.green3][i]);
     },
     floor: beigeTiles,
   },
@@ -995,7 +1000,6 @@ const STYLES: Record<PlaceId, Style> = {
       b.rect(122, 8, 8, 54, C.cream).rect(176, 8, 8, 54, C.cream).rect(122, 28, 8, 8, C.mint).rect(176, 28, 8, 8, C.mint);
       for (let y = 40; y < 62; y += 4) b.hline(122, 129, y, C.coral).hline(176, 183, y, C.coral);
       cubes(b, 8, 46, 2, 4, 3);
-      b.rect(252, 70, 60, 28, C.beech).rect(256, 66, 52, 8, C.white).rect(270, 68, 36, 8, C.coral);
       garland(b, 196, 260, 20, [C.red, C.yellow, C.blue, C.green3]);
     },
     floor: oakFloor,
@@ -1040,7 +1044,7 @@ export const VISUAL_FLAGS: Record<PlaceId, (keyof Flags)[]> = {
   hall: ['gatekey_taken'],
   living: ['booklet_taken', 'queen_placed', 'bay_open'],
   music: ['sticks_taken'],
-  kitchen: ['milk_taken', 'dough_mixed'],
+  kitchen: ['milk_taken', 'dough_mixed', 'fridge_open'],
   corridor0: [],
   wc0: ['wc_wet'],
   office: ['pliers_taken'],

@@ -46,6 +46,7 @@ export const SOLUTION: readonly Input[] = [
   take('music.basket'),
   give('sticks', 'music.drums'), // E03
   go('music.toKitchen'),
+  use('kitchen.fridge'),
   take('kitchen.fridge'),
   give('ricemilk', 'kitchen.robot'),
   give('chestnut', 'kitchen.robot'),
