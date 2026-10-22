@@ -77,14 +77,6 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "hs-garage.drawer"
-- tapOn:
-    id: "verb-take"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
     id: "hs-garage.breaker"
 - tapOn:
     id: "verb-use"
@@ -200,30 +192,6 @@ tags:
     id: "hs-pool.switch"
 - tapOn:
     id: "verb-use"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "inv-pliers"
-- tapOn:
-    id: "hs-pool.pump"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "hs-pool.pump"
-- tapOn:
-    id: "verb-use"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "hs-pool.bottle"
-- tapOn:
-    id: "verb-take"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
@@ -526,6 +494,14 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
+    id: "hs-office.shelf"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
     id: "exit-office.toCorridor"
 - extendedWaitUntil:
     visible:
@@ -533,6 +509,54 @@ tags:
     timeout: 15000
 - tapOn:
     id: "exit-corridor0.toHall"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-hall.toFront"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-front.toPool"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-pliers"
+- tapOn:
+    id: "hs-pool.pump"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-pool.pump"
+- tapOn:
+    id: "verb-use"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-pool.bottle"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-pool.toFront"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-front.toHall"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"

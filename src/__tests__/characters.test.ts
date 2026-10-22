@@ -87,7 +87,7 @@ describe('the doorbell sequence (AC-51)', () => {
     expect(later.chars.dad).toBe('answering');
   });
 
-  it('then the front door view: Papa outside 120 s (office free, front guarded), then back 60 s after his line', () => {
+  it('then the front door view: Papa outside 90 s (office free, front guarded), then back 60 s after his line', () => {
     const s = { ...rung().state, place: 'hall' as const };
     const out = interact(s, tick(TIMER_MS.answer));
     expect(out.beats).toContainEqual({ type: 'view', view: 'door' });
@@ -303,8 +303,20 @@ describe('the capture scene (AC-23)', () => {
     expect(kitchen.beats.slice(k)).toContainEqual({ type: 'cinematic', on: false });
   });
 
-  it('the PRD durations: answer 30 s, outside 120 s, back 60 s, dough 120 s', () => {
-    expect(TIMER_MS).toEqual({ answer: 30_000, outside: 120_000, back: 60_000, dough: 120_000 });
+  it('the PRD durations: answer 30 s, outside 90 s, back 60 s, dough 120 s', () => {
+    expect(TIMER_MS).toEqual({ answer: 30_000, outside: 90_000, back: 60_000, dough: 120_000 });
+  });
+});
+
+describe('first and later captures (AC-24)', () => {
+  it('the first capture asks who Sam is, even when the hatch was already unblocked; later ones say "Encore toi ?!"', () => {
+    const visited: GameState = { ...base('landing'), flags: { door_unlocked: true, hatch_open: true, bar_taken: true }, solved: [15] };
+    const first = interact(visited, enter('julien'));
+    expect(first.beats).toContainEqual(said('dad', 'capture.dad'));
+    expect(first.beats).not.toContainEqual(said('dad', 'line.captureAgain'));
+    const second = interact({ ...first.state, place: 'landing' }, enter('julien'));
+    expect(second.beats).toContainEqual(said('dad', 'line.captureAgain'));
+    expect(second.beats).not.toContainEqual(said('dad', 'capture.dad'));
   });
 });
 

@@ -485,9 +485,12 @@ const PROPS: Record<string, Prop> = {
     b.rect(r.x + 6, r.y, 14, 16, C.navy).dither(r.x + 7, r.y + 1, 12, 14, C.navy, C.sofaShade);
     b.rect(r.x + 4, r.y + 16, 18, 4, C.ink).vline(r.x + 13, r.y + 20, r.y + 26, C.ink).hline(r.x + 6, r.x + 20, r.y + 27, C.ink);
   },
-  'office.shelf': (b, r) => {
+  'office.shelf': (b, r, s) => {
     b.rect(r.x, r.y, r.w, r.h, C.white).frame(r.x, r.y, r.w, r.h, C.stone3);
-    for (let y = r.y + 4; y < r.y + r.h - 8; y += 16) for (let i = 0; i < 5; i++) b.rect(r.x + 4 + i * 9, y, 7, 13, [C.blue, C.red, C.green3, C.gold, C.stone3][i]);
+    for (let y = r.y + 4; y < r.y + 40; y += 16) for (let i = 0; i < 5; i++) b.rect(r.x + 4 + i * 9, y, 7, 13, [C.blue, C.red, C.green3, C.gold, C.stone3][i]);
+    // Papa's red toolbox on the bottom shelf, the pliers sticking out.
+    b.rect(r.x + 6, r.y + 48, 30, 16, C.red).frame(r.x + 6, r.y + 48, 30, 16, C.redDark).hline(r.x + 14, r.x + 28, r.y + 46, C.stone1);
+    if (!on(s, 'pliers_taken')) b.line(r.x + 22, r.y + 48, r.x + 30, r.y + 40, C.chrome).line(r.x + 24, r.y + 48, r.x + 33, r.y + 41, C.chrome);
   },
   // The utility room (photo): pale blue walls, a window with pink blinds, the white washing machine under the dryer,
   // the drying rack, the ironing board, the pantry shelves.
@@ -538,9 +541,8 @@ const PROPS: Record<string, Prop> = {
       b.rect(r.x + 4 + i * 4, r.y + 8, 3, 12, C.stone3).rect(r.x + 4 + i * 4, r.y + (down ? 15 : 9), 3, 4, down ? C.red : C.ink);
     }
   },
-  'garage.drawer': (b, r, s) => {
+  'garage.drawer': (b, r) => {
     b.rect(r.x, r.y, r.w, r.h, C.red).frame(r.x, r.y, r.w, r.h, C.redDark).hline(r.x + 2, r.x + r.w - 3, r.y + 8, C.redDark).hline(r.x + 2, r.x + r.w - 3, r.y + 16, C.redDark);
-    if (!on(s, 'pliers_taken')) b.line(r.x + 8, r.y + 4, r.x + 16, r.y - 2, C.chrome);
   },
   // The wine cellar.
   'cellar.rack': (b, r, s) => {
@@ -1041,9 +1043,9 @@ export const VISUAL_FLAGS: Record<PlaceId, (keyof Flags)[]> = {
   kitchen: ['milk_taken', 'dough_mixed'],
   corridor0: [],
   wc0: ['wc_wet'],
-  office: [],
+  office: ['pliers_taken'],
   utility: ['detergent_taken', 'machine_running', 'power_on', 'flours_taken'],
-  garage: ['pole_taken', 'wrench_taken', 'pliers_taken', 'power_on'],
+  garage: ['pole_taken', 'wrench_taken', 'power_on'],
   cellar: ['bar_taken', 'hatch_open'],
   attic: ['door_revealed', 'secret_open', 'lab_code'],
   laundry: [],

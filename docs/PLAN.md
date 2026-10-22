@@ -55,6 +55,9 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 
 - [x] T-43 Papa answers the doorbell after 30 s; the front door and kitchen views cannot be skipped (AC-49, AC-51) - proof: unit
 - [x] T-44 Capture scene that cannot be skipped: a boy shouts for Papa, Papa comes, takes Sam to the cellar, says "don't run away" and leaves (AC-23, AC-49) - proof: unit
+- [x] T-45 The capture scene plays inside the guarded room, after Sam steps in (AC-23) - proof: unit
+- [x] T-46 Papa stays 90 s outside; the pliers move to Papa's toolbox on the office shelves (AC-21, AC-31, AC-51) - proof: unit
+- [x] T-47 The first capture asks who Sam is; "Encore toi ?!" only from the second one (AC-24) - proof: unit
 
 ## Notes
 

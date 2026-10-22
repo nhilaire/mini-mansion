@@ -24,7 +24,7 @@ export const CODE_NOTE: Record<KeypadId, NoteId> = { computer: 'n08', safe: 'n11
 const KEYPAD_PLACE: Record<KeypadId, PlaceId> = { computer: 'office', safe: 'parents', lab: 'attic' };
 
 // Timer durations in ms of the timer clock (PRD "Timers").
-export const TIMER_MS = { answer: 30_000, outside: 120_000, back: 60_000, dough: 120_000 } as const;
+export const TIMER_MS = { answer: 30_000, outside: 90_000, back: 60_000, dough: 120_000 } as const;
 
 export function newGame(): GameState {
   return {
@@ -218,7 +218,9 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
 export const SCENE_MS = { call: 2000, beforeCellar: 1500, leave: 3000, view: 1500 } as const;
 
 function capture(c: Ctx, room: GuardedRoom, who: CharacterId): void {
-  const again = c.is('hatch_open');
+  // "Encore toi ?!" only from the second capture on; the narrator says whether the hatch opens from below.
+  const again = c.s.captures > 0;
+  const open = c.is('hatch_open');
   const adult: CharacterId = who === 'mom' ? 'mom' : 'dad';
   c.sfx('capture').cinematic(true);
   if (who !== adult) c.say(who, `capture.${who}`).wait(SCENE_MS.call).captor(adult);
@@ -231,7 +233,7 @@ function capture(c: Ctx, room: GuardedRoom, who: CharacterId): void {
   c.s.facing = 'down';
   c.beats.push({ type: 'room', place: 'cellar' });
   c.captor(adult).say(adult, 'capture.keep').wait(SCENE_MS.leave).captor(null).cinematic(false);
-  c.narrator(again ? 'capture.cellarOpen' : 'capture.cellar');
+  c.narrator(open ? 'capture.cellarOpen' : 'capture.cellar');
 }
 
 function character(c: Ctx, id: CharacterId, verb: Verb): void {
@@ -316,7 +318,7 @@ const TAKES: Readonly<Record<string, readonly [Flag, ItemId, string]>> = {
   'utility.shelf': ['detergent_taken', 'detergent', 'utility.shelf.take'],
   'florent.kit': ['oring_taken', 'oring', 'florent.kit.take'],
   'garage.bench': ['wrench_taken', 'wrench', 'garage.bench.take'],
-  'garage.drawer': ['pliers_taken', 'pliers', 'garage.drawer.take'],
+  'office.shelf': ['pliers_taken', 'pliers', 'office.shelf.take'],
   'garage.pole': ['pole_taken', 'pole', 'garage.pole.take'],
   'football.bench': ['extension_taken', 'extension', 'football.bench.take'],
   'cellar.rack': ['bar_taken', 'bar', 'cellar.rack.take'],

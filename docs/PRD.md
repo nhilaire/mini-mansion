@@ -165,7 +165,7 @@ means the front of the house (`front`).
 | kitchen | Cuisine (food processor, fridge, oven, Papa's bowl of hard dough; dead end) | right -> music |
 | corridor0 | Couloir du rez-de-chaussée | back -> hall; door 1 -> wc0; door 2 -> office; door 3 -> utility; stairs down (in a doorway) -> garage |
 | wc0 | WC du rez-de-chaussée (Japanese toilet) | door -> corridor0 |
-| office | Bureau de Papa (computer) | door -> corridor0 |
+| office | Bureau de Papa (computer, shelves with Papa's toolbox) | door -> corridor0 |
 | utility | Cellier (washing machine, shelves, flours) | door -> corridor0 |
 | garage | Garage (tools, Florent's bike, crate, circuit breaker, ladder, hatch) | stairs up -> corridor0; ladder -> attic; hatch -> cellar (always open from the garage) |
 | cellar | Cave à vin (wine racks, the hatch from below) | hatch -> garage (stuck from below until E15) |
@@ -229,7 +229,7 @@ means the front of the house (`front`).
 
 - Timers count play time only (Game screen active, not paused, not in background), stored in the save as deadlines
   on the play-time clock.
-- Durations: doorbell answer 30 s, Papa outside 120 s, Papa coming back 60 s, dough 120 s.
+- Durations: doorbell answer 30 s, Papa outside 90 s, Papa coming back 60 s, dough 120 s.
 - The testing fast mode makes timers run 30 times faster (it changes no rule and no save format).
 
 ### Character states
@@ -250,7 +250,7 @@ means the front of the house (`front`).
 
 - The doorbell sequence: ringing shows `line.dadAnswer` (Papa heard from inside); Sam has 30 s to go away from the
   front door. Then the front door view plays (no control, cannot be skipped): Papa in front of the house says `line.dadAtDoor`; if Sam
-  is in `front` at that moment, Papa catches Sam. Papa stays 120 s in front of the house (the office is free, `front`
+  is in `front` at that moment, Papa catches Sam. Papa stays 90 s in front of the house (the office is free, `front`
   is guarded), then `line.dadGoingBack` is heard; 60 s later Papa is back at his desk, and if Sam is in the office
   then, Papa catches Sam. The doorbell can be rung again once Papa is back at his desk (`line.bellBusy` meanwhile).
 - The dough (E19, optional): the Lait de riz (fridge), the Farine de châtaigne and the Farine de riz (utility room
@@ -277,8 +277,9 @@ means the front of the house (`front`).
     (« Ne t'échappe pas ! ») and disappears 3 s later.
   Sam is put in `cellar`. Inventory, flags, character states, timers, notebook and solved puzzles never
   change because of a capture. `captures` is incremented.
-- In the cellar the hatch is stuck from below until the Barre de fer is used on it (E15, once for good). After E15 a
-  capture plays `line.captureAgain` and Sam can walk straight up to the garage.
+- In the cellar the hatch is stuck from below until the Barre de fer is used on it (E15, once for good). From the second capture
+  on, the adult says `line.captureAgain` instead of the capture line (the first one asks who Sam is: « Qui es-tu et que
+  fais-tu là ? On n'aime pas trop les intrus par ici… »); after E15 Sam can walk straight up to the garage.
 
 ### Puzzle chain
 
@@ -287,7 +288,7 @@ E01-E14, plus one of E16 (doorbell) or E19 (dough) to free the office; E15 and E
 accept a code once it is in the notebook, so no code can be guessed).
 
 Dependencies (checked by AC-31): E02, E03, E16, E17, E18, E19 in any order after E01; E04 after E02; E05 after E04; E06
-after CUT07 (E05); E07 after E06 and (E16 or E19); E08 after E03 and E17; E09 after E08; E10 after E09; E14 after
+after CUT07 (E05); E07 after E06 and (E16 or E19); E08 after E03 and E17; E09 after E08; E10 after E09; E14 after (E16 or E19) and
 E02; E11 after E14; E12 after E10, E11 and E07; E13 after E12. E15 (cellar) and E18 (gates) are optional, and only
 one of E16 and E19 is needed.
 
@@ -311,7 +312,7 @@ recette, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de
 | E08 | Repair the shower (parents, Maman away): the Joint torique (florent: the Nerf modding kit), then the Clé à molette (garage workbench) | shower states: broken (look « Il manque un joint. », use `line.showerBroken`, wrench `line.wrenchNothing`); joint fitted (Joint used up, flag `shower_joint`, look `parents.shower.lookLoose`, use `line.showerLoose`); repaired (wrench used up) | - Joint, - Clé à molette; shower repaired (E08 solved at the wrench) |
 | E09 | Use the shower: hot water runs, the steam reveals a code on the mirror (CUT08) | shower not repaired: the lines above | notebook N11 (safe code 1987) at the end of CUT08; the digits stay on the mirror for good |
 | E10 | Look at the crooked painting (parents): it hides the safe; use the safe, type 1987 | N11 not in the notebook: `line.codeUnknown`; wrong code: `line.codeWrong` | + Clé ancienne, + Photo du gâteau, + Fragment de recette, + Mot de Papa; notebook N12 |
-| E14 | Drain the pool: open the cover (switch), the Pince (garage) on the pump, use the pump, take the Dissolvant from the pool floor | cover switch before E02: `line.coverBall`; pump before the Pince: `line.pumpPlug`; pump with cover closed: `line.pumpCover` | - Pince; the pool empties; + Dissolvant when taken (E14 solved when taken) |
+| E14 | Drain the pool: open the cover (switch), the Pince (office shelves, Papa's toolbox) on the pump, use the pump, take the Dissolvant from the pool floor | cover switch before E02: `line.coverBall`; pump before the Pince: `line.pumpPlug`; pump with cover closed: `line.pumpCover` | - Pince; the pool empties; + Dissolvant when taken (E14 solved when taken) |
 | E11 | Use the Dissolvant on the paint stain (attic) | - | - Dissolvant; CUT09: a door with a lock and a keypad appears |
 | E12 | Open the revealed door: the Clé ancienne in the lock and the code 2510 on its keypad, in any order | door used without the code known: `line.doorLocked`; wrong code: `line.codeWrong` | - Clé ancienne; CUT10 when both are done: the door opens; exit attic -> laundry |
 | E13 | In the laundry, use the Fragment de recette on Papa's recipe notebook | - | - Fragment; CUT11 (revelation), then Ending |
@@ -555,11 +556,11 @@ Puzzles, characters, captures, timers
   says `capture.keep` and leaves 3 s later) and inventory, flags, notebook, timers and character states are unchanged; given the occupant away,
   then no capture happens.
 - AC-24 [unit] Given Sam in the cellar, then the hatch is stuck from below until the Barre de fer is used on it
-  (E15), after which it leads up to the garage for good; going down from the garage is always possible; a capture
-  after E15 plays `line.captureAgain`.
+  (E15), after which it leads up to the garage for good; going down from the garage is always possible; the first
+  capture says the capture line (who are you, what are you doing here) and every later one `line.captureAgain`.
 - AC-51 [unit] Given the doorbell rung after E01 with Papa at his desk, then `line.dadAnswer` plays and Papa stays
   in the office (guarded) for 30 s of play time; then the front door view plays `line.dadAtDoor` and Sam is caught
-  if in `front`; then Papa stays outside 120 s (the office is free, `front` is guarded); then `line.dadGoingBack`
+  if in `front`; then Papa stays outside 90 s (the office is free, `front` is guarded); then `line.dadGoingBack`
   plays and 60 s later Papa is back at his desk, Sam being caught if in the office; meanwhile the doorbell answers
   `line.bellBusy`, and it can be rung again once Papa is back.
 - AC-52 [unit] Given the Lait de riz, the Farine de châtaigne and the Farine de riz used on the food processor in any

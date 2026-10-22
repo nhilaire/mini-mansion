@@ -25,7 +25,7 @@ import { exitsIn, hotspotsIn, ITEMS } from '../game/world';
 
 jest.setTimeout(900_000);
 
-// PRD "Dependencies": each puzzle with the puzzles that must be solved before it (E07 also needs E16 or E19).
+// PRD "Dependencies": each puzzle with the puzzles that must be solved before it (E07 and E14 also need E16 or E19).
 const DEPENDS: Record<number, number[]> = {
   2: [1],
   3: [1],
@@ -97,6 +97,7 @@ describe('story graph (AC-31)', () => {
       for (const [flag, ok] of USED) if (s.flags[flag] && !ok(s)) problems.push(`${flag} lost: ${storyKey(s)}`);
       for (const n of s.solved) for (const d of DEPENDS[n] ?? []) if (!s.solved.includes(d)) problems.push(`E${n} before E${d}: ${storyKey(s)}`);
       if (s.solved.includes(7) && !s.solved.includes(16) && !s.solved.includes(19)) problems.push(`E07 before E16/E19: ${storyKey(s)}`);
+      if (s.solved.includes(14) && !s.solved.includes(16) && !s.solved.includes(19)) problems.push(`E14 before E16/E19 (the pliers are in the office): ${storyKey(s)}`);
     });
   });
 

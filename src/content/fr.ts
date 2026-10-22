@@ -61,8 +61,8 @@ const lines = typoAll({
   'theo.door': "Sans ma dame blanche, l'échiquier refuse de démarrer ! Je parie que Julien l'a encore prise pour décorer un de ses trophées…",
 
   // Captures and the wine cellar.
-  'capture.dad': 'Hé ! Mais qui es-tu, toi ? Ouste, à la cave : tu réfléchiras à ta curiosité !',
-  'capture.mom': "Oh ! Un petit curieux dans la maison ? Hop, à la cave, le temps que je finisse !",
+  'capture.dad': "Qui es-tu et que fais-tu là ? On n'aime pas trop les intrus par ici… Allez, à la cave !",
+  'capture.mom': "Qui es-tu et que fais-tu là ? On n'aime pas trop les intrus par ici… Hop, à la cave !",
   'capture.julien': "PAPAAAAA ! Il y a quelqu'un dans ma chambre !",
   'capture.florent': 'PAPAAAAA ! Intrus repéré dans ma chambre !',
   'capture.theo': 'PAPAAAAA ! Un inconnu fouille dans ma chambre !',
@@ -246,7 +246,10 @@ const lines = typoAll({
   'office.lamp.use': "Clic, clac. La lampe marche. Bon, je ne suis pas là pour ça.",
   'office.chair.look': 'Le fauteuil de bureau de Papa. Il tourne.',
   'office.chair.use': "Je fais un tour sur le fauteuil. Wiiii ! … Concentration.",
-  'office.shelf.look': 'Des classeurs : « Impôts », « Factures »… et un « Projet O.M. » vide.',
+  'office.shelf.look': 'Des classeurs : « Impôts », « Factures »… et la boîte à outils de Papa. Une pince dépasse.',
+  'office.shelf.lookEmpty': 'Des classeurs : « Impôts », « Factures »… et un « Projet O.M. » vide.',
+  'office.shelf.take': 'Je prends la pince dans la boîte à outils de Papa.',
+  'office.shelf.empty': "J'ai déjà la pince.",
   'office.computer.look': "L'ordinateur de Papa. Un post-it : « Mot de passe : demande à Théo, il l'a caché dans son problème d'échecs. » Ben voyons.",
   'office.computer.lookRead': "L'ordinateur de Papa. J'ai lu ses documents secrets.",
   'line.codeUnknown': 'Je ne connais pas le code. Inutile de taper au hasard.',
@@ -287,10 +290,7 @@ const lines = typoAll({
   'garage.breaker.lookOn': 'Le tableau électrique. Tous les disjoncteurs sont levés.',
   'garage.breaker.on': 'Clac ! Je relève le disjoncteur du cellier.',
   'garage.breaker.already': 'Le disjoncteur est déjà levé.',
-  'garage.drawer.look': 'Un tiroir à outils. Une pince dépasse.',
-  'garage.drawer.lookEmpty': "Un tiroir à outils. Rien d'autre d'utile.",
-  'garage.drawer.take': 'Je prends la pince.',
-  'garage.drawer.empty': "J'ai déjà la pince.",
+  'garage.drawer.look': 'Un tiroir à outils. Des vis, des clous… et la place vide de la pince. Papa a dû la monter dans son bureau.',
   'combine.pole': "Clic ! La perche et sa rallonge ne font plus qu'une. Une perche rallongée !",
 
   // Upstairs.
@@ -416,7 +416,7 @@ const lines = typoAll({
   'julien.a.family2': "Florent fait du bruit, Théo réfléchit. Et toi, tu n'es pas de l'école de Théo, toi ?",
   'julien.q.pool': 'Et la pompe de la piscine ?',
   'julien.a.pool1': "Papa l'a débranchée en tirant sur le câble. La fiche est toute tordue.",
-  'julien.a.pool2': 'Avec une pince, tu la redresserais en deux secondes. Il y en a dans le tiroir du garage.',
+  'julien.a.pool2': 'Avec une pince, tu la redresserais en deux secondes. Papa garde la sienne dans sa boîte à outils, au bureau.',
   'julien.q.attic': 'Tu montes souvent au grenier ?',
   'julien.a.attic': "Jamais ! C'est plein de bazar. Et Papa dit qu'il y a des araignées géantes. Il y monte tout le temps, pourtant…",
 });
@@ -508,7 +508,7 @@ export const story = {
       'office.lamp': 'lampe',
       'office.computer': 'ordinateur',
       'office.chair': 'fauteuil',
-      'office.shelf': 'classeurs',
+      'office.shelf': 'étagères',
       'utility.basket': 'panier de linge',
       'utility.machine': 'machine à laver',
       'utility.shelf': 'étagère',

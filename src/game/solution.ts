@@ -21,7 +21,6 @@ export const SOLUTION: readonly Input[] = [
   go('corridor0.toGarage'),
   take('garage.pole'),
   take('garage.bench'),
-  take('garage.drawer'),
   use('garage.breaker'),
   go('garage.toCorridor'),
   go('corridor0.toUtility'),
@@ -39,9 +38,6 @@ export const SOLUTION: readonly Input[] = [
   go('football.toPool'),
   give('longpole', 'pool.ball'), // E02
   use('pool.switch'),
-  give('pliers', 'pool.pump'),
-  use('pool.pump'),
-  take('pool.bottle'), // E14
   go('pool.toFront'),
   go('front.toHall'),
   go('hall.toLiving'),
@@ -82,8 +78,16 @@ export const SOLUTION: readonly Input[] = [
   use('corridor0.officeDoor'),
   use('office.computer'),
   code('computer', '7867'), // E07
+  take('office.shelf'),
   go('office.toCorridor'),
   go('corridor0.toHall'),
+  go('hall.toFront'),
+  go('front.toPool'),
+  give('pliers', 'pool.pump'),
+  use('pool.pump'),
+  take('pool.bottle'), // E14
+  go('pool.toFront'),
+  go('front.toHall'),
   go('hall.stairs'),
   use('landing.parentsDoor'),
   give('oring', 'parents.shower'),
