@@ -41,6 +41,8 @@ tags:
     visible:
       id: "home-continue"
     timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 5000
 - takeScreenshot: 07-home-continue
 - tapOn:
     id: "home-continue"
