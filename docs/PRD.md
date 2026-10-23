@@ -324,8 +324,7 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
   of the occupied rooms stay faint, in the background, even when all four play at once. The music corner hears
   Papa cooking in the kitchen; the football corner hears Maman humming in the garden. Entering is never blocked.
 - Capture: entering a guarded place, or being in a place when its occupant arrives there (Papa coming out of the front
-  door, Papa back at his desk, Papa arriving in the kitchen or at the garage fuse box, Maman arriving in her room to
-  change or back in the garden). The capture is a short scene that cannot be skipped,
+  door, Papa back at his desk, Papa arriving in the kitchen or at the garage fuse box, Maman back in the garden). The capture is a short scene that cannot be skipped,
   played in the guarded place itself (entering a room, Sam first steps inside, then the scene starts):
   - caught by a boy: he shouts for Papa (`capture.julien` / `capture.florent` / `capture.theo`); 2 s later Papa
     arrives next to Sam and says his capture line (`capture.dad`);

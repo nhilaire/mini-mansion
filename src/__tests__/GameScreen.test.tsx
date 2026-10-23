@@ -103,6 +103,22 @@ describe('GameScreen, Act II', () => {
     expect(lastSaved(props).clock).toBe(clockDuringScene);
   });
 
+  it('no timer time passes during a capture scene either: Papa still answers the door right after it (AC-69)', async () => {
+    // Papa answers the door 5 s of timer time from now; the capture scene lasts far longer than that in fast mode.
+    await mount({ ...newGame(), place: 'landing', flags: { door_unlocked: true }, chars: chars({ dad: 'answering' }), timers: { dad: 5000, dough: null, mom: null, delivery: null }, tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('hs-landing.theoDoor'));
+    await fireEvent.press(screen.getByTestId('verb-use'));
+    expect(screen.getByText(line(t, 'capture.theo'))).toBeTruthy();
+    await dismissLines();
+    expect(screen.getByTestId('dad-answering')).toBeTruthy();
+    for (let i = 0; i < 20 && !screen.queryByTestId('view-door'); i++) {
+      await act(async () => {
+        jest.advanceTimersByTime(50);
+      });
+    }
+    expect(screen.getByTestId('view-door')).toBeTruthy();
+  });
+
   it('no timer time passes while a line plays: the doorbell timer waits, without catching up afterwards (AC-69)', async () => {
     // Papa answers the door 5 s of timer time from now (fast mode: 30 times faster, about 170 ms while idle).
     await mount({ ...newGame(), place: 'hall', flags: { door_unlocked: true }, chars: chars({ dad: 'answering' }), timers: { dad: 5000, dough: null, mom: null, delivery: null }, tutorial: 3 });
