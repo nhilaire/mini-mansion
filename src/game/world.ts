@@ -58,6 +58,15 @@ export const ITEMS: readonly ItemId[] = [
   'ricemilk',
   'chestnut',
   'riceflour',
+  'patches',
+  'hairdryer',
+  'sardines',
+  'tonka',
+  'pump',
+  'keyring',
+  'scrap2',
+  'scrap3',
+  'hat',
 ];
 
 export const CHARACTERS: readonly CharacterId[] = ['dad', 'mom', 'julien', 'florent', 'theo'];
@@ -110,6 +119,28 @@ export const FLAGS: readonly Flag[] = [
   'dough_mixed',
   'wc_wet',
   'fridge_open',
+  'dad_wary',
+  'delivered',
+  'sardines_taken',
+  'hairdryer_taken',
+  'patches_taken',
+  'cat_fed',
+  'parcel_taken',
+  'keyring_taken',
+  'patches_in',
+  'pump_in',
+  'bike_fixed',
+  'ink_revealed',
+  'bottles_done',
+  'fuses_cut',
+  'drawer_open',
+  'trunk_open',
+  'frag1_in',
+  'frag2_in',
+  'frag3_in',
+  'finale',
+  'hat_given',
+  'tonka_given',
   'ending',
 ];
 
@@ -131,7 +162,7 @@ export interface HotspotDef {
   verbs: readonly Verb[];
   visible?: (s: GameState) => boolean;
   character?: CharacterId;
-  // Doors of rooms that can be guarded: "use" enters, "talk" is offered while the occupant is inside.
+  // Doors of rooms that can be guarded: "use" enters, "listen" is offered while the occupant is inside.
   door?: DoorRoom;
 }
 
@@ -196,11 +227,16 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('pool.bottle', 'pool', r(222, 78, 22, 22), p(233, 108), ['look', 'take'], (s) => has(s, 'cover_open') && !has(s, 'thinner_taken')),
   hs('pool.switch', 'pool', r(250, 60, 22, 24), p(261, 108), ['look', 'use']),
   hs('pool.pump', 'pool', r(282, 64, 30, 36), p(297, 108), ['look', 'use']),
+  // The garden tap: the hose runs from here to the garden (E22).
+  hs('pool.tap', 'pool', r(100, 72, 24, 28), p(112, 108), ['look', 'use']),
   hs('garden.flowers', 'garden', r(40, 70, 80, 30), p(80, 108), ['look', 'use']),
   hs('garden.gnome', 'garden', r(126, 78, 22, 22), p(137, 108), ['look']),
   hs('garden.hose', 'garden', r(150, 76, 22, 24), p(161, 108), ['look', 'use']),
   hs('garden.swing', 'garden', r(170, 30, 50, 70), p(195, 108), ['look', 'use']),
-  hs('garden.shed', 'garden', r(236, 30, 40, 70), p(256, 108), ['look']),
+  hs('garden.shed', 'garden', r(236, 30, 40, 70), p(256, 108), ['look', 'take']),
+  // The delivered parcel among the flowers, with the neighbours' cat lying on it (CUT13 until E23 / E24).
+  hs('garden.cat', 'garden', r(84, 66, 26, 22), p(97, 108), ['look', 'use'], (s) => has(s, 'delivered') && !has(s, 'cat_fed')),
+  hs('garden.parcel', 'garden', r(84, 88, 26, 22), p(97, 112), ['look', 'take'], (s) => has(s, 'delivered') && !has(s, 'parcel_taken')),
   // Ground floor.
   hs('hall.umbrella', 'hall', r(36, 76, 22, 24), p(47, 108), ['look']),
   hs('hall.coats', 'hall', r(60, 40, 30, 60), p(75, 108), ['look']),
@@ -239,11 +275,13 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('office.computer', 'office', r(150, 62, 40, 30), p(170, 110), ['look', 'use']),
   hs('office.chair', 'office', r(196, 70, 26, 30), p(209, 110), ['look', 'use']),
   hs('office.shelf', 'office', r(230, 30, 50, 70), p(255, 108), ['look', 'take']),
+  hs('office.drawer', 'office', r(156, 92, 30, 22), p(171, 116), ['look', 'use']),
   hs('utility.basket', 'utility', r(50, 78, 36, 22), p(68, 110), ['look']),
   hs('utility.machine', 'utility', r(140, 58, 40, 42), p(160, 110), ['look', 'use']),
   hs('utility.shelf', 'utility', r(220, 30, 50, 40), p(245, 108), ['look', 'take']),
   hs('utility.flours', 'utility', r(220, 72, 50, 28), p(245, 110), ['look', 'take']),
   hs('utility.broom', 'utility', r(274, 40, 22, 60), p(285, 108), ['look']),
+  hs('utility.sardines', 'utility', r(96, 64, 26, 22), p(109, 108), ['look', 'take']),
   hs('garage.pole', 'garage', r(60, 24, 22, 76), p(71, 108), ['look', 'take']),
   hs('garage.crate', 'garage', r(90, 70, 40, 30), p(110, 108), ['look']),
   hs('garage.bike', 'garage', r(136, 60, 38, 40), p(155, 108), ['look', 'use']),
@@ -254,7 +292,7 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('cellar.rack', 'cellar', r(30, 40, 60, 60), p(60, 108), ['look', 'take']),
   hs('cellar.barrel', 'cellar', r(96, 70, 30, 30), p(111, 108), ['look']),
   hs('cellar.hatch', 'cellar', r(130, 10, 40, 40), p(150, 108), ['look', 'use'], (s) => !has(s, 'hatch_open')),
-  hs('cellar.bottles', 'cellar', r(190, 50, 40, 50), p(210, 108), ['look']),
+  hs('cellar.bottles', 'cellar', r(190, 50, 40, 50), p(210, 108), ['look', 'use']),
   hs('cellar.cobweb', 'cellar', r(250, 20, 30, 24), p(265, 108), ['look']),
   // The attic is cluttered with junk.
   hs('attic.horse', 'attic', r(8, 70, 28, 30), p(22, 110), ['look', 'use']),
@@ -294,6 +332,7 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('bathroom.scale', 'bathroom', r(100, 78, 26, 22), p(113, 110), ['look', 'use']),
   hs('bathroom.bath', 'bathroom', r(140, 64, 90, 36), p(185, 110), ['look']),
   hs('bathroom.duck', 'bathroom', r(240, 72, 22, 22), p(251, 110), ['look', 'use']),
+  hs('bathroom.hairdryer', 'bathroom', r(266, 40, 24, 28), p(278, 108), ['look', 'take']),
   hs('theo.poster', 'theo', r(60, 24, 40, 40), p(80, 108), ['look']),
   hs('theo.cube', 'theo', r(160, 70, 24, 22), p(172, 110), ['look', 'use']),
   hs('theo.desk', 'theo', r(196, 66, 50, 34), p(221, 110), ['look', 'use']),
@@ -304,6 +343,7 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('florent.poster', 'florent', r(124, 20, 30, 30), p(139, 108), ['look']),
   hs('florent.kit', 'florent', r(170, 70, 30, 24), p(185, 110), ['look', 'take']),
   hs('florent.console', 'florent', r(230, 50, 50, 40), p(255, 108), ['look', 'use']),
+  hs('florent.strip', 'florent', r(204, 80, 24, 22), p(216, 110), ['look', 'use']),
   hs('parents.bed', 'parents', r(40, 64, 80, 36), p(80, 110), ['look']),
   hs('parents.painting', 'parents', r(140, 26, 36, 30), p(158, 108), ['look'], (s) => !has(s, 'safe_found')),
   hs('parents.safe', 'parents', r(140, 26, 36, 30), p(158, 108), ['look', 'use'], (s) => has(s, 'safe_found')),
@@ -372,10 +412,12 @@ export function occupant(room: GuardedRoom, chars: CharacterStates): CharacterId
       return chars.dad === 'outside' ? 'dad' : null;
     case 'kitchen':
       return chars.dad === 'cooking' ? 'dad' : null;
+    case 'garage':
+      return chars.dad === 'fuses' ? 'dad' : null;
     case 'garden':
       return chars.mom === 'gardening' ? 'mom' : null;
     case 'parents':
-      return chars.mom === 'folding' ? 'mom' : null;
+      return chars.mom === 'folding' || chars.mom === 'changing' ? 'mom' : null;
     case 'julien':
       return chars.julien === 'in_room' ? 'julien' : null;
     case 'florent':
@@ -385,7 +427,7 @@ export function occupant(room: GuardedRoom, chars: CharacterStates): CharacterId
   }
 }
 
-export const GUARDED: readonly GuardedRoom[] = ['office', 'front', 'kitchen', 'parents', 'garden', 'julien', 'florent', 'theo'];
+export const GUARDED: readonly GuardedRoom[] = ['office', 'front', 'kitchen', 'parents', 'garden', 'julien', 'florent', 'theo', 'garage'];
 
 export function isGuardedRoom(place: PlaceId): place is GuardedRoom {
   return (GUARDED as readonly PlaceId[]).includes(place);
@@ -408,19 +450,26 @@ function person(id: CharacterId, place: PlaceId, x: number, y: number, busy: boo
   return { id, place, pos: p(x, y), rect: r(x - 12, y - 48, 24, 48), at: p(x + dx, y + 2), face: side === 'left' ? 'right' : 'left', busy };
 }
 
+const FINALE_X: Record<CharacterId, number> = { dad: 208, mom: 240, theo: 266, julien: 292, florent: 112 };
+
 export function characterPlacement(id: CharacterId, s: GameState): CharacterPlacement | null {
   if (s.flags.ending) return null;
+  // The finale: the whole family stands in the lab around Sam.
+  if (s.flags.finale) return person(id, 'laundry', FINALE_X[id], 114, false);
   const st = s.chars;
   switch (id) {
     case 'dad':
       if (st.dad === 'at_desk' || st.dad === 'answering') return person('dad', 'office', 210, 112, true);
       if (st.dad === 'outside') return person('dad', 'front', 210, 116, false);
+      if (st.dad === 'fuses') return person('dad', 'garage', 252, 112, true);
       return st.dad === 'cooking' ? person('dad', 'kitchen', 236, 112, true) : null;
     case 'mom':
+      if (st.mom === 'changing') return person('mom', 'parents', 199, 112, false);
       return st.mom === 'folding' ? person('mom', 'parents', 130, 112, true) : person('mom', 'garden', 130, 114, true, 'right');
     case 'julien':
       return st.julien === 'in_room' ? person('julien', 'julien', 120, 112, false, 'right') : person('julien', 'football', 170, 114, true);
     case 'florent':
+      if (st.florent === 'riding') return null;
       return st.florent === 'in_room' ? person('florent', 'florent', 130, 112, false, 'right') : person('florent', 'music', 243, 112, true);
     case 'theo':
       return st.theo === 'in_room' ? person('theo', 'theo', 130, 112, false, 'right') : person('theo', 'living', 200, 112, true);

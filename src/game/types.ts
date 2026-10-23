@@ -46,26 +46,38 @@ export type ItemId =
   | 'bar'
   | 'ricemilk'
   | 'chestnut'
-  | 'riceflour';
+  | 'riceflour'
+  // Act II.
+  | 'patches'
+  | 'hairdryer'
+  | 'sardines'
+  | 'tonka'
+  | 'pump'
+  | 'keyring'
+  | 'scrap2'
+  | 'scrap3'
+  | 'hat';
 
 export type CharacterId = 'dad' | 'mom' | 'julien' | 'florent' | 'theo';
 
 // Who says a line: the hero (Sam), the narrator (cutscene descriptions) or an inhabitant.
-export type Speaker = 'hero' | 'narrator' | CharacterId;
+// The delivery driver and the contest jury only speak in their scenes.
+export type Speaker = 'hero' | 'narrator' | 'driver' | 'jury' | CharacterId;
 
 export type Verb = 'look' | 'take' | 'listen' | 'use';
 
 export type Facing = 'left' | 'right' | 'up' | 'down';
 
-// Character states (PRD "Character states"): changed by story events and by the doorbell and dough timers.
-// Papa's doorbell phases: answering (still at his desk), outside (in front of the house), returning (on his way).
-export type DadState = 'at_desk' | 'answering' | 'outside' | 'returning' | 'cooking';
+// Character states (PRD "Character states"): changed by story events and by the timers.
+// Papa's doorbell phases: answering (still at his desk), outside (in front of the house), returning (on his way);
+// cooking the dough (90 s); at the garage fuse box after a power cut (60 s).
+export type DadState = 'at_desk' | 'answering' | 'outside' | 'returning' | 'cooking' | 'fuses';
 
 export interface CharacterStates {
   dad: DadState;
-  mom: 'folding' | 'gardening';
+  mom: 'folding' | 'gardening' | 'changing';
   julien: 'in_room' | 'football';
-  florent: 'in_room' | 'drumming';
+  florent: 'in_room' | 'drumming' | 'riding';
   theo: 'in_room' | 'chess';
 }
 
@@ -117,18 +129,44 @@ export type Flag =
   | 'dough_mixed'
   | 'wc_wet'
   | 'fridge_open'
+  // Act II.
+  | 'dad_wary'
+  | 'delivered'
+  | 'sardines_taken'
+  | 'hairdryer_taken'
+  | 'patches_taken'
+  | 'cat_fed'
+  | 'parcel_taken'
+  | 'keyring_taken'
+  | 'patches_in'
+  | 'pump_in'
+  | 'bike_fixed'
+  | 'ink_revealed'
+  | 'bottles_done'
+  | 'fuses_cut'
+  | 'drawer_open'
+  | 'trunk_open'
+  | 'frag1_in'
+  | 'frag2_in'
+  | 'frag3_in'
+  | 'finale'
+  | 'hat_given'
+  | 'tonka_given'
   | 'ending';
 
-export type NoteId = 'n01' | 'n02' | 'n03' | 'n04' | 'n05' | 'n06' | 'n07' | 'n08' | 'n09' | 'n10' | 'n11' | 'n12';
+export type NoteId = 'n01' | 'n02' | 'n03' | 'n04' | 'n05' | 'n06' | 'n07' | 'n08' | 'n09' | 'n10' | 'n11' | 'n12' | 'n13' | 'n14' | 'n15' | 'n16';
 
-// Cutscenes that play once (PRD "Cutscenes"; CUT02, the front door view, plays at each ring and is not recorded).
-export type CutId = 'cut01' | 'cut04' | 'cut05' | 'cut06' | 'cut07' | 'cut08' | 'cut09' | 'cut10' | 'cut11' | 'cut12';
+// Cutscenes that play once (PRD "Cutscenes"; CUT02, CUT14 and CUT18 play each time and are not recorded).
+export type CutId = 'cut01' | 'cut04' | 'cut05' | 'cut06' | 'cut07' | 'cut08' | 'cut09' | 'cut10' | 'cut11' | 'cut12' | 'cut13' | 'cut15' | 'cut16' | 'cut17';
 
 // Keypads: the father's computer, the safe of the parents' bedroom and the lab door in the attic.
 export type KeypadId = 'computer' | 'safe' | 'lab';
 
+// Sequence pads: Papa's four bottles in the cellar, the colour padlock of the attic trunk.
+export type PadId = 'bottles' | 'trunk';
+
 // The places that can be guarded by their occupant (telemetry `capture.room`), and those entered through a door.
-export type GuardedRoom = 'office' | 'front' | 'kitchen' | 'parents' | 'garden' | 'julien' | 'florent' | 'theo';
+export type GuardedRoom = 'office' | 'front' | 'kitchen' | 'parents' | 'garden' | 'julien' | 'florent' | 'theo' | 'garage';
 export type DoorRoom = 'office' | 'parents' | 'julien' | 'florent' | 'theo';
 
 export interface Point {
@@ -147,13 +185,17 @@ export interface Rect {
 export type TutorialStep = 0 | 1 | 2 | 3;
 
 // Running timers, as deadlines on the timer clock (ms); null when not running.
+// dad: doorbell phases, cooking, fuse box; dough: until Papa comes to cook; mom: changing after the hose; delivery:
+// until the parcel is delivered.
 export interface Timers {
   dad: number | null;
   dough: number | null;
+  mom: number | null;
+  delivery: number | null;
 }
 
 export interface GameState {
-  v: 2;
+  v: 3;
   place: PlaceId;
   pos: Point;
   facing: Facing;
@@ -164,7 +206,7 @@ export interface GameState {
   notes: NoteId[];
   unread: NoteId[];
   cuts: CutId[];
-  // Puzzles solved (E01-E19 as 1-19), in order.
+  // Puzzles solved (E01-E30 as 1-30), in order.
   solved: number[];
   captures: number;
   tutorial: TutorialStep;
@@ -195,20 +237,32 @@ export type SfxName =
   | 'breaker'
   | 'spray'
   | 'robot'
-  | 'gag';
+  | 'gag'
+  | 'van'
+  | 'cat'
+  | 'bikebell'
+  | 'fuse'
+  | 'padlock'
+  | 'bottle'
+  | 'applause';
+
+// Outside views: the front door (doorbell), the kitchen (dough), the delivery, the garden (parcel, hose), Florent riding
+// away, the power cut (dark house) and the jury's car; the hose view is the garden with Maman soaked.
+export type ViewId = 'door' | 'kitchen' | 'delivery' | 'garden' | 'hose' | 'ride' | 'dark' | 'jury';
 
 // What the UI plays, in order, after an interaction.
 export type Beat =
   | { type: 'say'; speaker: Speaker; key: string }
   | { type: 'keypad'; keypad: KeypadId }
+  | { type: 'pad'; pad: PadId }
   | { type: 'chess' }
   | { type: 'documents' }
   | { type: 'note'; note: NoteId }
   // A place change; pos/facing are given when it is not the saved place (Sam steps into a room before a capture).
   | { type: 'room'; place: PlaceId; pos?: Point; facing?: Facing }
   | { type: 'capture' }
-  // A view of another place without control (the front door view, Papa arriving in the kitchen).
-  | { type: 'view'; view: 'door' | 'kitchen' }
+  // A view of another place without control (PRD outside views).
+  | { type: 'view'; view: ViewId }
   // Cinematic mode: while on, lines cannot be skipped by a tap and play their full time.
   | { type: 'cinematic'; on: boolean }
   // A pause in a scene (ms of real time).
@@ -233,6 +287,8 @@ export type Input =
   | { kind: 'lookItem'; item: ItemId }
   | { kind: 'exit'; exit: string }
   | { kind: 'keypad'; keypad: KeypadId; code: string }
+  // The buttons tapped on a sequence pad, in order (bottle vintages or colours).
+  | { kind: 'pad'; pad: PadId; code: string[] }
   // The moves played on Théo's chess problem, as "e2e4" squares (white moves only).
   | { kind: 'chess'; moves: string[] }
   // Play time passing: advances the timer clock and resolves the timers that end.

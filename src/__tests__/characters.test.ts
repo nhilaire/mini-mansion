@@ -30,7 +30,7 @@ const OPEN: [GuardedRoom, PlaceId, string, Partial<CharacterStates>, 'dad' | 'mo
 describe('character states (AC-22)', () => {
   it('everyone starts in their room, Papa at his desk, no timer running', () => {
     expect(newGame().chars).toEqual({ dad: 'at_desk', mom: 'folding', julien: 'in_room', florent: 'in_room', theo: 'in_room' });
-    expect(newGame().timers).toEqual({ dad: null, dough: null });
+    expect(newGame().timers).toEqual({ dad: null, dough: null, mom: null, delivery: null });
   });
 
   it('walking around and time passing change nobody while no timer runs', () => {
@@ -162,7 +162,7 @@ describe('the dough (AC-52)', () => {
       { kind: 'item', item: 'chestnut', target: 'kitchen.robot' },
     ]);
 
-  it('the three ingredients in any order: E19, then Papa comes to cook 120 s later, for good', () => {
+  it('the three ingredients in any order: E19, then Papa comes to cook 120 s later, for 90 s, then goes back to his desk', () => {
     const { state, outcomes } = mixed();
     expect(outcomes[2].beats).toContainEqual(said('hero', 'line.doughMixed'));
     expect(outcomes[2].events).toEqual([{ type: 'puzzle', puzzle: 19 }]);
@@ -175,7 +175,12 @@ describe('the dough (AC-52)', () => {
     expect(o.state.chars.dad).toBe('cooking');
     expect(o.state.cuts).toContain('cut12');
     expect(occupant('office', o.state.chars)).toBeNull();
-    expect(interact(o.state, tick(3_600_000)).state.chars.dad).toBe('cooking');
+    expect(occupant('kitchen', o.state.chars)).toBe('dad');
+    expect(interact(o.state, tick(TIMER_MS.cook - 1)).state.chars.dad).toBe('cooking');
+    const back = interact(o.state, tick(TIMER_MS.cook));
+    expect(back.beats).toContainEqual(said('dad', 'line.dadOven'));
+    expect(back.state.chars.dad).toBe('at_desk');
+    expect(back.state.timers.dad).toBeNull();
   });
 
   it('Sam still in the kitchen when Papa arrives is caught', () => {
@@ -193,7 +198,7 @@ describe('the dough (AC-52)', () => {
     expect(s.chars.dad).toBe('outside');
     s = interact(s, { kind: 'wait' }).state;
     expect(s.chars.dad).toBe('cooking');
-    expect(s.timers).toEqual({ dad: null, dough: null });
+    expect(s.timers).toEqual({ dad: s.clock + TIMER_MS.cook, dough: null, mom: null, delivery: null });
     const bell = interact({ ...s, place: 'front' }, { kind: 'verb', verb: 'use', target: 'front.bell' });
     expect(bell.beats).toContainEqual(said('hero', 'line.bellNobody'));
   });
@@ -212,7 +217,7 @@ describe('guarded places and captures (AC-23)', () => {
   it.each(ROOMS)('entering %s with its occupant inside is a capture that keeps everything', (room) => {
     const from = DOOR_SPAWN[room].from;
     // A dough timer is running: the capture keeps it as it is.
-    const s = base(from, { inventory: ['pole', 'booklet'], notes: ['n01', 'n02'], solved: [1, 19], timers: { dad: null, dough: 90_000 } });
+    const s = base(from, { inventory: ['pole', 'booklet'], notes: ['n01', 'n02'], solved: [1, 19], timers: { dad: null, dough: 90_000, mom: null, delivery: null } });
     const o = interact(s, enter(room));
     expect(o.state.place).toBe('cellar');
     expect(o.state.captures).toBe(1);
@@ -240,7 +245,7 @@ describe('guarded places and captures (AC-23)', () => {
 
   it.each(OPEN)('walking into the %s while its occupant is there is a capture that keeps everything', (room, from, exit, patch, who) => {
     // Papa outside has his way-back timer running; it is kept by the capture.
-    const timers = patch.dad === 'outside' ? { dad: 40_000, dough: null } : { dad: null, dough: null };
+    const timers = patch.dad === 'outside' ? { dad: 40_000, dough: null, mom: null, delivery: null } : { dad: null, dough: null, mom: null, delivery: null };
     const s = base(from, { chars: chars(patch), flags: { door_unlocked: true, gates_open: true }, inventory: ['pole', 'sticks'], notes: ['n01', 'n03'], solved: [1, 16], timers });
     const o = interact(s, go(exit));
     expect(o.state.place).toBe('cellar');
@@ -318,7 +323,7 @@ describe('the capture scene (AC-23)', () => {
     const at = view.beats.findIndex((b) => b.type === 'view');
     expect(view.beats[at - 1]).toEqual({ type: 'cinematic', on: true });
     expect(view.beats.slice(at)).toContainEqual({ type: 'cinematic', on: false });
-    const dough: GameState = { ...base('music'), flags: { door_unlocked: true, dough_mixed: true }, timers: { dad: null, dough: 1000 } };
+    const dough: GameState = { ...base('music'), flags: { door_unlocked: true, dough_mixed: true }, timers: { dad: null, dough: 1000, mom: null, delivery: null } };
     const kitchen = interact(dough, tick(1000));
     const k = kitchen.beats.findIndex((b) => b.type === 'view');
     expect(kitchen.beats[k]).toEqual({ type: 'view', view: 'kitchen' });
@@ -326,8 +331,8 @@ describe('the capture scene (AC-23)', () => {
     expect(kitchen.beats.slice(k)).toContainEqual({ type: 'cinematic', on: false });
   });
 
-  it('the PRD durations: answer 30 s, outside 60 s, back 30 s, dough 120 s', () => {
-    expect(TIMER_MS).toEqual({ answer: 30_000, outside: 60_000, back: 30_000, dough: 120_000 });
+  it('the PRD durations: answer 30 s, outside 60 s, back 30 s, dough 120 s, cooking 90 s, changing 90 s, delivery 60 s, fuse box 60 s', () => {
+    expect(TIMER_MS).toEqual({ answer: 30_000, outside: 60_000, back: 30_000, dough: 120_000, cook: 90_000, change: 90_000, delivery: 60_000, fuses: 60_000 });
   });
 });
 

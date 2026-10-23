@@ -78,6 +78,14 @@ const sfx = {
   robot: () => render(SFX_RATE, 1.0, (t, p) => square(110 + 220 * Math.min(1, p * 3), t, 0.4) * 0.35 * Math.sin(Math.PI * p) + noise() * 0.08),
   // A small comic boing for the gags.
   gag: () => render(SFX_RATE, 0.3, (t, p) => triangle(330 + 330 * Math.sin(p * 18) * (1 - p), t) * (1 - p) * 0.7),
+  // Act II: the delivery van, the cat, the bike bell, the fuses, the padlock, the bottles, the jury's applause.
+  van: () => render(SFX_RATE, 1.4, (t, p) => square(55 + 25 * Math.sin(p * 9), t, 0.5) * 0.4 * Math.sin(Math.PI * p) + noise() * 0.12 * Math.sin(Math.PI * p)),
+  cat: () => render(SFX_RATE, 0.6, (t, p) => triangle(520 + 260 * Math.sin(Math.PI * p), t) * Math.sin(Math.PI * p) * 0.6 + (p > 0.7 ? noise() * 0.3 * (1 - p) : 0)),
+  bikebell: () => render(SFX_RATE, 0.6, (t, p) => (triangle(2093, t) + triangle(2637, t) * 0.5) * (p < 0.5 ? 1 - p * 1.4 : (1 - p) * 1.2) * 0.6),
+  fuse: () => render(SFX_RATE, 0.5, (t, p) => (p < 0.06 ? noise() : square(90 * (1 - p), t, 0.5) * 0.4 * (1 - p) + noise() * 0.1 * (1 - p))),
+  padlock: () => render(SFX_RATE, 0.25, (t, p) => (p < 0.1 || (p > 0.5 && p < 0.6) ? noise() * 0.8 : square(880, t, 0.2) * 0.1 * (1 - p))),
+  bottle: () => render(SFX_RATE, 0.4, (t, p) => (triangle(1760, t) + triangle(2349, t) * 0.4) * (1 - p) ** 2 * 0.6),
+  applause: () => lowpass(render(SFX_RATE, 1.6, (t, p) => noise() * (0.5 + 0.5 * Math.sin(t * 90) ** 8) * Math.sin(Math.PI * p) * 0.9), 0.6),
 };
 
 // Drum kit pattern: kick, snare (noise), hi-hat ticks.
@@ -119,6 +127,9 @@ const loops = {
   machineLoop: () => render(LOOP_RATE, 2, (t) => square(55, t, 0.5) * 0.3 * (0.7 + 0.3 * Math.sin(t * 6)) + noise() * 0.05),
   // Cooking: pans clattering and a sizzle.
   cooking: () => render(LOOP_RATE, 2.4, (t) => noise() * 0.2 * (0.6 + 0.4 * Math.sin(t * 31)) + ((t * 2.5) % 1 < 0.05 ? triangle(1760, t) * 0.4 : 0)),
+  // Papa grumbling at the fuse box (a low muttering voice and clicks), Maman's wardrobe doors while she changes.
+  fuses: () => render(LOOP_RATE, 2.4, (t) => square(110 + 30 * Math.sin(t * 9), t, 0.4) * 0.25 * (Math.sin(t * 4) > 0.2 ? 1 : 0) + ((t * 1.7) % 1 < 0.03 ? noise() * 0.6 : 0)),
+  wardrobe: () => render(LOOP_RATE, 2.4, (t) => ((t * 1.25) % 1 < 0.06 ? noise() * 0.5 : 0) + triangle([392, 440, 494, 440][Math.floor(t * 2) % 4], t) * 0.2),
 };
 
 // ---------- music (16 kHz) ----------

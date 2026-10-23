@@ -26,4 +26,6 @@ export const speakerColors: Record<Speaker, string> = {
   julien: '#8ad08c',
   florent: '#c8a0f0',
   theo: '#f0d060',
+  driver: '#d8c8a0',
+  jury: '#f0b070',
 };

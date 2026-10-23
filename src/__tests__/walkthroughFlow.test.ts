@@ -20,7 +20,8 @@ describe('walkthrough flow (AC-41)', () => {
     expect(yaml).toContain('id: "chess-sq-g8"');
     expect(yaml).toContain('id: "keypad-digit-7"');
     expect(yaml).toContain('id: "hs-laundry.notebook"');
-    expect(yaml).toContain('id: "timers-idle"');
+    // The timers: Papa cooking, Papa back at his desk, the parcel delivered; the sequence pads.
+    for (const marker of ['dad-cooking', 'dad-at_desk', 'delivered', 'pad', 'pad-1987', 'pad-green']) expect(yaml).toContain(`id: "${marker}"`);
     expect(yaml).toContain('id: "keypad-digit-2"');
     expect(yaml).toContain('readme-2-game');
     expect(yaml).toContain('readme-3-ending');

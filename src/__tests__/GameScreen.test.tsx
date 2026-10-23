@@ -49,6 +49,72 @@ const stepOf = (pred: (i: Input) => boolean) => SOLUTION.findIndex(pred);
 const stateAt = (n: number) => ({ ...playAll(newGame(), SOLUTION.slice(0, n)).state, tutorial: 3 as const });
 const chars = (patch: Partial<CharacterStates>): CharacterStates => ({ ...newGame().chars, ...patch });
 
+describe('GameScreen, Act II', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.clearAllMocks();
+    resetFastModeForTests();
+    applyTestingLink(FAST_LINK);
+  });
+
+  it('the bottle rack opens the sequence pad: the vintages in order give the second scrap (AC-65)', async () => {
+    const props = await mount({ ...newGame(), place: 'cellar', notes: ['n01', 'n13'], flags: { door_unlocked: true }, tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('hs-cellar.bottles'));
+    await fireEvent.press(screen.getByTestId('verb-use'));
+    expect(screen.getByTestId('pad')).toBeTruthy();
+    expect(screen.getByText(fr.pad.bottles)).toBeTruthy();
+    for (const b of ['1994', '1987', '2003', '2011']) await fireEvent.press(screen.getByTestId(`pad-${b}`));
+    expect(screen.getByText(line(t, 'line.bottlesWrong'))).toBeTruthy();
+    await dismissLines();
+    expect(lastSaved(props).inventory).toEqual([]);
+    await fireEvent.press(screen.getByTestId('hs-cellar.bottles'));
+    await fireEvent.press(screen.getByTestId('verb-use'));
+    for (const b of ['1987', '1994', '2003', '2011']) await fireEvent.press(screen.getByTestId(`pad-${b}`));
+    await dismissLines();
+    expect(screen.queryByTestId('pad')).toBeNull();
+    expect(lastSaved(props).inventory).toEqual(['scrap2']);
+  });
+
+  it('the trunk padlock shows the colours by name (AC-66)', async () => {
+    const props = await mount({ ...newGame(), place: 'attic', notes: ['n01', 'n14'], flags: { door_unlocked: true }, tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('hs-attic.trunk'));
+    await fireEvent.press(screen.getByTestId('verb-use'));
+    expect(screen.getByLabelText('Violet')).toBeTruthy();
+    for (const b of ['red', 'yellow', 'blue', 'green']) await fireEvent.press(screen.getByTestId(`pad-${b}`));
+    await dismissLines();
+    expect(lastSaved(props).inventory).toEqual(['hat', 'scrap3']);
+  });
+
+  it('the hose view shows Maman soaked in the garden and cannot be skipped; timers wait while it plays (AC-49, AC-61, AC-69)', async () => {
+    const props = await mount({ ...newGame(), place: 'pool', chars: chars({ mom: 'gardening' }), flags: { door_unlocked: true }, tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('hs-pool.tap'));
+    await fireEvent.press(screen.getByTestId('verb-use'));
+    expect(screen.getByTestId('view-hose')).toBeTruthy();
+    expect(screen.getByText(line(t, 'line.momSoaked'))).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('line-banner'));
+    expect(screen.getByTestId('view-hose')).toBeTruthy();
+    const clockDuringScene = lastSaved(props).clock;
+    await act(async () => {
+      jest.advanceTimersByTime(150);
+    });
+    expect(screen.getByTestId('mom-changing')).toBeTruthy();
+    await dismissLines();
+    expect(screen.queryByTestId('view-hose')).toBeNull();
+    expect(lastSaved(props).clock).toBe(clockDuringScene);
+  });
+
+  it('the power cut darkens the scene while Papa goes down to the fuse box (AC-64)', async () => {
+    await mount({ ...newGame(), place: 'florent', chars: chars({ florent: 'riding' }), inventory: ['hairdryer'], flags: { door_unlocked: true, computer_read: true, dad_wary: true }, tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('inv-hairdryer'));
+    await fireEvent.press(screen.getByTestId('hs-florent.strip'));
+    expect(screen.getByTestId('view-dark')).toBeTruthy();
+    expect(screen.getByText(line(t, 'line.dadFuses'))).toBeTruthy();
+    await dismissLines();
+    expect(screen.queryByTestId('view-dark')).toBeNull();
+    expect(screen.getByTestId('dad-fuses')).toBeTruthy();
+  });
+});
+
 describe('GameScreen', () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -308,7 +374,7 @@ describe('GameScreen', () => {
     expect(screen.queryByTestId('view-door')).toBeNull();
   });
 
-  it('the dough: Papa arrives in the kitchen view two minutes later and the timers are then idle (AC-52)', async () => {
+  it('the dough: Papa arrives in the kitchen view two minutes later and cooks (AC-52)', async () => {
     const props = await mount({ ...newGame(), place: 'kitchen', inventory: ['ricemilk', 'chestnut', 'riceflour'], flags: { door_unlocked: true }, tutorial: 3 });
     for (const item of ['ricemilk', 'chestnut', 'riceflour']) {
       await fireEvent.press(screen.getByTestId(`inv-${item}`));
@@ -334,7 +400,7 @@ describe('GameScreen', () => {
     expect(screen.getByText(line(t, 'line.dadDough'))).toBeTruthy();
     await dismissLines();
     expect(lastSaved(props).chars.dad).toBe('cooking');
-    expect(screen.getByTestId('timers-idle')).toBeTruthy();
+    expect(screen.getByTestId('dad-cooking')).toBeTruthy();
   });
 
   it('play time does not advance while paused (AC-38)', async () => {
@@ -365,13 +431,28 @@ describe('GameScreen', () => {
     expect(saved.notes).toContain('n11');
   });
 
-  it('the recipe scrap on the notebook leads to the revelation and the ending, saved as finished (AC-32, AC-50)', async () => {
-    const props = await mount(stateAt(SOLUTION.length - 1));
-    await fireEvent.press(screen.getByTestId('inv-scrap'));
+  it('the last recipe scrap gathers the family in the lab and the jury rings (AC-67, AC-68)', async () => {
+    const lastScrap = stepOf((i) => i.kind === 'item' && i.item === 'scrap3');
+    const finale = await mount(stateAt(lastScrap));
+    await fireEvent.press(screen.getByTestId('inv-scrap3'));
     await fireEvent.press(screen.getByTestId('hs-laundry.notebook'));
-    // The save is already finished while the revelation plays (killed now, nothing would resume).
-    expect(lastSaved(props).finished).toBe(true);
     expect(screen.getByText(line(t, 'line.final1'))).toBeTruthy();
+    await dismissLines();
+    expect(lastSaved(finale).flags.finale).toBe(true);
+    expect(lastSaved(finale).finished).toBe(false);
+    for (const who of ['dad', 'mom', 'julien', 'florent', 'theo']) expect(screen.getByTestId(`hs-${who}`)).toBeTruthy();
+  });
+
+  it('the hat and the tonka bean for Papa lead to the jury tasting and the ending, saved as finished (AC-32, AC-50, AC-67)', async () => {
+    const props = await mount(stateAt(SOLUTION.length - 1));
+    await fireEvent.press(screen.getByTestId('inv-tonka'));
+    await fireEvent.press(screen.getByTestId('hs-dad'));
+    // Sam walks to Papa first.
+    await act(async () => {
+      jest.advanceTimersByTime(3000);
+    });
+    // The save is already finished while the tasting plays (killed now, nothing would resume).
+    expect(lastSaved(props).finished).toBe(true);
     await dismissLines();
     expect(props.onEnding).toHaveBeenCalledTimes(1);
     expect((props.onEnding.mock.calls[0][0] as GameState).finished).toBe(true);

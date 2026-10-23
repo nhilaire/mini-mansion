@@ -315,6 +315,25 @@ const PROPS: Record<string, Prop> = {
     if (on(s, 'plug_fixed')) b.line(r.x + 4, r.y + 14, r.x - 6, r.y + 6, C.ink);
     else b.line(r.x + 4, r.y + 30, r.x - 2, r.y + 34, C.ink).set(r.x - 3, r.y + 33, C.yellow).set(r.x - 4, r.y + 35, C.yellow);
   },
+  // The garden tap (E22): a brass tap on a post, the green hose running away towards the garden.
+  'pool.tap': (b, r) => {
+    b.rect(r.x + 9, r.y + 6, 6, r.h - 6, C.stone2).frame(r.x + 9, r.y + 6, 6, r.h - 6, C.stone0);
+    b.rect(r.x + 6, r.y + 8, 12, 3, C.brass).rect(r.x + 4, r.y + 10, 3, 4, C.brass).rect(r.x + 11, r.y + 4, 2, 4, C.red);
+    b.line(r.x + 5, r.y + 14, r.x + 2, r.y + r.h - 2, C.green1).hline(r.x - 10, r.x + 2, r.y + r.h - 2, C.green1).hline(r.x - 10, r.x + 2, r.y + r.h - 1, C.green3);
+  },
+  // The delivered parcel among the flowers (CUT13), with the neighbours' cat curled up on it until it is fed.
+  'garden.parcel': (b, r) => {
+    b.rect(r.x + 3, r.y + 6, r.w - 6, r.h - 8, C.wood4).frame(r.x + 3, r.y + 6, r.w - 6, r.h - 8, C.wood2);
+    b.vline(r.x + r.w / 2, r.y + 6, r.y + r.h - 3, C.mustard).hline(r.x + 3, r.x + r.w - 4, r.y + 11, C.mustard).rect(r.x + 6, r.y + 13, 6, 4, C.white);
+  },
+  'garden.cat': (b, r) => {
+    const y = r.y + r.h + 2;
+    b.ellipse(r.x + 13, y, 9, 5, C.orange).ellipse(r.x + 21, y - 4, 5, 4, C.orange);
+    b.set(r.x + 18, y - 9, C.orange).set(r.x + 19, y - 8, C.orange).set(r.x + 23, y - 9, C.orange).set(r.x + 22, y - 8, C.orange);
+    b.set(r.x + 19, y - 5, C.ink).set(r.x + 23, y - 5, C.ink).set(r.x + 21, y - 3, C.pink);
+    for (let i = 0; i < 3; i++) b.hline(r.x + 8 + i * 4, r.x + 9 + i * 4, y - 3, C.wood2);
+    b.line(r.x + 4, y + 1, r.x + 1, y - 6, C.orange);
+  },
   // The garden, at the end of the football corner.
   'garden.flowers': (b, r) => {
     b.rect(r.x, r.y + 18, r.w, r.h - 18, C.mud);
@@ -337,10 +356,13 @@ const PROPS: Record<string, Prop> = {
     b.rect(r.x, r.y, r.w, 4, C.wood2).rect(r.x, r.y, 4, r.h, C.wood2).rect(r.x + r.w - 4, r.y, 4, r.h, C.wood2);
     b.vline(r.x + 16, r.y + 4, r.y + 46, C.stone3).vline(r.x + 32, r.y + 4, r.y + 46, C.stone3).rect(r.x + 14, r.y + 46, 21, 4, C.red);
   },
-  'garden.shed': (b, r) => {
+  'garden.shed': (b, r, s) => {
     b.rect(r.x, r.y + 12, r.w, r.h - 12, C.wood3);
     for (let y = 0; y < 12; y++) b.hline(r.x + 12 - y, r.x + r.w - 13 + y, r.y + y, C.wine1);
     b.rect(r.x + 12, r.y + 34, 16, r.h - 34, C.wood1);
+    // Papa's keyring on its nail, next to the door.
+    b.set(r.x + 6, r.y + 22, C.ink);
+    if (!on(s, 'keyring_taken')) b.frame(r.x + 4, r.y + 23, 5, 5, C.chrome).rect(r.x + 6, r.y + 28, 2, 4, C.brass);
   },
   // The hall.
   'hall.umbrella': (b, r) => {
@@ -489,6 +511,12 @@ const PROPS: Record<string, Prop> = {
   // The office (photo): teal walls with a mustard section, a long birch desk, two big monitors, a navy mesh chair.
   'office.window': (b, r) => windowPane(b, r, 'garden'),
   'office.lamp': (b, r) => b.rect(r.x + 4, r.y + 26, 12, 3, C.ink).line(r.x + 8, r.y + 26, r.x + 6, r.y + 12, C.ink).line(r.x + 6, r.y + 12, r.x + 16, r.y + 6, C.ink).rect(r.x + 14, r.y + 4, 8, 5, C.ink),
+  // Papa's desk drawer (E28), under the computer.
+  'office.drawer': (b, r, s) => {
+    b.rect(r.x, r.y, r.w, r.h - 4, C.wood3).frame(r.x, r.y, r.w, r.h - 4, C.wood1).rect(r.x + r.w / 2 - 3, r.y + 6, 6, 2, C.brass);
+    if (on(s, 'drawer_open')) b.rect(r.x + 2, r.y + r.h - 6, r.w - 4, 5, C.wood4).rect(r.x + 6, r.y + r.h - 7, 10, 3, C.paper);
+    else b.set(r.x + r.w / 2, r.y + 10, C.ink);
+  },
   'office.computer': (b, r) => {
     b.rect(r.x - 40, r.y + 22, r.w + 80, 4, C.beech).rect(r.x - 38, r.y + 26, 3, 12, C.white).rect(r.x + r.w + 36, r.y + 26, 3, 12, C.white);
     b.rect(r.x - 6, r.y + 18, r.w + 12, 3, C.white);
@@ -527,6 +555,10 @@ const PROPS: Record<string, Prop> = {
     b.rect(r.x + 4, r.y + 14, 14, 12, C.water1).rect(r.x + 4, r.y + 4, 10, 8, C.red);
     if (!on(s, 'flours_taken')) b.rect(r.x + 24, r.y + 8, 9, 16, C.wood3).rect(r.x + 26, r.y + 12, 5, 5, C.cream).rect(r.x + 36, r.y + 8, 9, 16, C.paper).rect(r.x + 38, r.y + 12, 5, 5, C.water1);
   },
+  'utility.sardines': (b, r, s) => {
+    b.hline(r.x, r.x + r.w - 1, r.y + r.h - 4, C.wood2).rect(r.x, r.y + r.h - 3, r.w, 3, C.wood1);
+    if (!on(s, 'sardines_taken')) b.rect(r.x + 5, r.y + r.h - 10, 16, 6, C.chrome).frame(r.x + 5, r.y + r.h - 10, 16, 6, C.stone1).rect(r.x + 8, r.y + r.h - 8, 10, 2, C.blue);
+  },
   'utility.broom': (b, r) => b.vline(r.x + 11, r.y, r.y + r.h - 14, C.wood4).rect(r.x + 4, r.y + r.h - 14, 15, 14, C.yellow),
   // The garage.
   'garage.pole': (b, r, s) => {
@@ -537,8 +569,12 @@ const PROPS: Record<string, Prop> = {
     b.rect(r.x, r.y, r.w, r.h, C.wood4).frame(r.x, r.y, r.w, r.h, C.wood2).line(r.x, r.y, r.x + r.w - 1, r.y + r.h - 1, C.wood2).line(r.x + r.w - 1, r.y, r.x, r.y + r.h - 1, C.wood2);
     b.rect(r.x + 6, r.y - 4, 12, 4, C.green3).rect(r.x + 20, r.y - 3, 12, 3, C.red);
   },
-  'garage.bike': (b, r) => {
-    b.ellipse(r.x + 8, r.y + 30, 7, 7, C.ink).ellipse(r.x + 8, r.y + 30, 5, 5, C.stone3).ellipse(r.x + 30, r.y + 30, 7, 7, C.ink).ellipse(r.x + 30, r.y + 30, 5, 5, C.stone3);
+  'garage.bike': (b, r, s) => {
+    // The back tyre is flat until E26.
+    const flat = !on(s, 'bike_fixed');
+    b.ellipse(r.x + 8, r.y + 30, 7, 7, C.ink).ellipse(r.x + 8, r.y + 30, 5, 5, C.stone3);
+    if (flat) b.ellipse(r.x + 30, r.y + 32, 8, 5, C.ink).ellipse(r.x + 30, r.y + 32, 6, 3, C.stone3);
+    else b.ellipse(r.x + 30, r.y + 30, 7, 7, C.ink).ellipse(r.x + 30, r.y + 30, 5, 5, C.stone3);
     b.line(r.x + 8, r.y + 30, r.x + 18, r.y + 18, C.red).line(r.x + 18, r.y + 18, r.x + 30, r.y + 30, C.red).line(r.x + 18, r.y + 18, r.x + 28, r.y + 18, C.red).rect(r.x + 14, r.y + 15, 6, 2, C.ink);
   },
   'garage.paint': (b, r) => {
@@ -573,8 +609,14 @@ const PROPS: Record<string, Prop> = {
     b.vline(r.x + 8, r.y + 10, FLOOR_Y - 1, C.wood3).vline(r.x + r.w - 9, r.y + 10, FLOOR_Y - 1, C.wood3);
     for (let y = r.y + 18; y < FLOOR_Y; y += 10) b.hline(r.x + 8, r.x + r.w - 9, y, C.wood3);
   },
-  'cellar.bottles': (b, r) => {
-    for (let i = 0; i < 5; i++) b.rect(r.x + 4 + i * 7, r.y + 20, 5, 28, C.green1).rect(r.x + 5 + i * 7, r.y + 14, 3, 6, C.green1).set(r.x + 5 + i * 7, r.y + 24, C.green3);
+  // Papa's four old bottles (E21); once in order, the hiding place behind them is open.
+  'cellar.bottles': (b, r, s) => {
+    b.rect(r.x + 1, r.y + 12, r.w - 2, r.h - 12, C.wood1);
+    if (on(s, 'bottles_done')) b.rect(r.x + 6, r.y + 18, r.w - 12, 14, C.black).frame(r.x + 5, r.y + 17, r.w - 10, 16, C.wood3);
+    for (let i = 0; i < 4; i++) {
+      const x = r.x + 4 + i * 9;
+      b.rect(x, r.y + 22, 6, 26, C.green1).rect(x + 1, r.y + 15, 4, 7, C.green1).rect(x + 1, r.y + 30, 4, 6, C.paper).set(x + 2, r.y + 26, C.green3);
+    }
   },
   'cellar.cobweb': (b, r) => {
     for (let i = 0; i < 5; i++) b.line(r.x + 2, r.y + 2, r.x + 2 + i * 6, r.y + 22 - i * 4, C.stone3);
@@ -607,9 +649,15 @@ const PROPS: Record<string, Prop> = {
     for (let j = 0; j < 12; j++) b.hline(r.x + 7 - Math.floor(j / 4), r.x + 17 + Math.floor(j / 4), r.y + 2 + j, C.rose);
     for (let x = r.x + 4; x < r.x + 21; x += 2) b.vline(x, r.y + 14, r.y + 17, C.wine1);
   },
-  'attic.trunk': (b, r) => {
-    b.rect(r.x, r.y + 6, r.w, r.h - 6, C.wood3).ellipse(r.x + r.w / 2, r.y + 7, r.w / 2, 5, C.wood4);
-    b.vline(r.x + 8, r.y + 3, r.y + r.h - 1, C.iron).vline(r.x + r.w - 9, r.y + 3, r.y + r.h - 1, C.iron).rect(r.x + r.w / 2 - 2, r.y + 10, 4, 5, C.brass);
+  // The trunk with its colour padlock (E29): open, the lid stands up and the padlock hangs loose.
+  'attic.trunk': (b, r, s) => {
+    b.rect(r.x, r.y + 6, r.w, r.h - 6, C.wood3);
+    if (on(s, 'trunk_open')) b.rect(r.x + 2, r.y - 10, r.w - 4, 14, C.wood4).frame(r.x + 2, r.y - 10, r.w - 4, 14, C.wood2).rect(r.x + 4, r.y + 6, r.w - 8, 4, C.black);
+    else b.ellipse(r.x + r.w / 2, r.y + 7, r.w / 2, 5, C.wood4);
+    b.vline(r.x + 8, r.y + 3, r.y + r.h - 1, C.iron).vline(r.x + r.w - 9, r.y + 3, r.y + r.h - 1, C.iron);
+    const ly = on(s, 'trunk_open') ? r.y + 14 : r.y + 10;
+    b.rect(r.x + r.w / 2 - 5, ly, 10, 7, C.brass);
+    for (let i = 0; i < 4; i++) b.set(r.x + r.w / 2 - 4 + i * 2, ly + 3, [C.red, C.yellow, C.blue, C.green3][i]);
   },
   'attic.stain': (b, r) => {
     b.ellipse(r.x + 20, r.y + 34, 18, 30, C.cream);
@@ -679,6 +727,10 @@ const PROPS: Record<string, Prop> = {
     for (let x = r.x + 2; x < r.x + r.w - 6; x += 8) b.rect(x, r.y + 18, 6, 6, [C.lime, C.redTile, C.royal, C.tileYellow, C.turquoise][(x / 8) % 5 | 0]);
     b.ellipse(r.x + 20, r.y - 4, 5, 4, C.pink);
   },
+  'bathroom.hairdryer': (b, r, s) => {
+    b.rect(r.x + 9, r.y + 2, 6, 3, C.stone2);
+    if (!on(s, 'hairdryer_taken')) b.rect(r.x + 4, r.y + 6, 16, 9, C.pink).ellipse(r.x + 6, r.y + 10, 4, 5, C.pink).rect(r.x + 14, r.y + 14, 5, 12, C.pink).set(r.x + 3, r.y + 10, C.ink);
+  },
   'bathroom.duck': (b, r) => b.ellipse(r.x + 11, r.y + 14, 7, 5, C.yellow).ellipse(r.x + 15, r.y + 8, 4, 4, C.yellow).set(r.x + 19, r.y + 8, C.orange).hline(r.x + 13, r.x + 17, r.y + 7, C.ink),
   // Théo's room (photo): bright turquoise walls, white cube bookcase, oak desk, pine bed with a pink blanket.
   'theo.poster': (b, r) => posterBox(b, r, C.blueDark, C.white),
@@ -718,6 +770,11 @@ const PROPS: Record<string, Prop> = {
     if (!on(s, 'oring_taken')) b.frame(r.x + 8, r.y + 9, 4, 4, C.ink);
     b.frame(r.x + 15, r.y + 9, 4, 4, C.ink);
     b.line(r.x + 34, r.y + 14, r.x + 38, r.y + 2, C.ink).rect(r.x + 34, r.y, 8, 4, C.mustard);
+  },
+  // The overloaded power strip: console, amp and fairy lights all plugged in.
+  'florent.strip': (b, r) => {
+    b.rect(r.x + 2, r.y + r.h - 6, r.w - 4, 5, C.white).frame(r.x + 2, r.y + r.h - 6, r.w - 4, 5, C.stone2).set(r.x + 4, r.y + r.h - 4, C.red);
+    for (let i = 0; i < 4; i++) b.line(r.x + 7 + i * 4, r.y + r.h - 6, r.x + 4 + i * 6, r.y + 2, [C.ink, C.stone1, C.green3, C.ink][i]);
   },
   'florent.console': (b, r) => b.rect(r.x, r.y, r.w, r.h - 10, C.ink).rect(r.x + 2, r.y + 2, r.w - 4, r.h - 14, C.purple).rect(r.x + 8, r.y + r.h - 8, 12, 6, C.stone1).rect(r.x + 30, r.y + r.h - 8, 10, 6, C.stone2),
   // The parents' room (photo): pale walls with a mauve band behind the bed, the rainbow-striped duvet with mustard
@@ -1040,23 +1097,23 @@ export const VISUAL_FLAGS: Record<PlaceId, (keyof Flags)[]> = {
   front: ['key_taken', 'door_unlocked', 'gates_open'],
   football: ['extension_taken', 'gates_open'],
   pool: ['ball_freed', 'cover_open', 'pool_drained', 'plug_fixed', 'thinner_taken', 'bay_open', 'gates_open'],
-  garden: [],
+  garden: ['delivered', 'cat_fed', 'parcel_taken', 'keyring_taken'],
   hall: ['gatekey_taken'],
   living: ['booklet_taken', 'queen_placed', 'bay_open'],
   music: ['sticks_taken'],
   kitchen: ['milk_taken', 'dough_mixed', 'fridge_open'],
   corridor0: [],
   wc0: ['wc_wet'],
-  office: ['pliers_taken'],
-  utility: ['detergent_taken', 'machine_running', 'power_on', 'flours_taken'],
-  garage: ['pole_taken', 'wrench_taken', 'power_on'],
-  cellar: ['bar_taken', 'hatch_open'],
-  attic: ['door_revealed', 'secret_open', 'lab_code'],
+  office: ['pliers_taken', 'drawer_open'],
+  utility: ['detergent_taken', 'machine_running', 'power_on', 'flours_taken', 'sardines_taken'],
+  garage: ['pole_taken', 'wrench_taken', 'power_on', 'bike_fixed'],
+  cellar: ['bar_taken', 'hatch_open', 'bottles_done'],
+  attic: ['door_revealed', 'secret_open', 'lab_code', 'trunk_open'],
   laundry: [],
   landing: [],
   wc1: [],
   julien: ['queen_taken'],
-  bathroom: [],
+  bathroom: ['hairdryer_taken'],
   theo: ['cube_solved'],
   florent: ['oring_taken'],
   parents: ['safe_found', 'safe_open', 'mirror_code', 'shower_repaired', 'oring_fitted'],

@@ -23,6 +23,8 @@ const P = {
   T: C.chocHi,
   m: C.yellow,
   e: C.green3,
+  P: C.pink,
+  S: C.stone2,
 };
 
 const E = '................';
@@ -197,6 +199,15 @@ const ICONS: Record<ItemId, string[]> = {
   ],
   scrap: [E, '...pppppppp.....', '...pkkkkkpppp...', '...pppppppppp...', '...pkkkkkkkpp...', '...pppppppppp...', '...pkkkkpppp....', '...ppppppppp....', '...pkkkkkkp.....', '...pppppppp.....', '....pp.ppp......', E, E, E, E, E],
   note: [E, E, '...mmmmmmmmmm...', '...mkkkkkkkkm...', '...mmmmmmmmmm...', '...mkkkkkkmmm...', '...mmmmmmmmmm...', '...mkkkkkkkkm...', '...mmmmmmmmmm...', '...mkkkkmmmmm...', '...mmmmmmmmGG...', '...mmmmmmmmG....', E, E, E, E],
+  patches: [E, '..rrrr..........', '.rRRRRr.........', '.rRRRRr...rrrr..', '.rRRRRr..rRRRRr.', '..rrrr...rRRRRr.', '.........rRRRRr.', '..........rrrr..', E, '...iiiiiiiiii...', '...iIIIIIIIIi...', '...iIlllllIIiii.', '...iIIIIIIIIi...', '...iiiiiiiiii...', E, E],
+  hairdryer: [E, '..PPPPPPPPP.....', '.PPPPPPPPPPPP...', 'kPPPPPPPPPPPPP..', 'kPPPPPPPPPPPPP..', '.PPPPPPPPPPPP...', '..PPPPPPPPP.....', '.......PPP......', '.......PPP......', '.......PPP......', '.......PPP......', '.......PPPk.....', '.......PPP.k....', '...........kk...', E, E],
+  sardines: [E, E, E, '.IIIIIIIIIIIIII.', 'IhhhhhhhhhhhhhhI', 'IllllllllllllllI', 'IlwwlllllllllllI', 'IlwwllllnnnnnllI', 'IllllllllllllllI', 'IhhhhhhhhhhhhhhI', '.IIIIIIIIIIIIII.', E, E, E, E, E],
+  tonka: [E, E, E, '.....tttttt.....', '...ttTTtttttt...', '..tTTttttTttt...', '.ttTttttttTttt..', '.tttttTttttttt..', '.tttTtttttTttt..', '..ttttttTtttt...', '...ttttttttt....', '.....tttttt.....', E, E, E, E],
+  pump: [E, '.....kkkkkk.....', '.......kk.......', '.......II.......', '......IIII......', '......ShhS......', '......ShhS......', '......ShhS..rr..', '......ShhSrrrr..', '......ShhS.rr...', '......ShhS.r.r..', '......ShhS......', '......SSSS......', '....kkkkkkkk....', E, E],
+  keyring: [E, '....IIII........', '...I....I.......', '..I......I......', '..I......I......', '...I....I.......', '....IIIIgg......', '........gGg.....', '.........gGg....', '..........gg....', '.........gg.g...', '..........g.....', E, E, E, E],
+  scrap2: [E, '...pppppppp.....', '...pkkkkkpppp...', '...pppppppppp...', '...pkkkkkkkpp...', '...pppppppppp...', '...pkkkkpppp....', '...ppppppppp....', '...pkkkkkkp.....', '...pppppppp.....', '....pp.ppp......', '.........kk.....', '........k..k....', '..........k.....', '.........kkkk...', E],
+  scrap3: [E, '...pppppppp.....', '...pkkkkkpppp...', '...pppppppppp...', '...pkkkkkkkpp...', '...pppppppppp...', '...pkkkkpppp....', '...ppppppppp....', '...pkkkkkkp.....', '...pppppppp.....', '....pp.ppp......', '.........kkk....', '...........k....', '.........kkk....', '...........k....', '.........kkk....'],
+  hat: [E, '....ww.ww.ww....', '...wwwwwwwwww...', '..wwwwwwwwwwww..', '..wwwwwcwwwwww..', '..wwwwwwwwwcww..', '...wwwwwwwwww...', '....wwwwwwww....', '....wcccccccw...', '....wwwwwwww....', '....wrrrrrrw....', '....wwwwwwww....', E, E, E, E],
   bar: [
     E,
     '.............ii.',

@@ -353,7 +353,7 @@ needed.
 
 Items: Clé de la maison, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du
 Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau,
-Fragment n°1, Fragment n°2, Fragment n°3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz,
+Fragment n° 1, Fragment n° 2, Fragment n° 3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz,
 Sèche-cheveux, Boîte de sardines, Fève tonka, Pompe à vélo, Trousseau de Papa, Toque de Papa (names in the Player
 copy).
 
@@ -372,12 +372,12 @@ copy).
 | E17 | Switch the circuit breaker back on (garage), take the Lessive (utility shelf), use it on the washing machine | no power: `line.machinePower` (the Lessive is kept); no detergent: `line.machineEmpty`; after E17: `line.machineDone` | - Lessive; the machine runs; at the next place change: `line.machineDing`, mom -> gardening |
 | E08 | Repair the shower (parents, Maman away): the Joint torique (florent: the Nerf modding kit, which also holds the Rustines), then the Clé à molette (garage workbench) | shower states: broken (look « Il manque un joint. », use `line.showerBroken`, wrench `line.wrenchNothing`); joint fitted (Joint used up, flag `shower_joint`, look `parents.shower.lookLoose`, use `line.showerLoose`); repaired (wrench used up) | taking the kit: + Joint torique, + Rustines; - Joint, - Clé à molette; shower repaired (E08 solved at the wrench) |
 | E09 | Use the shower: hot water runs, the steam reveals a code on the mirror (CUT08) | shower not repaired: the lines above | notebook N11 (safe code 1987) at the end of CUT08; the digits stay on the mirror for good |
-| E10 | Look at the crooked painting (parents): it hides the safe; use the safe, type 1987 | N11 not in the notebook: `line.codeUnknown`; wrong code: `line.codeWrong` | + Clé ancienne, + Photo du gâteau, + Fragment n°1, + Mot de Papa; notebook N12 |
+| E10 | Look at the crooked painting (parents): it hides the safe; use the safe, type 1987 | N11 not in the notebook: `line.codeUnknown`; wrong code: `line.codeWrong` | + Clé ancienne, + Photo du gâteau, + Fragment n° 1, + Mot de Papa; notebook N12 |
 | E14 | Drain the pool: open the cover (switch), the Pince (office shelves, Papa's toolbox) on the pump, use the pump, take the Dissolvant from the pool floor | cover switch before E02: `line.coverBall`; pump before the Pince: `line.pumpPlug`; pump with cover closed: `line.pumpCover` | - Pince; the pool empties; + Dissolvant when taken (E14 solved when taken) |
 | E11 | Use the Dissolvant on the paint stain (attic) | - | - Dissolvant; CUT09: a door with a lock and a keypad appears |
 | E12 | Open the revealed door: the Clé ancienne in the lock and the code 2510 on its keypad, in any order | door used without the code known: `line.doorLocked`; wrong code: `line.codeWrong` | - Clé ancienne; CUT10 when both are done: the door opens; exit attic -> laundry |
 | E20 | Heat the Mot de Papa with the Sèche-cheveux (taken in the corridor bathroom): invisible ink written with lemon juice appears | - | notebook N13 (the cellar bottles go from the oldest to the youngest); the note keeps its revealed text (look `item.note.lookInk`) |
-| E21 | The bottle rack (cellar): tap Papa's four bottles from the oldest to the youngest vintage (1987, 1994, 2003, 2011) on the sequence pad | N13 not in the notebook: `line.bottlesUnknown`; wrong order: `line.bottlesWrong`, the bottles go back, unlimited tries | a hidden compartment opens: + Fragment n°2 |
+| E21 | The bottle rack (cellar): tap Papa's four bottles from the oldest to the youngest vintage (1987, 1994, 2003, 2011) on the sequence pad | N13 not in the notebook: `line.bottlesUnknown`; wrong order: `line.bottlesWrong`, the bottles go back, unlimited tries | a hidden compartment opens: + Fragment n° 2 |
 | E22 | Open the garden tap (pool): the hose runs wild in the garden (CUT14) | Maman not gardening: `line.hoseLawn` (the water only waters the lawn) | Maman soaked: mom -> changing for 90 s (the garden is free, her room guarded) |
 | E23 | Use the Boîte de sardines (utility shelf) on the neighbours' cat lying on the parcel (garden, after CUT13) | the cat or the parcel used without the sardines: `line.catHiss` | - Boîte de sardines; the cat eats and runs off over the hedge |
 | E24 | Take the parcel (garden) | the cat still on it: `line.catHiss` | + Fève tonka, + Pompe à vélo (`line.parcelOpen`) |
@@ -385,7 +385,7 @@ copy).
 | E26 | Repair Florent's bike (garage): the Rustines and the Pompe à vélo, in any order | one of the two only: `line.bikeHalf` | - Rustines, - Pompe à vélo; when Sam then leaves the garage: CUT15, Florent rides away (florent -> riding) |
 | E27 | Plug the Sèche-cheveux into Florent's overloaded power strip (florent, Florent riding) | Florent not riding: `line.stripNotNow`; Papa not at his desk: `line.fusesNobody`; nothing left to get in the office: `line.fusesNoNeed` | the power cut (CUT18): dad -> fuses (garage) for 60 s; the Sèche-cheveux is kept |
 | E28 | Open Papa's desk drawer (office) with the Trousseau de Papa, once Papa is wary | drawer used without it: `line.drawerLocked`; Papa not wary yet: the drawer opens on bills only (`office.drawer.lookBills`), the keyring is kept | - Trousseau de Papa; Papa's sketchbook: notebook N14 (the trunk colours) |
-| E29 | Open the attic trunk: the colour padlock on the sequence pad (red, yellow, blue, green) | N14 not in the notebook: `line.trunkUnknown`; wrong colours: `line.codeWrong`, unlimited tries | + Toque de Papa, + Fragment n°3 |
+| E29 | Open the attic trunk: the colour padlock on the sequence pad (red, yellow, blue, green) | N14 not in the notebook: `line.trunkUnknown`; wrong colours: `line.codeWrong`, unlimited tries | + Toque de Papa, + Fragment n° 3 |
 | E13 | In the laundry, put the three fragments on Papa's recipe notebook, in any order | fewer than three yet: `line.recipeMore` (the fragment is kept in the notebook) | - Fragments; CUT11 (revelation, the family gathers), then CUT16 (the jury rings) |
 | E30 | Give Papa (laundry, after CUT16) the Toque de Papa and the Fève tonka, in any order | the first item given stays with Papa (it leaves the inventory), `line.dadStillMissing`; the second completes E30 | - Toque, - Fève tonka; CUT17, then the Ending |
 | E15 | Unblock the cellar hatch from below with the Barre de fer | hatch used without the bar: `line.hatchStuck` | - Barre de fer; hatch open both ways for good |
@@ -720,10 +720,10 @@ Puzzles, characters, captures, timers
   answers `line.stripNotNow`; the Sèche-cheveux is never used up and no other object changes state.
 - AC-65 [unit] Given the Sèche-cheveux used on the Mot de Papa, then N13 is added once (E20); given the bottle rack,
   then it refuses before N13 (`line.bottlesUnknown`), accepts only 1987, 1994, 2003, 2011 in that order, resets on a
-  wrong order (`line.bottlesWrong`, unlimited tries) and gives the Fragment n°2 once (E21).
+  wrong order (`line.bottlesWrong`, unlimited tries) and gives the Fragment n° 2 once (E21).
 - AC-66 [unit] Given the desk drawer, then it refuses without the Trousseau de Papa (`line.drawerLocked`) and with
   it adds N14 (E28) only once Papa is wary (before: bills only, the keyring is kept, no N14); given the trunk, then it refuses before N14 (`line.trunkUnknown`), accepts only red, yellow,
-  blue, green and gives the Toque de Papa and the Fragment n°3 once (E29).
+  blue, green and gives the Toque de Papa and the Fragment n° 3 once (E29).
 - AC-67 [unit] Given the recipe notebook, then it takes the three fragments in any order (`line.recipeMore` before
   the third), the third plays CUT11 then CUT16 (E13); then giving Papa the Toque de Papa and the Fève tonka in any order
   (one alone: `line.dadStillMissing`) plays CUT17 and the Ending (E30), and nothing else ends the game.
@@ -860,7 +860,7 @@ Final app name: fr "Mini Mansion", en "Mini Mansion". Language-specific assets: 
 | about.story | Enfant, je passais des heures à fouiller chaque pièce du manoir de Maniac Mansion, chez une famille complètement folle. Cette fois, j'ai voulu que le manoir soit une vraie maison : la mienne, transformée en pixel art, avec ses habitants loufoques et un secret bien gardé. | As a child, I spent hours searching every room of the Maniac Mansion manor, home to a completely crazy family. This time, I wanted the mansion to be a real house: mine, turned into pixel art, with its zany inhabitants and a well-kept secret. |
 | about.authorTitle | Un mot de l'auteur | A word from the author |
 | about.dataTitle | Tes données | Your data |
-| item names | Clé de la maison, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau, Fragment n°1, Fragment n°2, Fragment n°3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz, Sèche-cheveux, Boîte de sardines, Fève tonka, Pompe à vélo, Trousseau de Papa, Toque de Papa | House key, Gate key, Pole, Extension, Extended pole, Drumsticks, White queen, Rubik's Cube booklet, O-ring, Puncture patches, Adjustable wrench, Pliers, Detergent, Paint thinner, Old key, Cake photo, Scrap no. 1, Scrap no. 2, Scrap no. 3, Papa's note, Iron bar, Rice milk, Chestnut flour, Rice flour, Hair dryer, Tin of sardines, Tonka bean, Bike pump, Papa's keyring, Papa's chef's hat |
+| item names | Clé de la maison, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau, Fragment n° 1, Fragment n° 2, Fragment n° 3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz, Sèche-cheveux, Boîte de sardines, Fève tonka, Pompe à vélo, Trousseau de Papa, Toque de Papa | House key, Gate key, Pole, Extension, Extended pole, Drumsticks, White queen, Rubik's Cube booklet, O-ring, Puncture patches, Adjustable wrench, Pliers, Detergent, Paint thinner, Old key, Cake photo, Scrap no. 1, Scrap no. 2, Scrap no. 3, Papa's note, Iron bar, Rice milk, Chestnut flour, Rice flour, Hair dryer, Tin of sardines, Tonka bean, Bike pump, Papa's keyring, Papa's chef's hat |
 
 ## Out of scope
 

@@ -4,6 +4,7 @@ import { Canvas, FilterMode, Group, Image, MipmapMode, Rect, SkImage } from '@sh
 import { memo } from 'react';
 import { StyleSheet } from 'react-native';
 
+import { Extra } from '../art/act2';
 import { heroFrame, personFrame } from '../art/cast';
 import { C } from '../art/palette';
 import { PixelBuffer } from '../art/pixels';
@@ -34,6 +35,8 @@ interface Props {
   clock: number;
   // Inhabitants standing around Sam for a scene (the adult of a capture, the family at the end).
   guests?: readonly CharacterId[];
+  // Extra sprites of an outside view (the delivery van, the jury...).
+  extras?: readonly Extra[];
 }
 
 function Sprite({ buf, x, y }: { buf: PixelBuffer; x: number; y: number }) {
@@ -47,9 +50,9 @@ function Full({ image }: { image: SkImage | null }) {
   return <Image image={image} x={0} y={0} width={image.width()} height={image.height()} sampling={SAMPLING} />;
 }
 
-function SceneView({ state, hero, transform, width, height, speaker, selected, page, unread, clock, guests = [] }: Props) {
+function SceneView({ state, hero, transform, width, height, speaker, selected, page, unread, clock, guests = [], extras = [] }: Props) {
   const placed = charactersIn(state).filter((c) => !guests.includes(c.id));
-  const people = placed.map((c) => ({
+  const people: { key: string; y: number; buf: PixelBuffer; x: number; top: number }[] = placed.map((c) => ({
     key: c.id,
     y: c.pos.y,
     buf: personFrame(personSprites(c.id), c.id, { talking: speaker === c.id, busy: c.busy, clock }),
@@ -67,6 +70,7 @@ function SceneView({ state, hero, transform, width, height, speaker, selected, p
     const gy = hero.pos.y + (i % 2 === 0 ? 0 : 3);
     people.push({ key: g, y: gy, buf: personFrame(personSprites(g), g, { talking: speaker === g, busy: false, clock }), x: gx - 12, top: gy - 48 });
   });
+  for (const e of extras) people.push({ key: `extra-${e.key}`, y: e.y + e.buf.h, buf: e.buf, x: e.x, top: e.y });
   const drawables = [...people, { key: 'hero', y: hero.pos.y, buf: heroBuf, x: hero.pos.x - 12, top: hero.pos.y - 48 }].sort((a, b) => a.y - b.y);
   const inv = inventoryPage(state.inventory, page);
   const n = NOTEBOOK_BUTTON;

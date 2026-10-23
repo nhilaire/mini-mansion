@@ -30,12 +30,12 @@ describe('the whole solution (AC-21, AC-32)', () => {
     expect(state.flags.ending).toBe(true);
   });
 
-  it('solves every puzzle exactly once except the optional E15 and the doorbell (the dough frees the office)', () => {
+  it('solves every puzzle exactly once except the doorbell (the dough frees the office)', () => {
     const puzzles = events.filter((e) => e.type === 'puzzle').map((e) => (e as { puzzle: number }).puzzle);
-    expect([...puzzles].sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19]);
+    expect([...puzzles].sort((a, b) => a - b)).toEqual(Array.from({ length: 30 }, (_, i) => i + 1).filter((n) => n !== 16));
   });
 
-  it('E13 ends the game: game_complete once, with the captures, then the ending beat', () => {
+  it('E30 ends the game: game_complete once, with the captures, then the ending beat', () => {
     expect(events.filter((e) => e.type === 'complete')).toEqual([{ type: 'complete', captures: 0 }]);
     const last = outcomes[outcomes.length - 1];
     expect(last.beats[last.beats.length - 1]).toEqual({ type: 'ending' });
@@ -309,14 +309,28 @@ describe('E11-E13: the attic, the lab door, the lab', () => {
     expect(codeFirst.outcomes[2].events).toEqual([{ type: 'puzzle', puzzle: 12 }]);
   });
 
-  it('the recipe scrap on the recipe notebook leads to the revelation', () => {
-    const o = interact(at('laundry', { inventory: ['scrap'], captures: 2 }), item('scrap', 'laundry.notebook'));
-    expect(o.events).toEqual([{ type: 'puzzle', puzzle: 13 }, { type: 'complete', captures: 2 }]);
-    expect(o.state.finished).toBe(true);
-    expect(o.beats[o.beats.length - 1]).toEqual({ type: 'ending' });
+  it('the three fragments on the recipe notebook lead to the revelation (E13), then the jury rings (AC-67)', () => {
+    let s = at('laundry', { inventory: ['scrap', 'scrap2', 'scrap3'], captures: 2 });
+    for (const piece of ['scrap3', 'scrap'] as const) {
+      const more = interact(s, item(piece, 'laundry.notebook'));
+      expect(more.beats).toContainEqual({ type: 'say', speaker: 'hero', key: 'line.recipeMore' });
+      expect(more.events).toEqual([]);
+      s = more.state;
+    }
+    const o = interact(s, item('scrap2', 'laundry.notebook'));
+    expect(o.events).toEqual([{ type: 'puzzle', puzzle: 13 }]);
+    expect(o.state.finished).toBe(false);
+    expect(o.state.flags.finale).toBe(true);
+    expect(o.state.inventory).toEqual([]);
+    expect(o.state.cuts).toEqual(['cut11', 'cut16']);
+    expect(o.beats).toContainEqual({ type: 'view', view: 'jury' });
+    expect(o.beats).toContainEqual({ type: 'say', speaker: 'jury', key: 'line.juryRing' });
+    expect(o.beats[o.beats.length - 1]).toEqual({ type: 'say', speaker: 'dad', key: 'line.dadJury' });
     // The whole family joins Sam in the lab, each one before their line.
     const casts = o.beats.filter((b) => b.type === 'cast');
-    expect(casts[casts.length - 1]).toEqual({ type: 'cast', characters: ['dad', 'mom', 'theo', 'julien', 'florent'] });
+    expect(casts[casts.length - 2]).toEqual({ type: 'cast', characters: ['dad', 'mom', 'theo', 'julien', 'florent'] });
+    // Then the scene hands over to the family standing in the lab for the finale.
+    expect(casts[casts.length - 1]).toEqual({ type: 'cast', characters: [] });
     for (const [who, key] of [['dad', 'line.final2'], ['mom', 'line.final5'], ['theo', 'line.final6'], ['julien', 'line.final7'], ['florent', 'line.final8']] as const) {
       const said = o.beats.findIndex((b) => b.type === 'say' && b.key === key);
       const joined = o.beats.findIndex((b) => b.type === 'cast' && b.characters.includes(who));

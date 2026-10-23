@@ -97,6 +97,50 @@ export function Keypad({ title, onSubmit, onClose }: { title: string; onSubmit: 
   );
 }
 
+// The sequence pads (PRD E21, E29): Papa's four bottles (tap them from the oldest to the youngest) and the trunk's
+// colour padlock. The sequence is sent once it has as many taps as the code.
+const PAD_SWATCH: Record<string, string> = { red: '#c83a32', yellow: '#e8c040', blue: '#3a6ad0', green: '#3a9a48', purple: '#8a4ab8', orange: '#e07a2a' };
+const BOTTLE = '#2e6a3a';
+
+export function SequencePad({ title, buttons, length, colours, onSubmit, onClose }: { title: string; buttons: readonly string[]; length: number; colours: boolean; onSubmit: (code: string[]) => void; onClose: () => void }) {
+  const { t } = useI18n();
+  const [code, setCode] = useState<string[]>([]);
+  const press = (b: string) => {
+    const next = [...code, b];
+    if (next.length < length) setCode(next);
+    else {
+      setCode([]);
+      onSubmit(next);
+    }
+  };
+  const label = (b: string) => (colours ? t.colours[b as keyof typeof t.colours] : b);
+  return (
+    <View testID="pad" style={[StyleSheet.absoluteFill, styles.center, styles.dim]}>
+      <View style={[styles.panel, styles.keypad]}>
+        <Text style={styles.menuTitle}>{title}</Text>
+        <Text testID="pad-display" style={styles.display}>
+          {Array.from({ length }, (_, i) => (i < code.length ? '●' : '_')).join(' ')}
+        </Text>
+        <View style={[styles.row, styles.padRow]}>
+          {buttons.map((b) => (
+            <Pressable
+              key={b}
+              testID={`pad-${b}`}
+              accessibilityRole="button"
+              accessibilityLabel={label(b)}
+              onPress={() => press(b)}
+              style={({ pressed }) => [styles.key, styles.padKey, { backgroundColor: colours ? PAD_SWATCH[b] : BOTTLE }, pressed && styles.pressed]}
+            >
+              <Text style={styles.padText}>{label(b)}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Button label={t.keypad.close} onPress={onClose} variant="secondary" testID="pad-close" compact />
+      </View>
+    </View>
+  );
+}
+
 function Key({ label, testID, onPress, wide, disabled }: { label: string; testID: string; onPress: () => void; wide?: boolean; disabled?: boolean }) {
   return (
     <Pressable
@@ -327,6 +371,9 @@ const styles = StyleSheet.create({
   keyRows: { gap: spacing.xs },
   key: { width: 52, height: 44, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
   keyWide: { width: 96 },
+  padRow: { flexWrap: 'wrap', justifyContent: 'center', maxWidth: 420 },
+  padKey: { width: 64, height: 52 },
+  padText: { color: '#ffffff', fontFamily: font.family, fontSize: font.small, fontWeight: '700', textShadowColor: '#000000', textShadowRadius: 2 },
   keyText: { color: colors.text, fontFamily: font.family, fontSize: font.body, fontWeight: '700' },
   chessPanel: { flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
   boardRow: { flexDirection: 'row' },

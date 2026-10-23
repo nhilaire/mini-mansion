@@ -202,6 +202,22 @@ describe('French typography and tone (AC-45)', () => {
     expect(fr.about.story[0]).toBe(
       `Enfant, je passais des heures à fouiller chaque pièce du manoir de Maniac Mansion, chez une famille complètement folle. Cette fois, j'ai voulu que le manoir soit une vraie maison${N}: la mienne, transformée en pixel art, avec ses habitants loufoques et un secret bien gardé.`,
     );
+    // Act II (PRD v0.2.0).
+    const frCopy: [string, string][] = [
+      ['line.dadWary', `Tiens… mon ordinateur est allumé${N}? Quelqu'un fouine dans cette maison. Plus question que je quitte ce bureau${N}!`],
+      ['line.bellIgnored', `Encore la sonnette${N}? On ne m'y reprendra plus${N}!`],
+      ['line.deliveryThrow', `Personne${N}? Bon, je le lance par-dessus le portail${N}!`],
+      ['line.momSoaked', `Aaah${N}! Ce tuyau est devenu fou${N}! Je suis trempée, je monte me changer${N}!`],
+      ['line.florentBike', `Mon vélo est réparé${N}?! Trop bien, je vais faire un tour${N}!`],
+      ['line.dadFuses', `Les plombs ont sauté${N}! Qui a branché quoi${N}?! J'y vais…`],
+      ['line.fusesAgain', `Encore les plombs${N}?! Cette maison est ensorcelée…`],
+      ['line.dadJury', `Le jury${N}! Déjà${N}?! Il me manque ma toque porte-bonheur… et l'ingrédient secret du colis${N}!`],
+      ['line.juryTaste', `Sans gluten, sans lactose… et divin${N}! Premier prix${N}!`],
+      ['line.finalBakery', `Demain, toutes les pâtisseries de la ville seront vides${N}: la voilà, la catastrophe${N}!`],
+    ];
+    for (const [key, text] of frCopy) expect([key, line(DICTIONARIES.fr, key)]).toEqual([key, text]);
+    expect(fr.pad).toEqual({ bottles: `Les bouteilles de Papa${N}: de la plus vieille à la plus jeune${N}?`, trunk: 'Le cadenas de la malle' });
+    expect(fr.colours).toEqual({ red: 'Rouge', yellow: 'Jaune', blue: 'Bleu', green: 'Vert', purple: 'Violet', orange: 'Orange' });
     expect(Object.values(fr.story.names.items)).toEqual([
       'Clé de la maison',
       'Clé du portail',
@@ -218,12 +234,21 @@ describe('French typography and tone (AC-45)', () => {
       'Dissolvant',
       'Clé ancienne',
       'Photo du gâteau',
-      'Fragment de recette',
+      'Fragment n° 1',
       'Mot de Papa',
       'Barre de fer',
       'Lait de riz',
       'Farine de châtaigne',
       'Farine de riz',
+      'Rustines',
+      'Sèche-cheveux',
+      'Boîte de sardines',
+      'Fève tonka',
+      'Pompe à vélo',
+      'Trousseau de Papa',
+      'Fragment n° 2',
+      'Fragment n° 3',
+      'Toque de Papa',
     ]);
   });
 
@@ -232,6 +257,21 @@ describe('French typography and tone (AC-45)', () => {
     expect([en.home.subtitle, en.home.newGame, en.home.confirmNew]).toEqual(['The House Secret', 'New game', 'Erase your current game?']);
     expect([en.ending.title, en.ending.time(3, '12'), en.ending.captures(2)]).toEqual(['The End', 'Play time: 3 h 12', 'Times caught: 2']);
     expect(en.chess.title).toBe("Théo's problem: White to play and mate in 2");
+    const enCopy: [string, string][] = [
+      ['line.dadWary', "Hmm… my computer is on? Someone is snooping around this house. No way I'm leaving this office again!"],
+      ['line.bellIgnored', "The doorbell again? You won't fool me twice!"],
+      ['line.deliveryThrow', "Nobody? Fine, I'll throw it over the gate!"],
+      ['line.momSoaked', "Aaah! This hose has gone crazy! I'm soaked, I'm going up to change!"],
+      ['line.florentBike', "My bike is fixed?! Awesome, I'm going for a ride!"],
+      ['line.dadFuses', "The fuses blew! Who plugged what in?! I'm going…"],
+      ['line.fusesAgain', 'The fuses again?! This house is bewitched…'],
+      ['line.dadJury', "The jury! Already?! I'm missing my lucky chef's hat… and the secret ingredient from the parcel!"],
+      ['line.juryTaste', 'Gluten-free, lactose-free… and divine! First prize!'],
+      ['line.finalBakery', 'Tomorrow every bakery in town will be empty: there it is, the disaster!'],
+    ];
+    for (const [key, text] of enCopy) expect([key, line(en, key)]).toEqual([key, text]);
+    expect(en.pad).toEqual({ bottles: "Papa's bottles: oldest to youngest?", trunk: 'The trunk padlock' });
+    expect(en.colours).toEqual({ red: 'Red', yellow: 'Yellow', blue: 'Blue', green: 'Green', purple: 'Purple', orange: 'Orange' });
     expect(Object.values(en.story.names.items)).toEqual([
       'House key',
       'Gate key',
@@ -248,12 +288,21 @@ describe('French typography and tone (AC-45)', () => {
       'Paint thinner',
       'Old key',
       'Cake photo',
-      'Recipe scrap',
+      'Scrap no. 1',
       "Papa's note",
       'Iron bar',
       'Rice milk',
       'Chestnut flour',
       'Rice flour',
+      'Puncture patches',
+      'Hair dryer',
+      'Tin of sardines',
+      'Tonka bean',
+      'Bike pump',
+      "Papa's keyring",
+      'Scrap no. 2',
+      'Scrap no. 3',
+      "Papa's chef's hat",
     ]);
     expect(en.intro.cards[2]).toBe('Sam heard it in the playground and decided to investigate.');
     expect(en.intro.cards[3]).toBe('Your goal: find where this famous recipe is hidden, and what it really is. It is somewhere in this house…');

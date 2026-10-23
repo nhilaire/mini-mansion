@@ -52,6 +52,9 @@ export const fr = {
   },
   notebook: { title: "Carnet d'indices", empty: "Rien noté pour l'instant.", close: 'Fermer' },
   keypad: { computer: "L'ordinateur de Papa", safe: 'Le coffre-fort', lab: 'La porte du labo', ok: 'Valider', clear: 'Effacer', close: 'Fermer' },
+  // Sequence pads: the cellar bottles (vintages) and the trunk padlock (colours).
+  pad: { bottles: typo('Les bouteilles de Papa : de la plus vieille à la plus jeune ?'), trunk: 'Le cadenas de la malle' },
+  colours: { red: 'Rouge', yellow: 'Jaune', blue: 'Bleu', green: 'Vert', purple: 'Violet', orange: 'Orange' },
   chess: {
     title: typo('Problème de Théo : les Blancs jouent et font mat en 2 coups'),
     wrong: typo('Raté, les Noirs s\'en sortent. On recommence !'),

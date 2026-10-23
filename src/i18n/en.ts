@@ -50,6 +50,8 @@ export const en: Strings = {
   },
   notebook: { title: 'Clue notebook', empty: 'Nothing noted yet.', close: 'Close' },
   keypad: { computer: "Papa's computer", safe: 'The safe', lab: 'The lab door', ok: 'OK', clear: 'Clear', close: 'Close' },
+  pad: { bottles: "Papa's bottles: oldest to youngest?", trunk: 'The trunk padlock' },
+  colours: { red: 'Red', yellow: 'Yellow', blue: 'Blue', green: 'Green', purple: 'Purple', orange: 'Orange' },
   chess: {
     title: "Théo's problem: White to play and mate in 2",
     wrong: 'Missed, Black escapes. Try again!',

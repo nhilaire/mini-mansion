@@ -1,7 +1,7 @@
 // Mutable working copy of the state while one interaction is resolved; collects beats and events.
 import { Beat, CharacterId, CutId, Flag, GameEvent, GameState, ItemId, NoteId, SfxName, Speaker } from './types';
 
-export const PUZZLE_COUNT = 19;
+export const PUZZLE_COUNT = 30;
 export const WRONG_LINES = 6;
 // E15 (cellar hatch) and E18 (side gates) are optional; one of E16 (doorbell) and E19 (dough) frees the office.
 export const OPTIONAL_PUZZLES: readonly number[] = [15, 18];
@@ -133,7 +133,7 @@ export class Ctx {
     return this.s.solved.includes(n);
   }
 
-  // Marks a puzzle solved (once). E13 ends the game.
+  // Marks a puzzle solved (once). E30 ends the game.
   solve(n: number): this {
     if (this.s.solved.includes(n)) return this;
     this.s.solved.push(n);

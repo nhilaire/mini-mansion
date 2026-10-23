@@ -1,8 +1,8 @@
 // Builds the Maestro walkthrough flow from the engine's solution (src/game/solution.ts), so that the flow cannot drift
 // from the rules: a Jest test compares it with .maestro/06-walkthrough.yaml (UPDATE_FLOWS=1 rewrites the file).
 // The inventory band pages like the game screen does (page reset on every place change), so items beyond the
-// first page are reached with the "more" slot. Waiting for a timer (the dough) waits until the screen shows that no
-// timer runs any more (fast mode: timers 30 times faster).
+// first page are reached with the "more" slot. Waiting for a timer waits for the marker of what it changes (Papa's
+// or Maman's state, the delivered parcel), or until no timer runs any more (fast mode: timers run faster).
 import { interact, newGame } from '../game/rules';
 import { SOLUTION } from '../game/solution';
 import { GameState, Input, ItemId } from '../game/types';
@@ -37,7 +37,15 @@ class Band {
   }
 }
 
-function stepFor(input: Input, state: GameState, band: Band): string[] {
+// The screen marker that shows a timer has done its work.
+function waitMarker(before: GameState, after: GameState): string {
+  if (after.chars.dad !== before.chars.dad) return `dad-${after.chars.dad}`;
+  if (after.chars.mom !== before.chars.mom) return `mom-${after.chars.mom}`;
+  if (after.flags.delivered && !before.flags.delivered) return 'delivered';
+  return 'timers-idle';
+}
+
+function stepFor(input: Input, state: GameState, after: GameState, band: Band): string[] {
   switch (input.kind) {
     case 'exit':
       return [tap(`exit-${input.exit}`), idle()];
@@ -45,6 +53,7 @@ function stepFor(input: Input, state: GameState, band: Band): string[] {
       const head = [tap(`hs-${input.target}`), tap(`verb-${input.verb}`)];
       if (input.verb === 'use' && input.target === 'living.chess') return [...head, waitFor('chess')];
       if (input.verb === 'use' && (input.target === 'office.computer' || input.target === 'parents.safe' || input.target === 'attic.door')) return [...head, waitFor('keypad')];
+      if (input.verb === 'use' && (input.target === 'cellar.bottles' || input.target === 'attic.trunk')) return [...head, waitFor('pad')];
       return [...head, idle()];
     }
     case 'item': {
@@ -63,8 +72,10 @@ function stepFor(input: Input, state: GameState, band: Band): string[] {
     case 'chess':
       // After each white move, wait until Black has answered (the move stays on show a moment).
       return input.moves.flatMap((m) => [tap(`chess-sq-${m.slice(0, 2)}`), tap(`chess-sq-${m.slice(2, 4)}`), waitGone('chess-waiting')]).concat(idle());
+    case 'pad':
+      return [...input.code.map((b) => tap(`pad-${b}`)), idle()];
     case 'wait':
-      return [waitFor('timers-idle', 60000), idle()];
+      return [waitFor(waitMarker(state, after), 60000), idle()];
     case 'lookItem':
     case 'tick':
       return [];
@@ -76,10 +87,10 @@ export function walkthroughYaml(): string {
   let state = newGame();
   const steps: string[] = [];
   SOLUTION.forEach((input, i) => {
-    const out = stepFor(input, state, band);
+    const o = interact(state, input);
+    const out = stepFor(input, state, o.state, band);
     // The last step leads to the ending: no idle marker after it.
     steps.push(...(i === SOLUTION.length - 1 ? out.filter((s) => s !== idle()) : out));
-    const o = interact(state, input);
     if (o.beats.some((b) => b.type === 'room')) band.page = 0;
     state = o.state;
     if (SCREENSHOTS[i]) steps.push(`- takeScreenshot: ${SCREENSHOTS[i]}`);

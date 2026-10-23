@@ -66,23 +66,23 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 
 ### v0.2.0 - Act II (PRD amendment of 2026-10-23)
 
-- [ ] T-53 State v3: new items, flags, notes N13-N16, cutscenes, states (dad fuses, mom changing, florent riding, finale), timers (mom, delivery); v2 saves migrated (AC-35, AC-58) - proof: unit
-- [ ] T-54 Lures and wariness: Papa wary on his first return after E07 (bell ignored, dough ignored, wary door line); the dough is temporary (Papa cooks 90 s then goes back) (AC-51, AC-52, AC-59) - proof: unit
-- [ ] T-55 The delivery: N15 at E07, CUT13 60 s after Papa is wary, N16, the parcel under the cat in the garden (AC-60, AC-29) - proof: unit
-- [ ] T-56 The hose: CUT14, Maman changes 90 s in her room, garden free, captures, again / lawn / off lines (AC-61, AC-23) - proof: unit
-- [ ] T-57 The cat, the parcel and the shed: sardines, tonka bean + bike pump, Papa's keyring (AC-62) - proof: unit
-- [ ] T-58 Florent's bike: the Nerf kit also gives the patches, patches + pump repair the bike, CUT15, Florent rides away (AC-63, AC-22) - proof: unit
-- [ ] T-59 The power cut: hair dryer on the power strip, CUT18, Papa at the fuse box 60 s (garage guarded and announced), refusals and repeat rules (AC-64, AC-25, AC-23) - proof: unit
-- [ ] T-60 Invisible ink (E20) and the cellar bottle rack (E21) with the sequence pad (AC-65) - proof: unit
-- [ ] T-61 Papa's desk drawer (E28, bills before Papa is wary) and the attic trunk colour padlock (E29) (AC-66) - proof: unit
-- [ ] T-62 The finale: three fragments on the recipe notebook (E13, CUT11), the jury (CUT16), finale state, the hat and the tonka bean to Papa (E30, CUT17), game_complete at E30 (AC-67, AC-68, AC-32, AC-50) - proof: unit
-- [ ] T-63 Timers advance only while the scene is idle and due events fire in deadline order (AC-69, AC-58) - proof: unit
+- [x] T-53 State v3: new items, flags, notes N13-N16, cutscenes, states (dad fuses, mom changing, florent riding, finale), timers (mom, delivery); v2 saves migrated (AC-35, AC-58) - proof: unit
+- [x] T-54 Lures and wariness: Papa wary on his first return after E07 (bell ignored, dough ignored, wary door line); the dough is temporary (Papa cooks 90 s then goes back) (AC-51, AC-52, AC-59) - proof: unit
+- [x] T-55 The delivery: N15 at E07, CUT13 60 s after Papa is wary, N16, the parcel under the cat in the garden (AC-60, AC-29) - proof: unit
+- [x] T-56 The hose: CUT14, Maman changes 90 s in her room, garden free, captures, again / lawn / off lines (AC-61, AC-23) - proof: unit
+- [x] T-57 The cat, the parcel and the shed: sardines, tonka bean + bike pump, Papa's keyring (AC-62) - proof: unit
+- [x] T-58 Florent's bike: the Nerf kit also gives the patches, patches + pump repair the bike, CUT15, Florent rides away (AC-63, AC-22) - proof: unit
+- [x] T-59 The power cut: hair dryer on the power strip, CUT18, Papa at the fuse box 60 s (garage guarded and announced), refusals and repeat rules (AC-64, AC-25, AC-23) - proof: unit
+- [x] T-60 Invisible ink (E20) and the cellar bottle rack (E21) with the sequence pad (AC-65) - proof: unit
+- [x] T-61 Papa's desk drawer (E28, bills before Papa is wary) and the attic trunk colour padlock (E29) (AC-66) - proof: unit
+- [x] T-62 The finale: three fragments on the recipe notebook (E13, CUT11), the jury (CUT16), finale state, the hat and the tonka bean to Papa (E30, CUT17), game_complete at E30 (AC-67, AC-68, AC-32, AC-50) - proof: unit
+- [x] T-63 Timers advance only while the scene is idle and due events fire in deadline order (AC-69, AC-58) - proof: unit
 - [ ] T-64 Solution and exhaustive explorer extended to E20-E30 (reductions re-proven), every puzzle and refusal (AC-21, AC-31) - proof: unit
-- [ ] T-65 Content fr + en: every new line, look, notebook entry, item name and clue; Player copy table (AC-29, AC-30, AC-45) - proof: unit
-- [ ] T-66 UI: the sequence pad overlay (bottles, colours) and the new outside views (delivery, garden, ride, power cut, jury), unskippable (AC-49) - proof: unit
-- [ ] T-67 Art: cat, parcel, van and driver, jury lady, chef's hat, soaked Maman, Florent on his bike, shed, bottle rack, trunk padlock, drawer, power strip, hair dryer, new item icons, power cut flicker (AC-19, AC-57) - proof: unit
-- [ ] T-68 Sounds: van, cat, bike bell, fuse pop, padlock, bottles, applause, fuse box and changing activity sounds (AC-25, AC-43) - proof: unit
-- [ ] T-69 Telemetry: puzzle_solved 1-30, capture room garage (AC-06, AC-07) - proof: unit
+- [x] T-65 Content fr + en: every new line, look, notebook entry, item name and clue; Player copy table (AC-29, AC-30, AC-45) - proof: unit
+- [x] T-66 UI: the sequence pad overlay (bottles, colours) and the new outside views (delivery, garden, ride, power cut, jury), unskippable (AC-49) - proof: unit
+- [x] T-67 Art: cat, parcel, van and driver, jury lady, chef's hat, soaked Maman, Florent on his bike, shed, bottle rack, trunk padlock, drawer, power strip, hair dryer, new item icons, power cut flicker (AC-19, AC-57) - proof: unit
+- [x] T-68 Sounds: van, cat, bike bell, fuse pop, padlock, bottles, applause, fuse box and changing activity sounds (AC-25, AC-43) - proof: unit
+- [x] T-69 Telemetry: puzzle_solved 1-30, capture room garage (AC-06, AC-07) - proof: unit
 - [ ] T-70 Walkthrough flow regenerated for the whole story (AC-41) - proof: e2e
 
 ## Notes

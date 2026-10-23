@@ -1,11 +1,11 @@
 // Typed catalog of the only telemetry events this app may send (must match docs/PRD.md "Telemetry events").
 // Params are numbers or short lowercase enums. Never identifiers, names, free text or locations.
 
-export type CaptureRoom = 'office' | 'front' | 'kitchen' | 'parents' | 'garden' | 'julien' | 'florent' | 'theo';
+export type CaptureRoom = 'office' | 'front' | 'kitchen' | 'parents' | 'garden' | 'julien' | 'florent' | 'theo' | 'garage';
 export type SettingName = 'sfx' | 'music' | 'telemetry' | 'language';
 export type SettingValue = 'on' | 'off' | 'auto' | 'fr' | 'en';
 
-// duration_s: total play time of the current game, in seconds. puzzle: E01-E19 as 1-19.
+// duration_s: total play time of the current game, in seconds. puzzle: E01-E30 as 1-30.
 export type TelemetryEvents = {
   game_start: { mode: 'new' | 'continue' };
   tutorial_complete: Record<string, never>;

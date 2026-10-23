@@ -1,7 +1,7 @@
 // The adventure: Skia scene + touch overlays. Taps make Sam walk, hotspots open the verb menu, inventory items are
 // used on hotspots, characters or other items. Engine outcomes are played as beats (lines, dialogues, keypads, the
-// chess board, documents, captures, views of another place, unskippable scenes). Play time feeds the engine's timers (doorbell, dough)
-// through tick inputs, sent only while nothing is being shown or walked. Rules live in src/game.
+// chess board, sequence pads, documents, captures, outside views, unskippable scenes). Play time feeds the engine's
+// timers through tick inputs, sent only while nothing is being shown or walked. Rules live in src/game.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, BackHandler, GestureResponderEvent, Pressable, StatusBar, StyleSheet, useWindowDimensions, View } from 'react-native';
 
@@ -9,8 +9,9 @@ import { ambience, ambienceFor, sounds } from '../audio/sound';
 import { exitName, hotspotName, itemName, line } from '../content/index';
 import { findPath } from '../game/geometry';
 import { addPlayTime, advanceTutorial, TutorialSignal, tutorialBubble, tutorialDone } from '../game/progress';
-import { interact, nextDeadline, readNotes } from '../game/rules';
-import { Beat, CharacterId, Facing, GameState, Input, ItemId, KeypadId, PlaceId, Point, Speaker, Verb } from '../game/types';
+import { viewExtras, viewPlace } from '../art/act2';
+import { interact, nextDeadline, PADS, readNotes } from '../game/rules';
+import { Beat, CharacterId, Facing, GameState, Input, ItemId, KeypadId, PadId, PlaceId, Point, Speaker, Verb, ViewId } from '../game/types';
 import { poseAt } from '../game/walker';
 import {
   exitsIn,
@@ -42,6 +43,7 @@ import {
   NotebookOverlay,
   NoteToast,
   PauseMenu,
+  SequencePad,
   TutorialBubble,
   UseWithHint,
 } from './game/overlays';
@@ -49,6 +51,7 @@ import {
 type Presentation =
   | { kind: 'line'; speaker: Speaker; text: string; until: number }
   | { kind: 'keypad'; keypad: KeypadId }
+  | { kind: 'pad'; pad: PadId }
   | { kind: 'chess' }
   | { kind: 'documents' }
   | { kind: 'capture'; until: number }
@@ -75,7 +78,6 @@ interface Props {
 
 const TICK_MS = 33;
 const CAPTURE_MS = 900;
-type PlaceView = 'door' | 'kitchen';
 const TOAST_MS = 1800;
 
 // The hero is not part of a view of another place.
@@ -105,7 +107,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   const [walking, setWalking] = useState(false);
   const endedRef = useRef(false);
   // Another place shown without control while its lines play (Papa at the front door, Papa arriving in the kitchen).
-  const [view, setView] = useState<PlaceView | null>(null);
+  const [view, setView] = useState<ViewId | null>(null);
   // Play time not yet given to the engine's timers (held while a line, a walk or the notebook is on).
   const pendingRef = useRef(0);
   const notebookRef = useRef(false);
@@ -166,6 +168,9 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
         }
         case 'keypad':
           show({ kind: 'keypad', keypad: b.keypad });
+          return;
+        case 'pad':
+          show({ kind: 'pad', pad: b.pad });
           return;
         case 'chess':
           show({ kind: 'chess' });
@@ -280,7 +285,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       if (pausedRef.current) return;
       setClock((c) => c + dt);
       gameRef.current = addPlayTime(gameRef.current, dt, true);
-      pendingRef.current += dt * timerScale();
+      pendingRef.current += dt * timerScale(gameRef.current);
       if (!presentRef.current && !walkRef.current && !notebookRef.current && !gameRef.current.finished) {
         const g = gameRef.current;
         const next = nextDeadline(g);
@@ -507,11 +512,17 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       {/* Marker for the e2e flows: nothing is moving or being said. collapsable=false keeps it in the native tree. */}
       {idle && <View testID="scene-idle" collapsable={false} pointerEvents="none" style={styles.idle} />}
       {nextDeadline(game) === null && <View testID="timers-idle" collapsable={false} pointerEvents="none" style={styles.timersIdle} />}
+      {/* Markers for the e2e walkthrough: where Papa and Maman are, and the delivered parcel. */}
+      <View testID={`dad-${game.chars.dad}`} collapsable={false} pointerEvents="none" style={styles.timersIdle} />
+      <View testID={`mom-${game.chars.mom}`} collapsable={false} pointerEvents="none" style={styles.timersIdle} />
+      {game.flags.delivered && <View testID="delivered" collapsable={false} pointerEvents="none" style={styles.timersIdle} />}
 
-      {view && (
+      {view === 'dark' && <View testID="view-dark" style={[StyleSheet.absoluteFill, styles.dark, { opacity: Math.floor(clock / 120) % 5 === 0 ? 0.55 : 0.85 }]} pointerEvents="none" />}
+      {view && view !== 'dark' && (
         <View testID={`view-${view}`} style={StyleSheet.absoluteFill} pointerEvents="none">
           <Scene
-            state={{ ...game, place: view === 'door' ? 'front' : 'kitchen' }}
+            state={{ ...game, place: viewPlace(view) ?? game.place }}
+            extras={viewExtras(view)}
             hero={OFFSCREEN}
             transform={transform}
             width={width}
@@ -548,6 +559,20 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           onClose={runNext}
         />
       )}
+      {present?.kind === 'pad' && (
+        <SequencePad
+          title={t.pad[present.pad]}
+          buttons={PADS[present.pad].buttons}
+          length={PADS[present.pad].code.length}
+          colours={present.pad === 'trunk'}
+          onSubmit={(code) => {
+            const pad = present.pad;
+            show(null);
+            apply({ kind: 'pad', pad, code });
+          }}
+          onClose={runNext}
+        />
+      )}
       {present?.kind === 'chess' && (
         <ChessBoard
           onSolved={(moves) => {
@@ -572,4 +597,5 @@ const styles = StyleSheet.create({
   abs: { position: 'absolute' },
   idle: { position: 'absolute', right: 0, bottom: 0, width: 2, height: 2 },
   timersIdle: { position: 'absolute', left: 0, bottom: 0, width: 2, height: 2 },
+  dark: { backgroundColor: '#05040a' },
 });

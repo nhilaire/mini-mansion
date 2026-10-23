@@ -6,7 +6,7 @@ import { GameState, SfxName } from '../game/types';
 import { occupant } from '../game/world';
 
 export type SoundName = SfxName | 'step';
-export type LoopName = 'drums' | 'typing' | 'radio' | 'game' | 'cube' | 'humming' | 'machineLoop' | 'cooking';
+export type LoopName = 'drums' | 'typing' | 'radio' | 'game' | 'cube' | 'humming' | 'machineLoop' | 'cooking' | 'fuses' | 'wardrobe';
 export type Track = 'house' | 'ending';
 
 const SFX: Record<SoundName, number> = {
@@ -29,6 +29,13 @@ const SFX: Record<SoundName, number> = {
   spray: require('../../assets/audio/spray.wav'),
   robot: require('../../assets/audio/robot.wav'),
   gag: require('../../assets/audio/gag.wav'),
+  van: require('../../assets/audio/van.wav'),
+  cat: require('../../assets/audio/cat.wav'),
+  bikebell: require('../../assets/audio/bikebell.wav'),
+  fuse: require('../../assets/audio/fuse.wav'),
+  padlock: require('../../assets/audio/padlock.wav'),
+  bottle: require('../../assets/audio/bottle.wav'),
+  applause: require('../../assets/audio/applause.wav'),
 };
 
 const LOOPS: Record<LoopName, number> = {
@@ -40,6 +47,8 @@ const LOOPS: Record<LoopName, number> = {
   humming: require('../../assets/audio/loop_humming.wav'),
   machineLoop: require('../../assets/audio/loop_machineLoop.wav'),
   cooking: require('../../assets/audio/loop_cooking.wav'),
+  fuses: require('../../assets/audio/loop_fuses.wav'),
+  wardrobe: require('../../assets/audio/loop_wardrobe.wav'),
 };
 
 const TRACKS: Record<Track, number> = {
@@ -129,17 +138,19 @@ export interface AmbientLoop {
 
 // PRD: the activity sound of each occupied guarded room is heard from the corridor leading to it (Papa cooking from
 // the music corner, Maman humming in the garden from the football corner); the drums fill the music corner (and are
-// heard faintly next door) while Florent plays; the washing machine hums while it runs.
+// heard faintly next door) while Florent plays; the washing machine hums while it runs. Papa at the garage fuse box is
+// heard from the corridor, the attic and the cellar; Maman changing is heard as wardrobe doors on the landing.
 export function ambienceFor(s: GameState): AmbientLoop[] {
   const out: AmbientLoop[] = [];
   if (s.finished) return out;
   if (s.place === 'corridor0' && occupant('office', s.chars)) out.push({ loop: 'typing', volume: 0.5 });
+  if ((s.place === 'corridor0' || s.place === 'attic' || s.place === 'cellar') && occupant('garage', s.chars)) out.push({ loop: 'fuses', volume: 0.5 });
   // Upstairs, up to four rooms are heard at once: each stays faint, in the background (not to sound like music).
   if (s.place === 'landing') {
     if (occupant('julien', s.chars)) out.push({ loop: 'radio', volume: LANDING_VOLUME });
     if (occupant('florent', s.chars)) out.push({ loop: 'game', volume: LANDING_VOLUME });
     if (occupant('theo', s.chars)) out.push({ loop: 'cube', volume: LANDING_VOLUME });
-    if (occupant('parents', s.chars)) out.push({ loop: 'humming', volume: LANDING_VOLUME });
+    if (occupant('parents', s.chars)) out.push({ loop: s.chars.mom === 'changing' ? 'wardrobe' : 'humming', volume: LANDING_VOLUME });
   }
   if (s.place === 'music' && occupant('kitchen', s.chars)) out.push({ loop: 'cooking', volume: 0.4 });
   if (s.place === 'football' && occupant('garden', s.chars)) out.push({ loop: 'humming', volume: 0.35 });
