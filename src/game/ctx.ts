@@ -3,9 +3,8 @@ import { Beat, CharacterId, CutId, Flag, GameEvent, GameState, ItemId, NoteId, S
 
 export const PUZZLE_COUNT = 30;
 export const WRONG_LINES = 6;
-// E18 (side gates) is optional, E22 (the hose) only needed when Maman gardens; one of E16 (doorbell) and E19 (dough)
-// frees the office the first time.
-export const OPTIONAL_PUZZLES: readonly number[] = [18, 22];
+// E18 (side gates) is optional; one of E16 (doorbell) and E19 (dough) frees the office the first time.
+export const OPTIONAL_PUZZLES: readonly number[] = [18];
 export const OFFICE_ACCESS: readonly number[] = [16, 19];
 
 export function cloneState(s: GameState): GameState {

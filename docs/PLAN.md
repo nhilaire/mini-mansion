@@ -88,6 +88,8 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 
 - [x] T-72 Phone feedback: the hair dryer, the sardines, the flours and the pole disappear once taken; a clearer page button for the inventory; Théo stands in front of the chessboard (AC-17, AC-19, AC-57) - proof: unit
 - [x] T-73 The house stays dark during the power cut until Papa has fixed the fuses (AC-64) - proof: unit
+- [x] T-74 Papa gives his drawer key to Maman when he becomes wary: it is found in her gardening basket while she changes; no more bills in the drawer (AC-62, AC-66) - proof: unit
+- [x] T-75 New ending: the tonka bean goes into the dough in the food processor (E30); the family gathers one after the other in the lab once the recipe is complete and the tonka bean is in; no jury, no chef's hat (AC-32, AC-67, AC-68) - proof: unit, e2e
 
 ## Notes
 

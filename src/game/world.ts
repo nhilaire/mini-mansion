@@ -139,6 +139,7 @@ export const FLAGS: readonly Flag[] = [
   'frag2_in',
   'frag3_in',
   'finale',
+  'tonka_in',
   'hat_given',
   'tonka_given',
   'ending',
@@ -233,7 +234,9 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('garden.gnome', 'garden', r(126, 78, 22, 22), p(137, 108), ['look']),
   hs('garden.hose', 'garden', r(150, 76, 22, 24), p(161, 108), ['look', 'use']),
   hs('garden.swing', 'garden', r(170, 30, 50, 70), p(195, 108), ['look', 'use']),
-  hs('garden.shed', 'garden', r(236, 30, 40, 70), p(256, 108), ['look', 'take']),
+  hs('garden.shed', 'garden', r(236, 30, 40, 70), p(256, 108), ['look']),
+  // Maman's gardening basket, left behind while she changes, with Papa's drawer key once he gave it to her (E25).
+  hs('garden.basket', 'garden', r(8, 78, 26, 22), p(21, 108), ['look', 'take'], (s) => s.chars.mom === 'changing' && has(s, 'dad_wary') && !has(s, 'keyring_taken')),
   // The delivered parcel among the flowers, with the neighbours' cat lying on it (CUT13 until E23 / E24).
   hs('garden.cat', 'garden', r(84, 66, 26, 22), p(97, 108), ['look', 'use'], (s) => has(s, 'delivered') && !has(s, 'cat_fed')),
   hs('garden.parcel', 'garden', r(84, 88, 26, 22), p(97, 112), ['look', 'take'], (s) => has(s, 'delivered') && !has(s, 'parcel_taken')),
@@ -450,12 +453,8 @@ function person(id: CharacterId, place: PlaceId, x: number, y: number, busy: boo
   return { id, place, pos: p(x, y), rect: r(x - 12, y - 48, 24, 48), at: p(x + dx, y + 2), face: side === 'left' ? 'right' : 'left', busy };
 }
 
-const FINALE_X: Record<CharacterId, number> = { dad: 208, mom: 240, theo: 266, julien: 292, florent: 112 };
-
 export function characterPlacement(id: CharacterId, s: GameState): CharacterPlacement | null {
   if (s.flags.ending) return null;
-  // The finale: the whole family stands in the lab around Sam.
-  if (s.flags.finale) return person(id, 'laundry', FINALE_X[id], 114, false);
   const st = s.chars;
   switch (id) {
     case 'dad':

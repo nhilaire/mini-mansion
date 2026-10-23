@@ -356,13 +356,17 @@ const PROPS: Record<string, Prop> = {
     b.rect(r.x, r.y, r.w, 4, C.wood2).rect(r.x, r.y, 4, r.h, C.wood2).rect(r.x + r.w - 4, r.y, 4, r.h, C.wood2);
     b.vline(r.x + 16, r.y + 4, r.y + 46, C.stone3).vline(r.x + 32, r.y + 4, r.y + 46, C.stone3).rect(r.x + 14, r.y + 46, 21, 4, C.red);
   },
-  'garden.shed': (b, r, s) => {
+  'garden.shed': (b, r) => {
     b.rect(r.x, r.y + 12, r.w, r.h - 12, C.wood3);
     for (let y = 0; y < 12; y++) b.hline(r.x + 12 - y, r.x + r.w - 13 + y, r.y + y, C.wine1);
     b.rect(r.x + 12, r.y + 34, 16, r.h - 34, C.wood1);
-    // Papa's keyring on its nail, next to the door.
-    b.set(r.x + 6, r.y + 22, C.ink);
-    if (!on(s, 'keyring_taken')) b.frame(r.x + 4, r.y + 23, 5, 5, C.chrome).rect(r.x + 6, r.y + 28, 2, 4, C.brass);
+  },
+  // Maman's wicker gardening basket with her gloves, and Papa's small golden key at the bottom.
+  'garden.basket': (b, r) => {
+    b.ellipse(r.x + 13, r.y + 4, 10, 6, C.wood4).ellipse(r.x + 13, r.y + 4, 8, 4, -1);
+    b.rect(r.x + 3, r.y + 8, 20, 12, C.wood4).frame(r.x + 3, r.y + 8, 20, 12, C.wood2);
+    for (let x = r.x + 5; x < r.x + 22; x += 3) b.vline(x, r.y + 9, r.y + 18, C.wood3);
+    b.rect(r.x + 6, r.y + 5, 5, 4, C.green3).rect(r.x + 15, r.y + 6, 3, 2, C.gold);
   },
   // The hall.
   'hall.umbrella': (b, r) => {
@@ -1121,6 +1125,7 @@ export const VISUAL_FLAGS: Record<PlaceId, (keyof Flags)[]> = {
 
 // Julien's ball lies on the grass of the football corner while he plays: part of the drawing too.
 function stateKey(s: GameState): string {
+  if (s.place === 'garden') return `${s.chars.mom}${s.flags.dad_wary ? '-wary' : ''}`;
   return s.place === 'football' ? s.chars.julien : '';
 }
 

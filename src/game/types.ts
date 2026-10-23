@@ -61,8 +61,8 @@ export type ItemId =
 export type CharacterId = 'dad' | 'mom' | 'julien' | 'florent' | 'theo';
 
 // Who says a line: the hero (Sam), the narrator (cutscene descriptions) or an inhabitant.
-// The delivery driver and the contest jury only speak in their scenes.
-export type Speaker = 'hero' | 'narrator' | 'driver' | 'jury' | CharacterId;
+// The delivery driver only speaks in the delivery scene.
+export type Speaker = 'hero' | 'narrator' | 'driver' | CharacterId;
 
 export type Verb = 'look' | 'take' | 'listen' | 'use';
 
@@ -150,6 +150,7 @@ export type Flag =
   | 'frag2_in'
   | 'frag3_in'
   | 'finale'
+  | 'tonka_in'
   | 'hat_given'
   | 'tonka_given'
   | 'ending';
@@ -247,8 +248,8 @@ export type SfxName =
   | 'applause';
 
 // Outside views: the front door (doorbell), the kitchen (dough), the delivery, the garden (parcel, hose), Florent riding
-// away, the power cut (dark house) and the jury's car; the hose view is the garden with Maman soaked.
-export type ViewId = 'door' | 'kitchen' | 'delivery' | 'garden' | 'hose' | 'ride' | 'dark' | 'jury';
+// away, the power cut (dark house); the hose view is the garden with Maman soaked.
+export type ViewId = 'door' | 'kitchen' | 'delivery' | 'garden' | 'hose' | 'ride' | 'dark';
 
 // What the UI plays, in order, after an interaction.
 export type Beat =

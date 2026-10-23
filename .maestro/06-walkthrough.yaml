@@ -782,7 +782,7 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "hs-garden.shed"
+    id: "hs-garden.basket"
 - tapOn:
     id: "verb-take"
 - extendedWaitUntil:
@@ -809,6 +809,50 @@ tags:
     timeout: 15000
 - tapOn:
     id: "exit-front.toHall"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-hall.toLiving"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-living.toMusic"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-music.toKitchen"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-tonka"
+- tapOn:
+    id: "hs-kitchen.robot"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-kitchen.toMusic"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-music.toLiving"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-living.toHall"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
@@ -1067,22 +1111,6 @@ tags:
     id: "inv-scrap3"
 - tapOn:
     id: "hs-laundry.notebook"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "inv-hat"
-- tapOn:
-    id: "hs-dad"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "inv-tonka"
-- tapOn:
-    id: "hs-dad"
 - extendedWaitUntil:
     visible:
       id: "ending-screen"

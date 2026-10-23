@@ -27,6 +27,7 @@ describe('lures and wariness (AC-59)', () => {
     expect(s.flags.dad_wary).toBeUndefined();
     const back = interact(s, tick(TIMER_MS.back));
     expect(back.beats).toContainEqual(said('dad', 'line.dadWary'));
+    expect(back.beats).toContainEqual(said('dad', 'line.dadKey'));
     s = back.state;
     expect(s.chars.dad).toBe('at_desk');
     expect(s.flags.dad_wary).toBe(true);
@@ -43,7 +44,7 @@ describe('lures and wariness (AC-59)', () => {
   it('back from cooking after E07, he becomes wary as well', () => {
     const s = at('music', { flags: flags('computer_read', 'dough_mixed'), chars: chars({ dad: 'cooking' }), timers: { dad: 5000, dough: null, mom: null, delivery: null } });
     const o = interact(s, tick(5000));
-    expect(keys(o.beats)).toEqual(['line.dadOven', 'line.dadWary']);
+    expect(keys(o.beats)).toEqual(['line.dadOven', 'line.dadWary', 'line.dadKey']);
     expect(o.state.flags.dad_wary).toBe(true);
   });
 
@@ -160,11 +161,14 @@ describe('the cat, the parcel and the shed (AC-62)', () => {
     expect(findHotspot(parcel.state, 'garden.parcel')).toBeUndefined();
   });
 
-  it('the garden shed gives Papa\'s keyring once', () => {
-    const o = interact(garden(), take('garden.shed'));
+  it('Papa gives his drawer key to Maman when he becomes wary; her gardening basket holds it while she changes', () => {
+    expect(findHotspot({ ...garden(), flags: flags('delivered') }, 'garden.basket')).toBeUndefined();
+    expect(findHotspot({ ...garden(), chars: chars({ mom: 'folding' }) }, 'garden.basket')).toBeUndefined();
+    const o = interact(garden(), take('garden.basket'));
     expect(puzzles(o)).toEqual([25]);
     expect(o.state.inventory).toEqual(['keyring']);
-    expect(interact(o.state, take('garden.shed')).state.inventory).toEqual(['keyring']);
+    expect(findHotspot(o.state, 'garden.basket')).toBeUndefined();
+    expect(findHotspot(garden(), 'garden.shed')?.verbs).toEqual(['look']);
   });
 
   it('the sardines are on the utility shelf', () => {
@@ -275,12 +279,9 @@ describe('invisible ink and the cellar bottles (AC-65)', () => {
 });
 
 describe('the desk drawer and the attic trunk (AC-66)', () => {
-  it('the drawer is locked without the keyring, holds only bills before Papa is wary, then the sketchbook (E28)', () => {
+  it('the drawer is locked without its key, then gives the sketchbook (E28)', () => {
     expect(interact(at('office', { chars: chars({ dad: 'fuses' }) }), use('office.drawer')).beats).toEqual([said('hero', 'line.drawerLocked')]);
-    const early = interact(at('office', { chars: chars({ dad: 'outside' }), inventory: ['keyring'] }), give('keyring', 'office.drawer'));
-    expect(early.beats).toEqual([said('hero', 'office.drawer.lookBills')]);
-    expect(early.state.inventory).toEqual(['keyring']);
-    expect(early.state.notes).not.toContain('n14');
+    expect(interact(wary('office', { chars: chars({ dad: 'fuses' }) }), { kind: 'verb', verb: 'look', target: 'office.drawer' }).beats).toEqual([said('hero', 'office.drawer.lookWary')]);
     const o = interact(wary('office', { chars: chars({ dad: 'fuses' }), inventory: ['keyring'] }), give('keyring', 'office.drawer'));
     expect(puzzles(o)).toEqual([28]);
     expect(o.state.notes).toContain('n14');
@@ -296,49 +297,46 @@ describe('the desk drawer and the attic trunk (AC-66)', () => {
     expect(wrong.events).toEqual([]);
     const right = interact(s, { kind: 'pad', pad: 'trunk', code: ['red', 'yellow', 'blue', 'green'] });
     expect(puzzles(right)).toEqual([29]);
-    expect(right.state.inventory).toEqual(['hat', 'scrap3']);
+    expect(right.state.inventory).toEqual(['scrap3']);
     expect(interact(s, { kind: 'pad', pad: 'trunk', code: ['red', 'yellow', 'blue', 'pink'] }).accepted).toBe(false);
   });
 });
 
-describe('the finale (AC-67, AC-68)', () => {
-  const finale = () => {
-    const s = at('laundry', {
-      inventory: ['scrap', 'scrap2', 'scrap3', 'hat', 'tonka'],
-      chars: chars({ mom: 'changing', florent: 'riding', dad: 'fuses' }),
-      timers: { dad: 30_000, dough: 50_000, mom: 20_000, delivery: null },
-      captures: 3,
-    });
-    return playAll(s, [give('scrap', 'laundry.notebook'), give('scrap2', 'laundry.notebook'), give('scrap3', 'laundry.notebook')]).state;
-  };
+describe('the tonka bean and the end (AC-67, AC-68)', () => {
+  const lab = (flagsOn: Flag[]) => at('laundry', { inventory: ['scrap', 'scrap2', 'scrap3'], flags: flags('secret_open', ...flagsOn), captures: 3 });
+  const pieces = [give('scrap', 'laundry.notebook'), give('scrap2', 'laundry.notebook'), give('scrap3', 'laundry.notebook')];
 
-  it('E13 cancels every timer, gathers the family in the lab and nobody guards anything any more', () => {
-    const s = finale();
-    expect(s.timers).toEqual({ dad: null, dough: null, mom: null, delivery: null });
-    for (const id of ['dad', 'mom', 'julien', 'florent', 'theo'] as const) expect(characterPlacement(id, s)?.place).toBe('laundry');
-    expect(interact(s, tick(3_600_000)).events).toEqual([]);
-    const stay = interact(s, go('laundry.toAttic'));
-    expect(stay.beats).toEqual([said('hero', 'line.finaleStay')]);
-    expect(stay.state.place).toBe('laundry');
+  it('the tonka bean goes into Papa\'s dough in the food processor once the dough is made (E30)', () => {
+    const none = interact(at('kitchen', { inventory: ['tonka'] }), give('tonka', 'kitchen.robot'));
+    expect(none.beats).toEqual([said('hero', 'line.tonkaNoDough')]);
+    expect(none.state.inventory).toEqual(['tonka']);
+    const o = interact(at('kitchen', { inventory: ['tonka'], flags: flags('dough_mixed') }), give('tonka', 'kitchen.robot'));
+    expect(puzzles(o)).toEqual([30]);
+    expect(o.state.flags.tonka_in).toBe(true);
+    expect(o.state.inventory).toEqual([]);
   });
 
-  it('the hat and the tonka bean given to Papa in any order end the game (E30, CUT17)', () => {
-    const half = interact(finale(), give('tonka', 'dad'));
-    expect(half.beats).toEqual([said('dad', 'line.dadStillMissing')]);
-    expect(half.state.inventory).toEqual(['hat']);
-    expect(half.state.finished).toBe(false);
-    const o = interact(half.state, give('hat', 'dad'));
-    expect(o.events).toEqual([{ type: 'puzzle', puzzle: 30 }, { type: 'complete', captures: 3 }]);
-    expect(o.state.finished).toBe(true);
-    expect(o.beats).toContainEqual({ type: 'view', view: 'jury' });
-    expect(o.beats).toContainEqual(said('jury', 'line.juryTaste'));
+  it('with the tonka bean in the dough, the last fragment gathers the family one after the other, then the Ending', () => {
+    const { outcomes, state } = playAll(lab(['tonka_in']), pieces);
+    const o = outcomes[2];
+    expect(o.events).toEqual([{ type: 'puzzle', puzzle: 13 }, { type: 'complete', captures: 3 }]);
+    expect(state.finished).toBe(true);
+    const casts = o.beats.flatMap((b) => (b.type === 'cast' ? [b.characters.length] : []));
+    expect(casts).toEqual([1, 2, 3, 4, 5]);
     expect(o.beats[o.beats.length - 1]).toEqual({ type: 'ending' });
+    expect(keys(o.beats).slice(-2)).toEqual(['line.dadThanks', 'line.finalBakery']);
   });
 
-  it('the hat and the tonka bean do nothing to Papa before the finale', () => {
-    const o = interact(at('front', { chars: chars({ dad: 'outside' }), inventory: ['hat'] }), give('hat', 'dad'));
-    expect(o.state.inventory).toEqual(['hat']);
-    expect(o.events).toEqual([]);
+  it('without it, the recipe asks for the secret touch; the family gathers once Sam is back in the lab with it', () => {
+    const done = playAll(lab([]), pieces);
+    expect(done.outcomes[2].beats).toContainEqual(said('hero', 'line.recipeTonka'));
+    expect(done.state.finished).toBe(false);
+    expect(done.state.solved).toContain(13);
+    const away = interact(done.state, go('laundry.toAttic')).state;
+    expect(interact({ ...away, place: 'attic' }, go('attic.toLaundry')).state.finished).toBe(false);
+    const back = interact({ ...away, flags: { ...away.flags, tonka_in: true } }, go('attic.toLaundry'));
+    expect(back.state.finished).toBe(true);
+    expect(back.beats[back.beats.length - 1]).toEqual({ type: 'ending' });
   });
 });
 
@@ -398,15 +396,10 @@ describe('the outside views of Act II cannot be skipped (AC-49)', () => {
     expect(beats.slice(at)).toContainEqual({ type: 'cinematic', on: false });
   };
 
-  it('Florent riding away, the power cut, the jury ringing and tasting', () => {
+  it('Florent riding away and the power cut', () => {
     const fixed = at('garage', { flags: flags('bike_fixed') });
     wrapped(interact(fixed, go('garage.toCorridor')).beats, 'ride');
     wrapped(interact(wary('florent', { chars: chars({ florent: 'riding' }), inventory: ['hairdryer'] }), give('hairdryer', 'florent.strip')).beats, 'dark');
-    const lab = playAll(at('laundry', { inventory: ['scrap', 'scrap2', 'scrap3', 'hat', 'tonka'] }), [give('scrap', 'laundry.notebook'), give('scrap2', 'laundry.notebook')]).state;
-    const ring = interact(lab, give('scrap3', 'laundry.notebook'));
-    wrapped(ring.beats, 'jury');
-    const taste = playAll(ring.state, [give('hat', 'dad'), give('tonka', 'dad')]).outcomes[1];
-    wrapped(taste.beats, 'jury');
   });
 });
 

@@ -119,11 +119,18 @@ export const SOLUTION: readonly Input[] = [
   go('football.toGarden'),
   give('sardines', 'garden.cat'), // E23
   take('garden.parcel'), // E24
-  take('garden.shed'), // E25
+  take('garden.basket'), // E25: Papa's drawer key
   go('garden.toFootball'),
   go('football.toPool'),
   go('pool.toFront'),
   go('front.toHall'),
+  go('hall.toLiving'),
+  go('living.toMusic'),
+  go('music.toKitchen'),
+  give('tonka', 'kitchen.robot'), // E30: the secret touch in Papa's dough
+  go('kitchen.toMusic'),
+  go('music.toLiving'),
+  go('living.toHall'),
   go('hall.toCorridor'),
   go('corridor0.toGarage'),
   give('patches', 'garage.bike'),
@@ -157,7 +164,5 @@ export const SOLUTION: readonly Input[] = [
   go('attic.toLaundry'),
   give('scrap', 'laundry.notebook'),
   give('scrap2', 'laundry.notebook'),
-  give('scrap3', 'laundry.notebook'), // E13: CUT11, CUT16
-  give('hat', 'dad'),
-  give('tonka', 'dad'), // E30: CUT17, the Ending
+  give('scrap3', 'laundry.notebook'), // E13: CUT11, the family gathers, the Ending
 ];

@@ -87,11 +87,6 @@ export function interact(state: GameState, input: Input): Outcome {
     case 'exit': {
       const e = findExit(state, input.exit);
       if (!e) return rejected(state);
-      // The finale: the whole family is in the lab, Sam stays.
-      if (c.is('finale')) {
-        c.hero('line.finaleStay');
-        return done(c);
-      }
       c.sfx('door');
       goTo(c, e.to, e.spawn, e.spawnFace);
       return done(c);
@@ -213,7 +208,8 @@ function backAtDesk(c: Ctx): void {
   c.s.timers.dad = null;
   arrival(c, 'office');
   if (c.is('computer_read') && !c.is('dad_wary')) {
-    c.set('dad_wary').say('dad', 'line.dadWary');
+    // He locks his sketchbook in his drawer and gives the key to Maman.
+    c.set('dad_wary').say('dad', 'line.dadWary').say('dad', 'line.dadKey');
     c.s.timers.delivery = c.s.clock + TIMER_MS.delivery;
   }
 }
@@ -279,6 +275,8 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
     c.move('florent', 'riding');
     after.push((k) => k.cut('cut15', (q) => view(q, 'ride', (v) => v.sfx('bikebell').say('florent', 'line.florentBike'))));
   }
+  // Back in the lab with the recipe complete and the tonka bean in the dough: the reunion.
+  if (to === 'laundry' && c.isSolved(13) && c.is('tonka_in')) after.push((k) => reunion(k));
   if (c.is('machine_running')) {
     c.clear('machine_running').set('machine_done').sfx('ding').narrator('line.machineDing').say('mom', 'mom.machine');
     c.move('mom', 'gardening').solve(17);
@@ -323,9 +321,9 @@ function capture(c: Ctx, room: GuardedRoom, who: CharacterId): void {
   c.narrator(open ? 'capture.cellarOpen' : 'capture.cellar');
 }
 
-// Nobody can be talked to: an inhabitant can only be looked at (in the lab, gathered for the finale).
+// Nobody can be talked to: an inhabitant can only be looked at.
 function character(c: Ctx, id: CharacterId): void {
-  c.hero(c.is('finale') ? `${id}.lookFinale` : `${id}.look`);
+  c.hero(`${id}.look`);
 }
 
 const DOOR_NOTE: Record<CharacterId, NoteId> = { julien: 'n02', florent: 'n03', theo: 'n04', mom: 'n05', dad: 'n06' };
@@ -411,7 +409,8 @@ const TAKES: Readonly<Record<string, readonly [Flag, ItemId | readonly ItemId[],
   'kitchen.fridge': ['milk_taken', 'ricemilk', 'kitchen.fridge.take'],
   'utility.sardines': ['sardines_taken', 'sardines', 'utility.sardines.take'],
   'bathroom.hairdryer': ['hairdryer_taken', 'hairdryer', 'bathroom.hairdryer.take'],
-  'garden.shed': ['keyring_taken', 'keyring', 'garden.shed.take', 25],
+  // E25: the drawer key in Maman's gardening basket, left in the garden while she changes.
+  'garden.basket': ['keyring_taken', 'keyring', 'garden.basket.take', 25],
 };
 
 function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
@@ -620,10 +619,10 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       else c.beats.push({ type: 'keypad', keypad: 'lab' });
       return;
     case 'laundry.notebook:look':
-      c.hero(c.is('finale') ? 'laundry.notebook.lookDone' : 'laundry.notebook.look');
+      c.hero(c.isSolved(13) ? 'laundry.notebook.lookDone' : 'laundry.notebook.look');
       return;
     case 'laundry.notebook:use':
-      c.hero(c.is('finale') ? 'laundry.notebook.lookDone' : 'laundry.notebook.use');
+      c.hero(c.isSolved(13) ? 'laundry.notebook.lookDone' : 'laundry.notebook.use');
       return;
     // E22: the garden tap; the hose soaks Maman when she gardens (CUT14), as long as the garden still holds something.
     case 'pool.tap:use':
@@ -665,7 +664,7 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       return;
     // E28: Papa's desk drawer.
     case 'office.drawer:look':
-      c.hero(c.is('drawer_open') ? 'office.drawer.lookOpen' : 'office.drawer.look');
+      c.hero(c.is('drawer_open') ? 'office.drawer.lookOpen' : c.is('dad_wary') ? 'office.drawer.lookWary' : 'office.drawer.look');
       return;
     case 'office.drawer:use':
       c.hero(c.is('drawer_open') ? 'office.drawer.lookOpen' : 'line.drawerLocked');
@@ -735,8 +734,7 @@ export const USE_RULES: readonly string[] = [
   'keyring>office.drawer',
   'scrap2>laundry.notebook',
   'scrap3>laundry.notebook',
-  'hat>dad',
-  'tonka>dad',
+  'tonka>kitchen.robot',
 ];
 
 function useItem(c: Ctx, item: ItemId, target: string): void {
@@ -762,10 +760,10 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
     else c.hero('line.recipeMore');
     return;
   }
-  if ((item === 'hat' || item === 'tonka') && target === 'dad' && c.is('finale')) {
-    c.remove(item).set(item === 'hat' ? 'hat_given' : 'tonka_given');
-    if (c.is('hat_given') && c.is('tonka_given')) juryTastes(c);
-    else c.say('dad', 'line.dadStillMissing');
+  // E30: the tonka bean grated into Papa's dough, in the food processor.
+  if (item === 'tonka' && target === 'kitchen.robot') {
+    if (!c.is('dough_mixed')) c.hero('line.tonkaNoDough');
+    else c.remove('tonka').set('tonka_in').sfx('robot').hero('e30.tonka').solve(30);
     return;
   }
   switch (`${item}>${target}`) {
@@ -851,11 +849,10 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
         arrival(c, 'garage');
       }
       return;
-    // E28: the keyring opens the desk drawer; the sketchbook is only there once Papa is wary.
+    // E28: the drawer key opens Papa's desk drawer: his sketchbook.
     case 'keyring>office.drawer':
       if (c.is('drawer_open')) break;
-      if (!c.is('dad_wary')) c.hero('office.drawer.lookBills');
-      else c.remove('keyring').set('drawer_open').sfx('door').hero('e28.open').note('n14').solve(28);
+      c.remove('keyring').set('drawer_open').sfx('door').hero('e28.open').note('n14').solve(28);
       return;
     case 'bar>cellar.hatch':
       c.remove('bar').set('hatch_open').sfx('door').hero('e15.open').solve(15);
@@ -864,11 +861,17 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
   c.wrong();
 }
 
-// E13: the three fragments complete the recipe: the family gathers in the lab (CUT11), then the jury rings (CUT16).
-// From then on every timer is cancelled and nobody guards anything.
+// E13: the three fragments complete the recipe. With the tonka bean already in the dough, the family gathers (CUT11);
+// otherwise the recipe says the secret touch is still missing.
 function recipeComplete(c: Ctx): void {
-  c.solve(13).set('finale');
-  c.s.timers = { dad: null, dough: null, mom: null, delivery: null };
+  c.solve(13);
+  if (c.is('tonka_in')) reunion(c);
+  else c.hero('line.recipeTonka');
+}
+
+// CUT11, the end: in the lab, Papa then the whole family join Sam one after the other; then the Ending.
+function reunion(c: Ctx): void {
+  c.finish();
   c.cut('cut11', (k) => {
     const cast = (characters: CharacterId[]) => k.beats.push({ type: 'cast', characters });
     k.cinematic(true).narrator('line.final1');
@@ -882,23 +885,7 @@ function recipeComplete(c: Ctx): void {
     k.say('julien', 'line.final7');
     cast(['dad', 'mom', 'theo', 'julien', 'florent']);
     k.say('florent', 'line.final8').wait(SCENE_MS.reunion);
-    cast([]);
-    k.cinematic(false);
-  });
-  c.cut('cut16', (k) => {
-    k.sfx('van');
-    view(k, 'jury', (q) => q.sfx('bell').say('jury', 'line.juryRing'));
-    k.say('dad', 'line.dadJury');
-  });
-}
-
-// E30: the chef's hat and the tonka bean given to Papa: the jury tastes the cake (CUT17), then the Ending.
-function juryTastes(c: Ctx): void {
-  c.solve(30).finish();
-  c.cut('cut17', (k) => {
-    k.cinematic(true).narrator('cut17.hat');
-    view(k, 'jury', (q) => q.say('jury', 'line.juryTaste').sfx('applause').say('dad', 'line.dadThanks').narrator('line.finalBakery'));
-    k.cinematic(false);
+    k.sfx('applause').say('dad', 'line.dadThanks').narrator('line.finalBakery').cinematic(false);
   });
   c.beats.push({ type: 'ending' });
 }
@@ -972,7 +959,7 @@ function pad(c: Ctx, id: PadId, code: readonly string[]): boolean {
     return true;
   }
   if (id === 'bottles') c.set('bottles_done').sfx('secret').give('scrap2').hero('e21.open').solve(21);
-  else c.set('trunk_open').sfx('padlock').give('hat').give('scrap3').hero('e29.open').solve(29);
+  else c.set('trunk_open').sfx('padlock').give('scrap3').hero('e29.open').solve(29);
   return true;
 }
 

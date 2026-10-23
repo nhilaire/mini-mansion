@@ -47,10 +47,13 @@ describe('places drawn in code', () => {
       milk_taken: { fridge_open: true },
       cat_fed: { delivered: true },
       parcel_taken: { delivered: true },
+      // Maman's basket (with the drawer key) is only in the garden while she changes, once Papa is wary.
+      keyring_taken: { dad_wary: true },
     };
+    const charsFor: Partial<Record<keyof GameState['flags'], Partial<GameState['chars']>>> = { keyring_taken: { mom: 'changing' } };
     for (const place of PLACES) {
       for (const flag of VISUAL_FLAGS[place]) {
-        const s: GameState = { ...newGame(), place, flags: { ...needs[flag] } };
+        const s: GameState = { ...newGame(), place, flags: { ...needs[flag] }, chars: { ...newGame().chars, ...charsFor[flag] } };
         const changed = paintRoom({ ...s, flags: { ...s.flags, [flag]: true } }).data;
         const base = paintRoom(s).data;
         expect([place, flag, changed.some((v, i) => v !== base[i])]).toEqual([place, flag, true]);

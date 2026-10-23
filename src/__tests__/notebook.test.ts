@@ -83,7 +83,7 @@ describe('clue notebook (AC-29)', () => {
 describe('once-only cutscenes', () => {
   it('every cutscene of the solution plays exactly once', () => {
     const { state, outcomes } = playAll(newGame(), SOLUTION);
-    expect([...state.cuts].sort()).toEqual(['cut01', 'cut04', 'cut05', 'cut06', 'cut07', 'cut08', 'cut09', 'cut10', 'cut11', 'cut12', 'cut13', 'cut15', 'cut16', 'cut17']);
+    expect([...state.cuts].sort()).toEqual(['cut01', 'cut04', 'cut05', 'cut06', 'cut07', 'cut08', 'cut09', 'cut10', 'cut11', 'cut12', 'cut13', 'cut15']);
     const narratorKeys = outcomes.flatMap((o) => o.beats).filter((b) => b.type === 'say' && b.speaker === 'narrator').map((b) => (b as { key: string }).key);
     for (const k of ['cut01', 'cut04', 'cut05', 'cut06', 'cut08', 'cut09', 'cut10', 'cut13']) expect(narratorKeys.filter((x) => x === k)).toHaveLength(1);
   });
@@ -96,8 +96,7 @@ describe('once-only cutscenes', () => {
       const o = interact(s, input);
       const narrated = o.beats.filter((b) => b.type === 'say' && b.speaker === 'narrator' && /^cut\d\d$/.test(b.key)).map((b) => (b as { key: string }).key);
       for (const cut of narrated) expect(o.state.cuts).toContain(cut);
-      if (o.state.cuts.includes('cut11')) expect(o.state.flags.finale).toBe(true);
-      if (o.state.cuts.includes('cut17')) expect(o.state.finished).toBe(true);
+      if (o.state.cuts.includes('cut11')) expect(o.state.finished).toBe(true);
       s = o.state;
     }
   });

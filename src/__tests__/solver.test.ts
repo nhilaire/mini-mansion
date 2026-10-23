@@ -54,11 +54,12 @@ const DEPENDS: Record<number, number[]> = {
   22: [17],
   23: [7],
   24: [23],
+  25: [7, 17],
   26: [24],
   27: [26],
   28: [25, 27],
   29: [28],
-  30: [13],
+  30: [19, 24],
 };
 
 const has = (s: GameState, i: GameState['inventory'][number]) => s.inventory.includes(i);
@@ -84,9 +85,9 @@ const USED: [Flag, (s: GameState) => boolean][] = [
   ['keyring_taken', (s) => has(s, 'keyring') || s.flags.drawer_open === true],
   ['patches_taken', (s) => has(s, 'patches') || s.flags.patches_in === true],
   ['hairdryer_taken', (s) => has(s, 'hairdryer')],
-  ['parcel_taken', (s) => (has(s, 'tonka') || s.flags.tonka_given === true) && (has(s, 'pump') || s.flags.pump_in === true)],
+  ['parcel_taken', (s) => (has(s, 'tonka') || s.flags.tonka_in === true) && (has(s, 'pump') || s.flags.pump_in === true)],
   ['bottles_done', (s) => has(s, 'scrap2') || s.flags.frag2_in === true],
-  ['trunk_open', (s) => (has(s, 'hat') || s.flags.hat_given === true) && (has(s, 'scrap3') || s.flags.frag3_in === true)],
+  ['trunk_open', (s) => has(s, 'scrap3') || s.flags.frag3_in === true],
 ];
 
 const SAMPLE_EVERY = 31;
@@ -185,8 +186,8 @@ describe('story graph (AC-31)', () => {
           }
           // The power cut: only Papa, his timer and E27 change (see fuseSteps).
           if (input.kind === 'item' && input.target === 'florent.strip' && storyKey({ ...o.state, chars: s.chars, timers: s.timers, solved: s.solved }) === storyKey(s)) continue;
-          // The shed gives the keyring and solves E25 (the keyring is taken on the way, see lazyItem).
-          if (input.kind === 'verb' && input.target === 'garden.shed' && storyKey({ ...o.state, solved: s.solved }) === storyKey(s)) continue;
+          // The basket gives the drawer key and solves E25 (the key is taken on the way, see lazyItem).
+          if (input.kind === 'verb' && input.target === 'garden.basket' && storyKey({ ...o.state, solved: s.solved }) === storyKey(s)) continue;
           // A piece put in alone: checked with the pieces below.
           if (input.kind === 'item' && PART_GROUPS.some((g) => g.target === input.target && g.items.includes(input.item))) continue;
           if (k === storyKey(s) || k === bay || (dough && k === storyKey(dough))) continue;

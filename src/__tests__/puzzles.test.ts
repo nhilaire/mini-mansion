@@ -309,8 +309,8 @@ describe('E11-E13: the attic, the lab door, the lab', () => {
     expect(codeFirst.outcomes[2].events).toEqual([{ type: 'puzzle', puzzle: 12 }]);
   });
 
-  it('the three fragments on the recipe notebook lead to the revelation (E13), then the jury rings (AC-67)', () => {
-    let s = at('laundry', { inventory: ['scrap', 'scrap2', 'scrap3'], captures: 2 });
+  it('the three fragments on the recipe notebook, with the tonka bean in the dough, lead to the revelation (E13, AC-67)', () => {
+    let s = at('laundry', { inventory: ['scrap', 'scrap2', 'scrap3'], captures: 2, flags: { door_unlocked: true, tonka_in: true } });
     for (const piece of ['scrap3', 'scrap'] as const) {
       const more = interact(s, item(piece, 'laundry.notebook'));
       expect(more.beats).toContainEqual({ type: 'say', speaker: 'hero', key: 'line.recipeMore' });
@@ -318,19 +318,14 @@ describe('E11-E13: the attic, the lab door, the lab', () => {
       s = more.state;
     }
     const o = interact(s, item('scrap2', 'laundry.notebook'));
-    expect(o.events).toEqual([{ type: 'puzzle', puzzle: 13 }]);
-    expect(o.state.finished).toBe(false);
-    expect(o.state.flags.finale).toBe(true);
+    expect(o.events).toEqual([{ type: 'puzzle', puzzle: 13 }, { type: 'complete', captures: 2 }]);
+    expect(o.state.finished).toBe(true);
     expect(o.state.inventory).toEqual([]);
-    expect(o.state.cuts).toEqual(['cut11', 'cut16']);
-    expect(o.beats).toContainEqual({ type: 'view', view: 'jury' });
-    expect(o.beats).toContainEqual({ type: 'say', speaker: 'jury', key: 'line.juryRing' });
-    expect(o.beats[o.beats.length - 1]).toEqual({ type: 'say', speaker: 'dad', key: 'line.dadJury' });
+    expect(o.state.cuts).toEqual(['cut11']);
+    expect(o.beats[o.beats.length - 1]).toEqual({ type: 'ending' });
     // The whole family joins Sam in the lab, each one before their line.
     const casts = o.beats.filter((b) => b.type === 'cast');
-    expect(casts[casts.length - 2]).toEqual({ type: 'cast', characters: ['dad', 'mom', 'theo', 'julien', 'florent'] });
-    // Then the scene hands over to the family standing in the lab for the finale.
-    expect(casts[casts.length - 1]).toEqual({ type: 'cast', characters: [] });
+    expect(casts[casts.length - 1]).toEqual({ type: 'cast', characters: ['dad', 'mom', 'theo', 'julien', 'florent'] });
     for (const [who, key] of [['dad', 'line.final2'], ['mom', 'line.final5'], ['theo', 'line.final6'], ['julien', 'line.final7'], ['florent', 'line.final8']] as const) {
       const said = o.beats.findIndex((b) => b.type === 'say' && b.key === key);
       const joined = o.beats.findIndex((b) => b.type === 'cast' && b.characters.includes(who));

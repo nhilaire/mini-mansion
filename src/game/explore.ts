@@ -28,9 +28,9 @@
 //     player does while it is on its way can be done once it has arrived, so it is fired as soon as Papa is wary;
 //   - the first power cut and the later ones only differ by Papa's line (fuses_cut is left out of the story part),
 //     and the patches are taken with the O-ring (patches_taken repeats oring_taken);
-//   - Papa's keyring (garden shed) can always be fetched until it is taken: the garden is free while Maman folds the
-//     laundry, and once she gardens the hose works as long as the garden holds it; it is only used on the drawer: it
-//     is taken "on the way" too, solving E25;
+//   - Papa's drawer key (in Maman's gardening basket, once he is wary) can be fetched during any hose window until it
+//     is taken (the hose works as long as the garden holds it), and it is only used on the drawer: it is taken "on the
+//     way" too, solving E25;
 //   - while Papa is away from his desk (doorbell, dough, fuse box), only his office opens: the window is explored as
 //     one step (see officeWindow) with what can be done in the office (the computer, the pliers, the drawer), Papa
 //     then back with Sam out of the office or caught in it. What can be done elsewhere meanwhile can be done before
@@ -98,7 +98,7 @@ export const REDUCED_PUZZLES: readonly number[] = [15, 18];
 // Inputs of the reduced side systems, not explored one by one.
 export const GATE_TARGETS: readonly string[] = ['front.gateLeft', 'front.gateRight', 'football.gate', 'pool.gate'];
 export const BELL = 'front.bell';
-export const SIDE_TAKES: readonly string[] = ['hall.shoes', 'kitchen.fridge', 'utility.flours', 'cellar.rack', 'cellar.hatch', 'garage.breaker', 'bathroom.hairdryer', 'utility.sardines', 'garden.shed', TAP];
+export const SIDE_TAKES: readonly string[] = ['hall.shoes', 'kitchen.fridge', 'utility.flours', 'cellar.rack', 'cellar.hatch', 'garage.breaker', 'bathroom.hairdryer', 'utility.sardines', 'garden.basket', TAP];
 const PAD_IDS = Object.keys(PADS) as PadId[];
 
 // Story keys are computed once per state object (states are never mutated once returned by the engine).
@@ -208,9 +208,10 @@ export function actionInputs(s: GameState): Input[] {
 }
 
 // A lazy item can be fetched while it is still in its place (the sardines are used up by the cat), once inside;
-// the keyring once Maman gardens (the hose then gives a window).
+// the drawer key once Papa gave it to Maman and she gardens (the hose then gives a window).
 export function lazyAvailable(s: GameState, item: ItemId): boolean {
   if (!s.flags.door_unlocked) return false;
+  if (item === 'keyring' && !s.inventory.includes(item) && !(s.flags.dad_wary && s.flags.machine_done)) return false;
   return s.inventory.includes(item) || !s.flags[LAZY_ITEMS[item]!];
 }
 

@@ -15,7 +15,7 @@ Last updated: 2026-10-23
 > navigation plan, and the user's phone tests (2026-10-21: 21 notes in `docs/evidence/v0.1.0/RELEASE.md`; 2026-10-22:
 > unskippable capture and front door scenes, Papa answers the doorbell after 30 s; 2026-10-23, after v0.1.0 was
 > accepted: a longer story with the recipe in three fragments, a delivered parcel, the neighbours' cat, a garden hose,
-> Florent's bike, a power cut and the contest jury, and the rule that an inhabitant lured out twice needs a second
+> Florent's bike and a power cut, and the rule that an inhabitant lured out twice needs a second
 > reason that only becomes possible later), which amend this PRD: timed doorbell sequence, kitchen/garden/front captures, side gates, merged music corner and dining
 > room, breaker, cellar hatch, lab door code, optional kitchen recipe, art from the author's room photos. Every rule
 > kept is restated here: this PRD is the only source of truth.
@@ -32,7 +32,8 @@ cracks a chess problem, a computer and a safe. Act II: the father has cut his re
 safe, one hidden in the wine cellar, one in an old trunk of the attic) and its secret ingredient is delivered today.
 Sam reads invisible ink, wins the parcel back from the neighbours' cat, puts the cellar bottles in order, opens the
 trunk and the father's lab behind a painted-over door in the attic. The truth: a gluten-free, lactose-free chocolate
-cake for the town baking contest, whose jury rings at the door just as the whole family gathers in the lab. The fun
+cake for the town baking contest, whose secret touch, the delivered tonka bean, Sam grates into the dough before the
+whole family gathers in the lab, one after the other. The fun
 is in observing, sneaking, a few tense timed escapes and the "aha" of each puzzle, with family humour; being caught
 only sends Sam to the wine cellar, never loses progress, and there is no hint system.
 
@@ -103,11 +104,11 @@ flowchart LR
   bottom (one row, pages), a notebook button and a menu button. Overlays: action menu, digit
   keypad (computer, safe, lab door), sequence pad (the cellar bottles, the trunk colour padlock), chess board,
   documents, capture fade, and the outside views (front door, kitchen, delivery, garden, Florent's ride, power cut,
-  jury), played without control.
+  played without control.
 - **Clue notebook:** the list of entries learnt so far (see "Clue notebook"), newest first, `notebook.empty` when
   none; `notebook.close`. The notebook button shows a dot while an entry is unread.
 - **Pause:** `pause.resume`, `pause.settings`, `pause.home` (progress is already saved; timers are frozen).
-- **Ending:** after CUT17, final cutscene cards, then `ending.title`, play time (`ending.time`), number of captures
+- **Ending:** after CUT11, final cutscene cards, then `ending.title`, play time (`ending.time`), number of captures
   (`ending.captures`), `ending.home`. After the ending the save is marked finished: Home shows no `home.continue`.
 - **Settings:** toggles `settings.sfx`, `settings.music`, `settings.telemetry`; language (`settings.languageAuto`
   + one entry per language, each named in itself); button `settings.erase` (with `settings.confirmErase`);
@@ -138,7 +139,7 @@ TypeScript engine. The "Ending" shows play time and captures.
   down), idle frame per direction. The 5 inhabitants have a 2-frame idle animation and a talk frame, plus an
   activity pose (drumming seen from the back, playing chess, folding laundry, cooking, gardening, playing football,
   typing, Papa at the fuse box). Act II adds the neighbours' cat (lying, eating), the parcel, the delivery van and
-  driver, Maman soaked, Florent on his bike, the jury lady in her big hat, Papa's chef's hat, and a dark flicker for
+  driver, Maman soaked, Florent on his bike, Maman's gardening basket, and a dark flicker for
   the power cut.
 - Touch targets: the scene is scaled so that 1 logical px >= 2 dp on a 360 dp-high landscape screen; every hotspot
   and exit tap area is at least 22x22 logical px (>= 44 dp).
@@ -155,7 +156,7 @@ TypeScript engine. The "Ending" shows play time and captures.
 | theo | Théo | electronic chess and Rubik's Cubes | `theo` (his room) |
 
 Non-player characters, seen only in the listed scenes: the neighbours' cat (garden, from CUT13 until E23), the
-delivery driver (CUT13) and the contest jury, a lady in a big hat (CUT16, CUT17). None of them catches Sam.
+delivery driver (CUT13). Neither catches Sam.
 
 The first names are fictional. Character states change only through the events and timers of the "Character
 states" table; no random movement.
@@ -171,7 +172,7 @@ means the front of the house (`front`).
 | front | Devant la porte (front door, doormat, doorbell, two side gates) | front door -> hall (locked until E01); left gate -> football and right gate -> pool (both locked until E18) |
 | football | Coin foot | right gate -> front (locked until E18); middle -> pool; left -> garden |
 | pool | Piscine (pool, cover, cover switch, pump, garden tap with the hose running to the garden) | left gate -> front (locked until E18); middle -> football; bay window -> living (locked from inside until opened from living) |
-| garden | Jardin (flowers, swing, garden shed with Papa's keyring; the parcel and the cat after CUT13) | right -> football |
+| garden | Jardin (flowers, swing, garden shed; the parcel and the cat after CUT13; Maman's gardening basket while she changes) | right -> football |
 | hall | Entrée (stairs up in a doorway, coat rack, shoes) | front door -> front; left -> living; right -> corridor0; stairs -> landing |
 | living | Salon (electronic chess set, sofa, bookshelf, TV) | right -> hall; left -> music; bay window -> pool |
 | music | Coin musique et salle à manger (dining part on the left, next to the kitchen: sideboard, dining table, bread basket; music part on the right: piano, guitar, drums, xylophone) | right -> living; left -> kitchen |
@@ -270,10 +271,8 @@ means the front of the house (`front`).
 | florent | in_room | florent | E26 done and Sam leaves the garage: CUT15, he rides away | riding (nowhere) until CUT11 |
 | theo | in_room | theo | E04: the white queen is put back on the chessboard | chess (living) |
 | theo | chess | living | the Rubik's Cube is solved and Sam leaves `theo` | in_room (theo) again, CUT07 plays |
-| all | any | any | E13 (CUT11) | finale (laundry): every timer is cancelled, nobody guards anything, no capture can happen |
 
-- The finale: from CUT11 on, the whole family stands in the laundry; Sam cannot leave it (the exit answers
-  `line.finaleStay`) and only E30 remains.
+- The end: CUT11 gathers the whole family in the lab whatever their state, then the Ending.
 - The doorbell sequence: ringing shows `line.dadAnswer` (Papa heard from inside); Sam has 30 s to go away from the
   front door. Then the front door view plays (no control, cannot be skipped): Papa in front of the house says `line.dadAtDoor`; if Sam
   is in `front` at that moment, Papa catches Sam. Papa stays 60 s in front of the house (the office is free, `front`
@@ -295,8 +294,8 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
 
 - Papa, 1st exit: the doorbell (E16) or the dough (E19), needed for the computer (E07). The next time Papa is back at
   his desk after E07, he notices his computer was used: `line.dadWary`, flag `dad_wary`; he locks his sketchbook in his
-  desk drawer, which is locked again even if Sam opened it before (the keyring is needed again; before that, the drawer
-  only holds bills: `office.drawer.lookBills`, and N14 cannot be found). From
+  desk drawer and gives its key to Maman (`line.dadKey`); before that, the drawer is simply locked and its key
+  cannot be found. From
   then on the doorbell answers `line.bellIgnored`, and his door line becomes `dad.doorWary` (« … sauf panne de
   courant ! »). The dough: mixed while Papa is wary, `line.doughIgnored` is heard at once from the office (E19 still
   counts if it was not solved yet); if Papa becomes wary while the dough timer runs, CUT12 does not play when it ends
@@ -310,7 +309,7 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
 - Florent, 1st exit: the drums (E03). 2nd exit: his repaired bike (E26), which needs the Rustines, found in his Nerf
   kit together with the Joint torique (so only during or after his 1st exit), and the bike pump of the parcel.
 - Maman leaves her room once (E17). In the garden, the hose (E22) sends her to change for 90 s; it can be used again
-  once she is back (`line.momSoakedAgain`), until the parcel and Papa's keyring have been taken
+  once she is back (`line.momSoakedAgain`), until the parcel and Papa's drawer key have been taken
   (then `line.hoseOff`: the tap stays closed).
 - Julien and Théo leave their rooms once.
 - Non-player characters: the cat lies on the parcel from CUT13 and runs away at E23.
@@ -320,7 +319,7 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
 - A guarded place is a place whose occupant is in it: `office` (dad at_desk or answering), `front` (dad outside),
   `kitchen` (dad cooking), `garage` (dad fuses), `parents` (mom folding or changing), `garden` (mom gardening),
   `julien` (julien in_room), `florent` (florent in_room), `theo` (theo in_room). The delivery driver, the cat and the
-  jury guard nothing.
+  basket guard nothing.
 - Announcement: next to a guarded room (corridor0 or landing; the garage is also heard from the attic and the
   cellar while Papa is at the fuse box) the occupant's activity sound plays and looking at its
   door gives a line saying who is inside; listening at the door gives the occupant's door line. Upstairs the sounds
@@ -343,23 +342,24 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
 ### Puzzle chain
 
 Puzzle ids keep the draft's numbering (E01-E15), then the lures and the gates (E16-E19), then Act II (E20-E30).
-Needed to finish: E01-E15, E20, E21 and E23-E30, plus one of E16 (doorbell) or E19 (dough) to free the office the
-first time; E15 is needed since the bottle rack is in the cellar, whose hatch only opens from below with the iron
-bar; E22 (the hose) is needed when Maman already gardens while something is left to get in the garden (while she
-still folds the laundry upstairs the garden is free); E18 is optional (the keypads, the bottle rack and the trunk only
+Needed to finish: E01-E15, E17 and E19-E30 (the dough is needed for the tonka bean, E30; it frees the office the
+first time unless the doorbell, E16, did it before);
+E15 is needed since the bottle rack is in the cellar, whose hatch only opens from below with the iron bar; E22 (the
+hose) is needed for Papa's drawer key, which Maman leaves in the garden only while she changes; E18 is optional (the keypads, the bottle rack and the trunk only
 accept a code once it is in the notebook, so nothing can be guessed).
 
 Dependencies (checked by AC-31; the drawer of E28 only gives N14 once Papa is wary): E02, E03, E16, E17, E18, E19 in any order after E01; E04 after E02; E05 after E04; E06
 after CUT07 (E05); E07 after E06 and (E16 or E19); E08 after E03 and E17; E09 after E08; E10 after E09; E14 after
 (E16 or E19, or later E27: the power cut stays possible until the Pince is taken) and E02; E11 after E14; E12 after E10, E11 and E07; E20 after E10; E21 after E20; E22 after
-E17; CUT13 (the delivery) after E07 (60 s after Papa is wary); E23 after CUT13, with the garden free (Maman still folding, or E22); E24 after E23; E25 with the garden free;
+E17; CUT13 (the delivery) after E07 (60 s after Papa is wary); E23 after CUT13, with the garden free (Maman still folding, or E22); E24 after E23; E25 after E22 and Papa wary (E07);
 E26 after E24 and the Nerf kit taken (E08's Joint torique); E27 after E26; E28 after E25 and E27; E29 after E28; E13
-after E12, E21 and E29; E30 after E13. E18 (gates) is optional, and only one of E16 and E19 is needed.
+after E12, E21 and E29; E30 after E19 and E24; the end (CUT11) once E13 and E30 are done, in the lab. E16 and E18 are
+optional.
 
 Items: Clé de la maison, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du
 Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau,
 Fragment n° 1, Fragment n° 2, Fragment n° 3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz,
-Sèche-cheveux, Boîte de sardines, Fève tonka, Pompe à vélo, Trousseau de Papa, Toque de Papa (names in the Player
+Sèche-cheveux, Boîte de sardines, Fève tonka, Pompe à vélo, Clé du tiroir (names in the Player
 copy).
 
 | # | Puzzle | Condition | Effect |
@@ -386,20 +386,19 @@ copy).
 | E22 | Open the garden tap (pool): the hose runs wild in the garden (CUT14) | Maman not gardening: `line.hoseLawn` (the water only waters the lawn) | Maman soaked: mom -> changing for 90 s (the garden is free, her room guarded) |
 | E23 | Use the Boîte de sardines (utility shelf) on the neighbours' cat lying on the parcel (garden, after CUT13) | the cat or the parcel used without the sardines: `line.catHiss` | - Boîte de sardines; the cat eats and runs off over the hedge |
 | E24 | Take the parcel (garden) | the cat still on it: `line.catHiss` | + Fève tonka, + Pompe à vélo (`line.parcelOpen`) |
-| E25 | Take Papa's keyring in the garden shed (garden, Maman away) | - | + Trousseau de Papa |
+| E25 | Take Papa's drawer key in Maman's gardening basket, which she leaves in the garden while she changes after the hose (after Papa is wary) | - | + Clé du tiroir |
 | E26 | Repair Florent's bike (garage): the Rustines and the Pompe à vélo, in any order | one of the two only: `line.bikeHalf` | - Rustines, - Pompe à vélo; when Sam then leaves the garage: CUT15, Florent rides away (florent -> riding) |
 | E27 | Plug the Sèche-cheveux into Florent's overloaded power strip (florent, Florent riding) | Florent not riding: `line.stripNotNow`; Papa not at his desk: `line.fusesNobody`; nothing left to get in the office: `line.fusesNoNeed` | the power cut (CUT18): dad -> fuses (garage) for 60 s; the Sèche-cheveux is kept |
-| E28 | Open Papa's desk drawer (office) with the Trousseau de Papa, once Papa is wary | drawer used without it: `line.drawerLocked`; Papa not wary yet: the drawer opens on bills only (`office.drawer.lookBills`), the keyring is kept | - Trousseau de Papa; Papa's sketchbook: notebook N14 (the trunk colours) |
-| E29 | Open the attic trunk: the colour padlock on the sequence pad (red, yellow, blue, green) | N14 not in the notebook: `line.trunkUnknown`; wrong colours: `line.codeWrong`, unlimited tries | + Toque de Papa, + Fragment n° 3 |
-| E13 | In the laundry, put the three fragments on Papa's recipe notebook, in any order | fewer than three yet: `line.recipeMore` (the fragment is kept in the notebook) | - Fragments; CUT11 (revelation, the family gathers), then CUT16 (the jury rings) |
-| E30 | Give Papa (laundry, after CUT16) the Toque de Papa and the Fève tonka, in any order | the first item given stays with Papa (it leaves the inventory), `line.dadStillMissing`; the second completes E30 | - Toque, - Fève tonka; CUT17, then the Ending |
+| E28 | Open Papa's desk drawer (office) with the Clé du tiroir | drawer used without it: `line.drawerLocked` | - Trousseau de Papa; Papa's sketchbook: notebook N14 (the trunk colours) |
+| E29 | Open the attic trunk: the colour padlock on the sequence pad (red, yellow, blue, green) | N14 not in the notebook: `line.trunkUnknown`; wrong colours: `line.codeWrong`, unlimited tries | + Fragment n° 3 |
+| E13 | In the laundry, put the three fragments on Papa's recipe notebook, in any order | fewer than three yet: `line.recipeMore` (the fragment is kept in the notebook) | - Fragments; the recipe is complete: with the tonka bean already in the dough, CUT11 and the Ending; otherwise `line.recipeTonka` (the secret touch is missing), and CUT11 plays when Sam is back in the lab once it is in |
+| E30 | Grate the Fève tonka into Papa's dough in the food processor (kitchen) | no dough yet: `line.tonkaNoDough` | - Fève tonka; flag `tonka_in` (`e30.tonka`) |
 | E15 | Unblock the cellar hatch from below with the Barre de fer | hatch used without the bar: `line.hatchStuck` | - Barre de fer; hatch open both ways for good |
 
 - Effects happen exactly once; a solved puzzle stays solved; trying again gives the "already done" look line.
   Exceptions: the lures listed in "Lures and wariness" (doorbell, hose, power cut) can be used again under their
   rules, and `puzzle_solved` is emitted on their first success only.
-- The Photo du gâteau and the Mot de Papa are look-only items: they stay in the inventory until the end. The Fève
-  tonka is only given to Papa in the finale (E30). The
+- The Photo du gâteau and the Mot de Papa are look-only items: they stay in the inventory until the end. The
   Sèche-cheveux is never used up.
 - Items can be taken as soon as Sam can stand next to them; items found before their puzzle stay in the inventory.
 - Always winnable: from every reachable state, the ending is reachable (exhaustive search of the engine's state
@@ -422,7 +421,7 @@ copy).
 
 Each cutscene has an id, a trigger, lines and a final state, and plays once, except CUT02 (each ring), CUT14 (each
 hose) and CUT18 (each power cut). Saving during a cutscene stores the state after it. The outside views (CUT02,
-CUT12, CUT13, CUT14, CUT15, CUT16, CUT18) play wherever Sam is, without control, and cannot be skipped.
+CUT12, CUT13, CUT14, CUT15, CUT18) play wherever Sam is, without control, and cannot be skipped.
 
 | Id | Trigger | Content |
 |---|---|---|
@@ -440,9 +439,7 @@ CUT12, CUT13, CUT14, CUT15, CUT16, CUT18) play wherever Sam is, without control,
 | CUT14 | E22 (each time) | the garden view: the hose writhes and soaks Maman (`line.momSoaked`, later `line.momSoakedAgain`); she runs inside to change |
 | CUT15 | Sam leaves the garage after E26 | the front view: Florent runs out to his bike, `line.florentBike`, and rides away down the street |
 | CUT18 | E27 (each time) | the power cut: the scene goes dark and flickers, `sfx` fuse pop, Papa heard: `line.dadFuses` (the first time) or `line.fusesAgain`; he goes down to the garage; the house then stays dark (dimmed, still playable; outside stays lit) until he has fixed the fuses |
-| CUT11 | E13 | Papa climbs into his lab (`line.final1-8`), then Maman, Théo, Julien and Florent join one after the other until the whole family stands around Sam: the "disaster" is a gluten-free, lactose-free chocolate cake for the town baking contest, and the recipe is complete again |
-| CUT16 | right after CUT11 | the jury view: a car stops in front of the house, a lady in a big hat rings (`line.juryRing`); back in the lab, Papa: `line.dadJury` (his lucky chef's hat and the secret ingredient are missing); control returns in the laundry with the family |
-| CUT17 | E30 | Papa puts on his chef's hat and grates the tonka bean on the cake; the family brings the cake down to the front door; the jury lady tastes it: `line.juryTaste`; Sam is thanked (`line.dadThanks`); narrator: `line.finalBakery` (tomorrow every bakery in town will be empty: that is the rumour's "disaster"); then the Ending |
+| CUT11 | E13 and E30 done, in the lab | Papa climbs into his lab (`line.final1-8`), then Maman, Théo, Julien and Florent join one after the other until the whole family stands around Sam: the "disaster" is a gluten-free, lactose-free chocolate cake for the town baking contest, and its secret touch is the tonka bean; Papa thanks Sam (`line.dadThanks`), the narrator ends (`line.finalBakery`: tomorrow every bakery in town will be empty); then the Ending |
 
 ### Clue notebook
 
@@ -495,13 +492,13 @@ checked by a unit test:
 - E21: N13; bottle rack look (four dusty bottles, their vintages on the labels); N12 (a piece in the cellar).
 - E22: garden tap look (the hose runs to the garden); Maman humming heard from the football corner; `line.hoseLawn`.
 - E23: cat look (it hisses, it looks hungry); sardines look (utility shelf); N16.
-- E24: parcel look (addressed to Papa, a bakery supplier's label). E25: shed look (Papa's keyring on a hook).
+- E24: parcel look (addressed to Papa, a bakery supplier's label). E25: `line.dadKey` (Papa gives the key to Maman); basket look.
 - E26: bike look (flat tyre); Nerf kit look (puncture patches next to the O-ring); N15 (the pump is for Florent).
 - E27: power strip look (« console, ampli, guirlande… un appareil de plus et tout saute ! »); `dad.doorWary`.
-- E28: drawer look (locked, a small key needed); keyring look (a small drawer key). E29: trunk look (a padlock with
+- E28: drawer look once Papa is wary (locked, he gave the key to Maman); drawer key look. E29: trunk look (a padlock with
   colour wheels); N14; N12 (a piece in the attic trunk).
-- E30: `line.dadJury` (the chef's hat and the secret ingredient); the trunk look after opening (Papa's old chef's
-  hat); N15 and the parcel look (the tonka bean is the secret ingredient).
+- E30: fragment n° 2 look (« une fève tonka râpée dans la pâte du robot »); `line.recipeTonka`; N15 and the parcel look (the
+  tonka bean is the secret ingredient).
 
 ### Tutorial (first scene)
 
@@ -522,8 +519,8 @@ an item was selected. Then the tutorial is complete. No hint system afterwards.
 
 ### Ending
 
-- When E30 resolves, the save is marked finished and `game_complete` is sent once, before CUT17. If the app is killed
-  during CUT17 or the Ending screen, the relaunch shows Home without `home.continue`, and nothing is sent again.
+- When CUT11 starts (E13 and E30 done), the save is marked finished and `game_complete` is sent once. If the app is
+  killed during CUT11 or the Ending screen, the relaunch shows Home without `home.continue`, and nothing is sent again.
 - Play time: whole minutes rounded down, minutes always 2 digits, hours without padding ("0 h 05", "3 h 12").
 
 ## Look, sound and feel
@@ -700,8 +697,8 @@ Puzzles, characters, captures, timers
 - AC-31 [unit] Given the engine's state graph explored exhaustively from a new game over all actions and timer
   expiries (captures included), then from every reachable state the ending remains reachable (no dead end), no
   needed item can be removed early, and no puzzle can be solved before the puzzles it depends on.
-- AC-32 [unit] Given the engine, when the full solution sequence is played, then E13 plays CUT11 and CUT16, E30 leads
-  to the ending, the save is marked finished and `game_complete` is emitted exactly once with duration and captures.
+- AC-32 [unit] Given the engine, when the full solution sequence is played, then the last of E13 and E30 leads to
+  CUT11 and the ending, the save is marked finished and `game_complete` is emitted exactly once with duration and captures.
 - AC-59 [unit] Given Papa lured before E07, then the doorbell and the dough work as in AC-51 and AC-52 and can be
   used again; given E07 done, then the next time Papa is back at his desk `line.dadWary` plays, and from then on the
   doorbell answers `line.bellIgnored`, a dough mixed does not bring him (`line.doughIgnored` at once, E19 still solved
@@ -712,10 +709,11 @@ Puzzles, characters, captures, timers
 - AC-61 [unit] Given Maman gardening, when the garden tap is used, then CUT14 plays and Maman changes in her room for
   90 s (garden free, her room guarded; Sam is caught entering her room meanwhile or still in the garden when she comes
   back); given Maman not gardening, then `line.hoseLawn`; the hose works again once she is back, and says
-  `line.hoseOff` once the parcel and the keyring are taken.
+  `line.hoseOff` once the parcel and the drawer key are taken.
 - AC-62 [unit] Given the cat on the parcel, then the cat and the parcel answer `line.catHiss` until the Boîte de
   sardines is used on the cat (E23), after which the cat is gone and the parcel gives the Fève tonka and the Pompe à
-  vélo (E24); the garden shed gives the Trousseau de Papa (E25).
+  vélo (E24); once Papa is wary, Maman's gardening basket, left in the garden while she changes, gives the Clé du tiroir
+  (E25).
 - AC-63 [unit] Given the Nerf kit taken, then the inventory holds the Joint torique and the Rustines; given the
   Rustines and the Pompe à vélo used on the bike in any order, then E26 is solved (one alone: `line.bikeHalf`), and
   when Sam leaves the garage CUT15 plays and Florent rides away: his room is free until CUT11.
@@ -727,14 +725,15 @@ Puzzles, characters, captures, timers
 - AC-65 [unit] Given the Sèche-cheveux used on the Mot de Papa, then N13 is added once (E20); given the bottle rack,
   then it refuses before N13 (`line.bottlesUnknown`), accepts only 1987, 1994, 2003, 2011 in that order, resets on a
   wrong order (`line.bottlesWrong`, unlimited tries) and gives the Fragment n° 2 once (E21).
-- AC-66 [unit] Given the desk drawer, then it refuses without the Trousseau de Papa (`line.drawerLocked`) and with
-  it adds N14 (E28) only once Papa is wary (before: bills only, the keyring is kept, no N14); given the trunk, then it refuses before N14 (`line.trunkUnknown`), accepts only red, yellow,
-  blue, green and gives the Toque de Papa and the Fragment n° 3 once (E29).
-- AC-67 [unit] Given the recipe notebook, then it takes the three fragments in any order (`line.recipeMore` before
-  the third), the third plays CUT11 then CUT16 (E13); then giving Papa the Toque de Papa and the Fève tonka in any order
-  (one alone: `line.dadStillMissing`) plays CUT17 and the Ending (E30), and nothing else ends the game.
-- AC-68 [unit] Given E13, then every timer is cancelled, the whole family is in the laundry, no place is guarded, no
-  capture can happen and the laundry exit answers `line.finaleStay`.
+- AC-66 [unit] Given the desk drawer, then it refuses without the Clé du tiroir (`line.drawerLocked`) and with it adds
+  N14 (E28); given the trunk, then it refuses before N14 (`line.trunkUnknown`), accepts only red, yellow,
+  blue, green and gives the Fragment n° 3 once (E29).
+- AC-67 [unit] Given the tonka bean, then the food processor refuses it without dough (`line.tonkaNoDough`) and with
+  the dough takes it (E30); given the recipe notebook, then it takes the three fragments in any order
+  (`line.recipeMore` before the third), the third completes the recipe (E13).
+- AC-68 [unit] Given E13 and E30 both done, then CUT11 plays in the lab (at the third fragment, or when Sam comes
+  back to the lab), the family joins one after the other, then the Ending; with E13 done but not E30,
+  `line.recipeTonka` plays and the game goes on; nothing else ends the game.
 - AC-69 [unit] Given several timer deadlines due at once or during a scene, then timers do not advance while a line,
   cutscene, outside view or capture plays, and the due events fire one after another in deadline order, each scene
   in full.
@@ -773,10 +772,10 @@ Persistence, pause, ending, settings, about
   copy" table, and French typography uses a no-break space before `: ; ! ?` and inside « ».
 - AC-49 [unit] Given a spoken line, then it stays until tapped or until max(2 s, 50 ms x length) has elapsed, and
   scene input is ignored while a line, a cutscene or an outside view plays; the capture scene and the outside views
-  (front door, kitchen, delivery, garden, Florent's ride, power cut, jury) cannot be skipped by a tap (their lines
+  (front door, kitchen, delivery, garden, Florent's ride, power cut) cannot be skipped by a tap (their lines
   play their full time).
 - AC-50 [unit] Given a save requested during a cutscene, then the stored state is the state after the cutscene;
-  given the app going to the background, then the game is saved; given the app killed during CUT17 or the Ending
+  given the app going to the background, then the game is saved; given the app killed during CUT11 or the Ending
   screen, then the relaunch shows no continue and `game_complete` is not sent again.
 
 Technical and feel
@@ -790,7 +789,7 @@ Technical and feel
   (layout, colours, characteristic objects), the stairs are seen from the front in a doorway, the attic is cluttered,
   Florent drums and Théo plays chess seen from the back, Julien's ball lies on the grass, Théo's chess set is electronic,
   the whole family gathers in the lab at the end, and the Act II scenes (delivery, cat, soaked Maman, Florent's ride,
-  power cut, jury) are readable and funny.
+  power cut, the family gathering one after the other) are readable and funny.
 
 ## Player copy
 
@@ -841,8 +840,6 @@ Final app name: fr "Mini Mansion", en "Mini Mansion". Language-specific assets: 
 | line.florentBike | Mon vélo est réparé ?! Trop bien, je vais faire un tour ! | My bike is fixed?! Awesome, I'm going for a ride! |
 | line.dadFuses | Les plombs ont sauté ! Qui a branché quoi ?! J'y vais… | The fuses blew! Who plugged what in?! I'm going… |
 | line.fusesAgain | Encore les plombs ?! Cette maison est ensorcelée… | The fuses again?! This house is bewitched… |
-| line.dadJury | Le jury ! Déjà ?! Il me manque ma toque porte-bonheur… et l'ingrédient secret du colis ! | The jury! Already?! I'm missing my lucky chef's hat… and the secret ingredient from the parcel! |
-| line.juryTaste | Sans gluten, sans lactose… et divin ! Premier prix ! | Gluten-free, lactose-free… and divine! First prize! |
 | line.finalBakery | Demain, toutes les pâtisseries de la ville seront vides : la voilà, la catastrophe ! | Tomorrow every bakery in town will be empty: there it is, the disaster! |
 | line.codeUnknown | Je ne connais pas le code. Inutile de taper au hasard. | I don't know the code. No point typing at random. |
 | line.dadAnswer | Qui sonne à cette heure-là ? Oui, deux minutes, j'arrive ! | Who's ringing at this hour? Yes, two minutes, I'm coming! |
@@ -866,7 +863,7 @@ Final app name: fr "Mini Mansion", en "Mini Mansion". Language-specific assets: 
 | about.story | Enfant, je passais des heures à fouiller chaque pièce du manoir de Maniac Mansion, chez une famille complètement folle. Cette fois, j'ai voulu que le manoir soit une vraie maison : la mienne, transformée en pixel art, avec ses habitants loufoques et un secret bien gardé. | As a child, I spent hours searching every room of the Maniac Mansion manor, home to a completely crazy family. This time, I wanted the mansion to be a real house: mine, turned into pixel art, with its zany inhabitants and a well-kept secret. |
 | about.authorTitle | Un mot de l'auteur | A word from the author |
 | about.dataTitle | Tes données | Your data |
-| item names | Clé de la maison, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau, Fragment n° 1, Fragment n° 2, Fragment n° 3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz, Sèche-cheveux, Boîte de sardines, Fève tonka, Pompe à vélo, Trousseau de Papa, Toque de Papa | House key, Gate key, Pole, Extension, Extended pole, Drumsticks, White queen, Rubik's Cube booklet, O-ring, Puncture patches, Adjustable wrench, Pliers, Detergent, Paint thinner, Old key, Cake photo, Scrap no. 1, Scrap no. 2, Scrap no. 3, Papa's note, Iron bar, Rice milk, Chestnut flour, Rice flour, Hair dryer, Tin of sardines, Tonka bean, Bike pump, Papa's keyring, Papa's chef's hat |
+| item names | Clé de la maison, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau, Fragment n° 1, Fragment n° 2, Fragment n° 3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz, Sèche-cheveux, Boîte de sardines, Fève tonka, Pompe à vélo, Clé du tiroir | House key, Gate key, Pole, Extension, Extended pole, Drumsticks, White queen, Rubik's Cube booklet, O-ring, Puncture patches, Adjustable wrench, Pliers, Detergent, Paint thinner, Old key, Cake photo, Scrap no. 1, Scrap no. 2, Scrap no. 3, Papa's note, Iron bar, Rice milk, Chestnut flour, Rice flour, Hair dryer, Tin of sardines, Tonka bean, Bike pump, Drawer key |
 
 ## Out of scope
 

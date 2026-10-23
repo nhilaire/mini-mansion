@@ -211,8 +211,6 @@ describe('French typography and tone (AC-45)', () => {
       ['line.florentBike', `Mon vélo est réparé${N}?! Trop bien, je vais faire un tour${N}!`],
       ['line.dadFuses', `Les plombs ont sauté${N}! Qui a branché quoi${N}?! J'y vais…`],
       ['line.fusesAgain', `Encore les plombs${N}?! Cette maison est ensorcelée…`],
-      ['line.dadJury', `Le jury${N}! Déjà${N}?! Il me manque ma toque porte-bonheur… et l'ingrédient secret du colis${N}!`],
-      ['line.juryTaste', `Sans gluten, sans lactose… et divin${N}! Premier prix${N}!`],
       ['line.finalBakery', `Demain, toutes les pâtisseries de la ville seront vides${N}: la voilà, la catastrophe${N}!`],
     ];
     for (const [key, text] of frCopy) expect([key, line(DICTIONARIES.fr, key)]).toEqual([key, text]);
@@ -245,7 +243,7 @@ describe('French typography and tone (AC-45)', () => {
       'Boîte de sardines',
       'Fève tonka',
       'Pompe à vélo',
-      'Trousseau de Papa',
+      'Clé du tiroir',
       'Fragment n° 2',
       'Fragment n° 3',
       'Toque de Papa',
@@ -265,8 +263,6 @@ describe('French typography and tone (AC-45)', () => {
       ['line.florentBike', "My bike is fixed?! Awesome, I'm going for a ride!"],
       ['line.dadFuses', "The fuses blew! Who plugged what in?! I'm going…"],
       ['line.fusesAgain', 'The fuses again?! This house is bewitched…'],
-      ['line.dadJury', "The jury! Already?! I'm missing my lucky chef's hat… and the secret ingredient from the parcel!"],
-      ['line.juryTaste', 'Gluten-free, lactose-free… and divine! First prize!'],
       ['line.finalBakery', 'Tomorrow every bakery in town will be empty: there it is, the disaster!'],
     ];
     for (const [key, text] of enCopy) expect([key, line(en, key)]).toEqual([key, text]);
@@ -299,7 +295,7 @@ describe('French typography and tone (AC-45)', () => {
       'Tin of sardines',
       'Tonka bean',
       'Bike pump',
-      "Papa's keyring",
+      'Drawer key',
       'Scrap no. 2',
       'Scrap no. 3',
       "Papa's chef's hat",

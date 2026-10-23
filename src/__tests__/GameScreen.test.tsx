@@ -82,7 +82,7 @@ describe('GameScreen, Act II', () => {
     expect(screen.getByLabelText('Violet')).toBeTruthy();
     for (const b of ['red', 'yellow', 'blue', 'green']) await fireEvent.press(screen.getByTestId(`pad-${b}`));
     await dismissLines();
-    expect(lastSaved(props).inventory).toEqual(['hat', 'scrap3']);
+    expect(lastSaved(props).inventory).toEqual(['scrap3']);
   });
 
   it('the hose view shows Maman soaked in the garden and cannot be skipped; timers wait while it plays (AC-49, AC-61, AC-69)', async () => {
@@ -481,28 +481,13 @@ describe('GameScreen', () => {
     expect(saved.notes).toContain('n11');
   });
 
-  it('the last recipe scrap gathers the family in the lab and the jury rings (AC-67, AC-68)', async () => {
-    const lastScrap = stepOf((i) => i.kind === 'item' && i.item === 'scrap3');
-    const finale = await mount(stateAt(lastScrap));
+  it('the last recipe scrap, with the tonka bean in the dough, gathers the family and ends the game, saved as finished (AC-32, AC-50, AC-67)', async () => {
+    const props = await mount(stateAt(SOLUTION.length - 1));
     await fireEvent.press(screen.getByTestId('inv-scrap3'));
     await fireEvent.press(screen.getByTestId('hs-laundry.notebook'));
-    expect(screen.getByText(line(t, 'line.final1'))).toBeTruthy();
-    await dismissLines();
-    expect(lastSaved(finale).flags.finale).toBe(true);
-    expect(lastSaved(finale).finished).toBe(false);
-    for (const who of ['dad', 'mom', 'julien', 'florent', 'theo']) expect(screen.getByTestId(`hs-${who}`)).toBeTruthy();
-  });
-
-  it('the hat and the tonka bean for Papa lead to the jury tasting and the ending, saved as finished (AC-32, AC-50, AC-67)', async () => {
-    const props = await mount(stateAt(SOLUTION.length - 1));
-    await fireEvent.press(screen.getByTestId('inv-tonka'));
-    await fireEvent.press(screen.getByTestId('hs-dad'));
-    // Sam walks to Papa first.
-    await act(async () => {
-      jest.advanceTimersByTime(3000);
-    });
-    // The save is already finished while the tasting plays (killed now, nothing would resume).
+    // The save is already finished while the reunion plays (killed now, nothing would resume).
     expect(lastSaved(props).finished).toBe(true);
+    expect(screen.getByText(line(t, 'line.final1'))).toBeTruthy();
     await dismissLines();
     expect(props.onEnding).toHaveBeenCalledTimes(1);
     expect((props.onEnding.mock.calls[0][0] as GameState).finished).toBe(true);

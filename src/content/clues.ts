@@ -26,10 +26,10 @@ export const CLUES: Record<number, readonly string[]> = {
   22: ['pool.tap.look', 'line.hoseLawn'],
   23: ['garden.cat.look', 'utility.sardines.look', 'line.catHiss'],
   24: ['garden.parcel.look', 'line.catHiss'],
-  25: ['garden.shed.look'],
+  25: ['line.dadKey', 'garden.basket.look'],
   26: ['garage.bike.look', 'florent.kit.look'],
   27: ['florent.strip.look', 'dad.doorWary'],
-  28: ['office.drawer.look', 'item.keyring.look', 'line.drawerLocked'],
+  28: ['office.drawer.lookWary', 'item.keyring.look', 'line.drawerLocked'],
   29: ['attic.trunk.look', 'line.trunkUnknown'],
-  30: ['line.dadJury'],
+  30: ['item.scrap2.look', 'line.recipeTonka', 'item.tonka.look'],
 };
