@@ -214,6 +214,8 @@ means the front of the house (`front`).
   overhears the occupant talking to themself), `verb.use` (operable objects). Inhabitants can only be looked at. Tapping elsewhere closes it.
 - Choosing a verb makes Sam walk to the hotspot's interaction point, face it, then the engine runs the action and
   shows the response line.
+- When an inhabitant arrives where Sam stands (Florent at the drums in CUT05, Théo at the chessboard in CUT06), Sam
+  steps aside as they arrive, so that nobody hides the other.
 - Inventory: tapping an item selects it (highlight + banner `game.useWith`); the next tap on a hotspot, a character
   or another inventory item makes Sam apply it (walk there first for scene targets; "give" when the target is a
   character; "combine" when it is an item). Tapping the selected item again clears the selection. Long press on an

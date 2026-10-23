@@ -260,6 +260,8 @@ export type Beat =
   | { type: 'note'; note: NoteId }
   // A place change; pos/facing are given when it is not the saved place (Sam steps into a room before a capture).
   | { type: 'room'; place: PlaceId; pos?: Point; facing?: Facing }
+  // Sam steps aside (an inhabitant arrives where Sam stands).
+  | { type: 'step'; pos: Point; facing: Facing }
   | { type: 'capture' }
   // A view of another place without control (PRD outside views).
   | { type: 'view'; view: ViewId }

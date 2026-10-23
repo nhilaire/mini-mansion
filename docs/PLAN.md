@@ -83,6 +83,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-67 Art: cat, parcel, van and driver, jury lady, chef's hat, soaked Maman, Florent on his bike, shed, bottle rack, trunk padlock, drawer, power strip, hair dryer, new item icons, power cut flicker (AC-19, AC-57) - proof: unit
 - [x] T-68 Sounds: van, cat, bike bell, fuse pop, padlock, bottles, applause, fuse box and changing activity sounds (AC-25, AC-43) - proof: unit
 - [x] T-69 Telemetry: puzzle_solved 1-30, capture room garage (AC-06, AC-07) - proof: unit
+- [x] T-71 Sam steps aside when Florent comes to the drums and Théo to the chessboard, so that nobody hides the other (user feedback 2026-10-23) - proof: unit
 - [ ] T-70 Walkthrough flow regenerated for the whole story (AC-41) - proof: e2e
 
 ## Notes

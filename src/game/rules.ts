@@ -764,12 +764,12 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
       return;
     case 'sticks>music.drums':
       c.remove('sticks').sfx('drums');
-      c.cut('cut05', (k) => k.narrator('cut05').say('florent', 'line.florentDrums'));
+      c.cut('cut05', (k) => stepAside(k, { x: 196, y: 124 }, 'right').narrator('cut05').say('florent', 'line.florentDrums'));
       c.move('florent', 'drumming').solve(3);
       return;
     case 'queen>living.chess':
       c.remove('queen').set('queen_placed');
-      c.cut('cut06', (k) => k.narrator('cut06').say('theo', 'line.theoQueen'));
+      c.cut('cut06', (k) => stepAside(k, { x: 256, y: 126 }, 'left').narrator('cut06').say('theo', 'line.theoQueen'));
       c.move('theo', 'chess').solve(4);
       return;
     case 'booklet>theo.cube':
@@ -881,6 +881,14 @@ function juryTastes(c: Ctx): void {
     k.cinematic(false);
   });
   c.beats.push({ type: 'ending' });
+}
+
+// Florent coming down to his drums and Théo to the chessboard would stand where Sam is: Sam steps aside as they arrive.
+function stepAside(c: Ctx, pos: Point, facing: Facing): Ctx {
+  c.s.pos = { ...pos };
+  c.s.facing = facing;
+  c.beats.push({ type: 'step', pos: { ...pos }, facing });
+  return c;
 }
 
 // E12: the lab door opens once both its lock (old key) and its keypad (code 2510) are done, in any order.

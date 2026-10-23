@@ -148,6 +148,8 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   }, []);
 
   // Plays the next beat of the queue (sounds, notes and place changes do not wait).
+  // The walk used by a step-aside beat (walkTo is defined below, with the walking code).
+  const walkToRef = useRef<((target: Point, face: Facing | null, then: (() => void) | null) => void) | null>(null);
   const runNext = useCallback(() => {
     for (;;) {
       const b = queue.current.shift();
@@ -214,6 +216,10 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           setPage(0);
           break;
         }
+        case 'step':
+          // Sam steps aside; the scene goes on once there.
+          walkToRef.current?.(b.pos, b.facing, runNext);
+          return;
         case 'ending':
           show(null);
           if (!endedRef.current) {
@@ -274,6 +280,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
     },
     [commit, signal],
   );
+  walkToRef.current = walkTo;
 
   // Game loop: walking, play time, line timers, animation clock.
   useEffect(() => {

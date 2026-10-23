@@ -361,3 +361,20 @@ describe('the timer order (AC-69)', () => {
     ]);
   });
 });
+
+describe('Sam steps aside when an inhabitant arrives where Sam stands', () => {
+  it.each([
+    ['florent', 'music', 'sticks', 'music.drums', 'line.florentDrums'],
+    ['theo', 'living', 'queen', 'living.chess', 'line.theoQueen'],
+  ] as const)('%s', (who, place, item, target, key) => {
+    const o = interact(at(place, { inventory: [item] }), give(item, target));
+    const step = o.beats.findIndex((b) => b.type === 'step');
+    const line = o.beats.findIndex((b) => b.type === 'say' && b.key === key);
+    expect(step).toBeGreaterThanOrEqual(0);
+    expect(step).toBeLessThan(line);
+    const placed = characterPlacement(who, o.state)!;
+    // The sprites (24 px wide) no longer overlap.
+    expect(Math.abs(o.state.pos.x - placed.pos.x)).toBeGreaterThanOrEqual(24);
+    expect(o.beats[step]).toEqual({ type: 'step', pos: o.state.pos, facing: o.state.facing });
+  });
+});
