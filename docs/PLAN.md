@@ -84,7 +84,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-68 Sounds: van, cat, bike bell, fuse pop, padlock, bottles, applause, fuse box and changing activity sounds (AC-25, AC-43) - proof: unit
 - [x] T-69 Telemetry: puzzle_solved 1-30, capture room garage (AC-06, AC-07) - proof: unit
 - [x] T-71 Sam steps aside when Florent comes to the drums and Théo to the chessboard, so that nobody hides the other (user feedback 2026-10-23) - proof: unit
-- [ ] T-70 Walkthrough flow regenerated for the whole story (AC-41) - proof: e2e
+- [x] T-70 Walkthrough flow regenerated for the whole story (AC-41) - proof: e2e
 
 ## Notes
 
@@ -103,5 +103,6 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
   feel test) are produced by `/verify-app` and `/release-apk`.
 - T-41 proof (2026-10-21, commit f383657): x86_64 release APK on the emulator, 7/7 short flows and the generated walkthrough passed (the dough timer reached CUT12 in fast mode; ending screen then home without "continue").
 - T-42 is preparation only, as T-27: the device proofs come from /verify-app and /release-apk.
+- T-70 proof (2026-10-23): x86_64 release APK on the emulator, the generated walkthrough of the whole Act II story reached the ending screen in 10 min 20 (fast mode; the timed windows run 1.5 times faster only).
 - Risks: art volume (24 scenes, 6 characters) and startup time (decode per place, lazily); Maestro walkthrough length
   (fast mode).

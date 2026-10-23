@@ -75,7 +75,7 @@ function stepFor(input: Input, state: GameState, after: GameState, band: Band): 
     case 'pad':
       return [...input.code.map((b) => tap(`pad-${b}`)), idle()];
     case 'wait':
-      return [waitFor(waitMarker(state, after), 60000), idle()];
+      return [waitFor(waitMarker(state, after), 90000), waitFor('scene-idle', 60000)];
     case 'lookItem':
     case 'tick':
       return [];

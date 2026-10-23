@@ -579,7 +579,8 @@ Business and technical indicators followed in Firebase (free Spark plan). Detail
 - Privacy: opt-in telemetry, no personal data, AD_ID permission removed. Room photos never enter the repository
   (`photos/` git-ignored).
 - Testing hook: the deep link `minimansion://test/fast` makes walks instant, spoken lines short and timers 30 times
-  faster for the current run only, so that the end-to-end walkthrough fits the verification budget. It changes no
+  faster (1.5 times while Papa is away or Maman changes, so that the automated run can act in those windows) for the
+  current run only, so that the end-to-end walkthrough fits the verification budget. It changes no
   rule and no save format.
 
 ## Acceptance criteria

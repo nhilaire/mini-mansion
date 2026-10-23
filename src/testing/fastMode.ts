@@ -23,7 +23,7 @@ export function applyTestingLink(url: string | null): boolean {
 // How much faster the engine's timers run than play time (PRD "Timers"). While a timed window is open (Papa away from
 // his desk, Maman changing), the walkthrough has to act in it: the timers then run only FAST_WINDOW_SCALE times faster.
 export const FAST_TIMER_SCALE = 30;
-export const FAST_WINDOW_SCALE = 3;
+export const FAST_WINDOW_SCALE = 1.5;
 
 export function windowOpen(s: GameState): boolean {
   return ['outside', 'returning', 'cooking', 'fuses'].includes(s.chars.dad) || s.chars.mom === 'changing';

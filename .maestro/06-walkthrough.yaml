@@ -520,11 +520,11 @@ tags:
 - extendedWaitUntil:
     visible:
       id: "dad-cooking"
-    timeout: 60000
+    timeout: 90000
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
-    timeout: 15000
+    timeout: 60000
 - tapOn:
     id: "hs-corridor0.officeDoor"
 - tapOn:
@@ -578,19 +578,19 @@ tags:
 - extendedWaitUntil:
     visible:
       id: "dad-at_desk"
-    timeout: 60000
+    timeout: 90000
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
-    timeout: 15000
+    timeout: 60000
 - extendedWaitUntil:
     visible:
       id: "delivered"
-    timeout: 60000
+    timeout: 90000
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
-    timeout: 15000
+    timeout: 60000
 - tapOn:
     id: "exit-corridor0.toHall"
 - extendedWaitUntil:
@@ -918,11 +918,11 @@ tags:
 - extendedWaitUntil:
     visible:
       id: "dad-at_desk"
-    timeout: 60000
+    timeout: 90000
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
-    timeout: 15000
+    timeout: 60000
 - tapOn:
     id: "exit-corridor0.toGarage"
 - extendedWaitUntil:
