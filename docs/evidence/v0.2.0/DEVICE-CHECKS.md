@@ -1,7 +1,7 @@
 # Device checks: Mini Mansion v0.2.0
 
-Commit: fbb6b6b (APK built at d5f7d1f; fbb6b6b only adds a test and a PRD wording)
-APK: dist/mini-mansion-0.2.0-universal.apk, SHA-256 4857501be8a81b30c6e6fac4a827c18f332ac2599504384e8f293ef455123397
+Commit: ba8bab8
+APK: dist/mini-mansion-0.2.0-universal.apk, SHA-256 a3dc65681647be3afe49f9b60775d4882d12b8caa39945a6e0a6a59881e8976d
 Device: emulator sdk_gphone64_x86_64, Android 16 (API 36), 2400x1080 landscape
 Date: 2026-10-23
 
@@ -18,7 +18,7 @@ in `raw/device-*.txt` (local, git-ignored).
 | Events sent after « Accepter » (AC-08) | `verify.mjs --telemetry` (REPORT.md step 13, raw/logcat-telemetry.txt) | PASS: game_start, tutorial_complete, puzzle_solved seen |
 | Cold start < 3 s (AC-46) | `verify.mjs` (REPORT.md step 10) | PASS: median 970 ms |
 | No crash during the flows (AC-47) | `verify.mjs` (REPORT.md step 12: crash buffer cleared before the run, empty after) | PASS: 0 fatal log lines |
-| No ANR during the flows (AC-47) | `dumpsys dropbox --print data_app_anr` and `logcat -b events` `am_anr` (raw/device-anr.txt); the events buffer starts at 10-23 13:57, before this verification run (2026-10-23 15:28 UTC) | PASS: 0 ANR entries for the package |
+| No ANR during the flows (AC-47) | `dumpsys dropbox --print data_app_anr` and `logcat -b events` `am_anr` (raw/device-anr.txt); the events buffer starts at 10-23 14:59, before this verification run (2026-10-23 17:41 UTC) | PASS: 0 ANR entries for the package |
 
 Not checked here (on the phone at release): APK size of the arm64 phone build (the universal emulator APK is 136 MB
 because it carries 4 ABIs; the phone build is arm64 only, target < 60 MB), the launcher name seen on the phone, the
