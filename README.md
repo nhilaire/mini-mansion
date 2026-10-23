@@ -6,6 +6,11 @@ you can change it in the settings).
 ## Screenshots
 
 <!-- factory:screenshots:start -->
+<p>
+  <img src="docs/screenshots/readme-1-home.png" width="480" alt="home">
+  <img src="docs/screenshots/readme-2-game.png" width="480" alt="game">
+  <img src="docs/screenshots/readme-3-ending.png" width="480" alt="ending">
+</p>
 <!-- factory:screenshots:end -->
 
 ## Play
