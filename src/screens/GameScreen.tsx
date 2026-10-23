@@ -292,7 +292,8 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       if (pausedRef.current) return;
       setClock((c) => c + dt);
       gameRef.current = addPlayTime(gameRef.current, dt, true);
-      pendingRef.current += dt * timerScale(gameRef.current);
+      // Timers only count the time the scene is not playing something (a line, a scene, a view, a capture, an overlay).
+      if (!presentRef.current) pendingRef.current += dt * timerScale(gameRef.current);
       if (!presentRef.current && !walkRef.current && !notebookRef.current && !gameRef.current.finished) {
         const g = gameRef.current;
         const next = nextDeadline(g);

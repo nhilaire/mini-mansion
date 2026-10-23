@@ -378,3 +378,34 @@ describe('Sam steps aside when an inhabitant arrives where Sam stands', () => {
     expect(o.beats[step]).toEqual({ type: 'step', pos: o.state.pos, facing: o.state.facing });
   });
 });
+
+describe('the notebook entries of Act II (AC-29)', () => {
+  it('N15 comes with the computer (E07); N16 at the end of CUT13, after both views', () => {
+    const computer = interact(wary('office', { flags: flags(), notes: ['n01', 'n08'], chars: chars({ dad: 'outside' }) }), { kind: 'keypad', keypad: 'computer', code: '7867' });
+    expect(computer.state.notes).toEqual(['n01', 'n08', 'n09', 'n10', 'n15']);
+    const o = interact(wary('hall', { timers: { dad: null, dough: null, mom: null, delivery: 1000 } }), tick(1000));
+    const lastView = o.beats.map((b) => b.type).lastIndexOf('view');
+    const note = o.beats.findIndex((b) => b.type === 'note' && b.note === 'n16');
+    expect(note).toBeGreaterThan(lastView);
+  });
+});
+
+describe('the outside views of Act II cannot be skipped (AC-49)', () => {
+  const wrapped = (beats: readonly Beat[], view: string) => {
+    const at = beats.findIndex((b) => b.type === 'view' && b.view === view);
+    expect(at).toBeGreaterThan(0);
+    expect(beats[at - 1]).toEqual({ type: 'cinematic', on: true });
+    expect(beats.slice(at)).toContainEqual({ type: 'cinematic', on: false });
+  };
+
+  it('Florent riding away, the power cut, the jury ringing and tasting', () => {
+    const fixed = at('garage', { flags: flags('bike_fixed') });
+    wrapped(interact(fixed, go('garage.toCorridor')).beats, 'ride');
+    wrapped(interact(wary('florent', { chars: chars({ florent: 'riding' }), inventory: ['hairdryer'] }), give('hairdryer', 'florent.strip')).beats, 'dark');
+    const lab = playAll(at('laundry', { inventory: ['scrap', 'scrap2', 'scrap3', 'hat', 'tonka'] }), [give('scrap', 'laundry.notebook'), give('scrap2', 'laundry.notebook')]).state;
+    const ring = interact(lab, give('scrap3', 'laundry.notebook'));
+    wrapped(ring.beats, 'jury');
+    const taste = playAll(ring.state, [give('hat', 'dad'), give('tonka', 'dad')]).outcomes[1];
+    wrapped(taste.beats, 'jury');
+  });
+});

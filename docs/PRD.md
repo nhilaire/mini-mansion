@@ -708,7 +708,7 @@ Puzzles, characters, captures, timers
 - AC-60 [unit] Given Papa wary, then 60 s later CUT13 plays wherever Sam is (no capture, cannot be skipped), N16 is
   added, and the parcel lies in the garden under the cat.
 - AC-61 [unit] Given Maman gardening, when the garden tap is used, then CUT14 plays and Maman changes in her room for
-  90 s (garden free, her room guarded; Sam is caught if in her room when she arrives or in the garden when she comes
+  90 s (garden free, her room guarded; Sam is caught entering her room meanwhile or still in the garden when she comes
   back); given Maman not gardening, then `line.hoseLawn`; the hose works again once she is back, and says
   `line.hoseOff` once the parcel and the keyring are taken.
 - AC-62 [unit] Given the cat on the parcel, then the cat and the parcel answer `line.catHiss` until the Boîte de

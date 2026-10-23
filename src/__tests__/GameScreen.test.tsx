@@ -103,6 +103,30 @@ describe('GameScreen, Act II', () => {
     expect(lastSaved(props).clock).toBe(clockDuringScene);
   });
 
+  it('no timer time passes while a line plays: the doorbell timer waits, without catching up afterwards (AC-69)', async () => {
+    // Papa answers the door 5 s of timer time from now (fast mode: 30 times faster, about 170 ms while idle).
+    await mount({ ...newGame(), place: 'hall', flags: { door_unlocked: true }, chars: chars({ dad: 'answering' }), timers: { dad: 5000, dough: null, mom: null, delivery: null }, tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('hs-hall.coats'));
+    await fireEvent.press(screen.getByTestId('verb-look'));
+    expect(screen.getByTestId('line-banner')).toBeTruthy();
+    await act(async () => {
+      jest.advanceTimersByTime(240);
+    });
+    expect(screen.getByTestId('dad-answering')).toBeTruthy();
+    // The line is gone: the 250 ms it played are not added to the timers.
+    await act(async () => {
+      jest.advanceTimersByTime(70);
+    });
+    expect(screen.queryByTestId('line-banner')).toBeNull();
+    expect(screen.getByTestId('dad-answering')).toBeTruthy();
+    for (let i = 0; i < 20 && !screen.queryByTestId('view-door'); i++) {
+      await act(async () => {
+        jest.advanceTimersByTime(50);
+      });
+    }
+    expect(screen.getByTestId('view-door')).toBeTruthy();
+  });
+
   it('the power cut darkens the scene while Papa goes down to the fuse box (AC-64)', async () => {
     await mount({ ...newGame(), place: 'florent', chars: chars({ florent: 'riding' }), inventory: ['hairdryer'], flags: { door_unlocked: true, computer_read: true, dad_wary: true }, tutorial: 3 });
     await fireEvent.press(screen.getByTestId('inv-hairdryer'));

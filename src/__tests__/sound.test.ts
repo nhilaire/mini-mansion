@@ -77,6 +77,14 @@ describe('activity sounds (AC-25)', () => {
     expect(ambienceFor(at('corridor0', { dad: 'outside' }))).toEqual([]);
   });
 
+  it('Papa at the garage fuse box is heard from the corridor, the attic and the cellar; Maman changing as wardrobe doors upstairs', () => {
+    for (const place of ['corridor0', 'attic', 'cellar'] as const) expect(ambienceFor(at(place, { dad: 'fuses' })).map((l) => l.loop)).toEqual(['fuses']);
+    expect(ambienceFor(at('attic'))).toEqual([]);
+    expect(ambienceFor(at('hall', { dad: 'fuses' }))).toEqual([]);
+    expect(ambienceFor(at('landing', { mom: 'changing' })).map((l) => l.loop)).toContain('wardrobe');
+    expect(ambienceFor(at('landing', { mom: 'changing' })).map((l) => l.loop)).not.toContain('humming');
+  });
+
   it('the drums fill the music corner and are heard faintly next door; the washing machine hums while it runs', () => {
     expect(ambienceFor(at('music', { florent: 'drumming' }))).toEqual([{ loop: 'drums', volume: 0.7 }]);
     expect(ambienceFor(at('living', { florent: 'drumming' }))[0].volume).toBeLessThan(0.7);
