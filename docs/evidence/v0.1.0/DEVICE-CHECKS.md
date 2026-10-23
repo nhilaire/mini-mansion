@@ -1,9 +1,9 @@
 # Device checks: Mini Mansion v0.1.0
 
-Commit: 01c2af8
-APK: dist/mini-mansion-0.1.0-universal.apk, SHA-256 adf047da3c6bbfd18d1d3a294abc4ba6b157b3259964bb02b6d9ca819827c5d9
+Commit: f95d6d3 (APK built at fd2d8b5; f95d6d3 only changes a Maestro flow)
+APK: dist/mini-mansion-0.1.0-universal.apk, SHA-256 c5c88568445b061d20ecbf43ffbb48b97eade8f40477f463ff24655fb741a5fd
 Device: emulator sdk_gphone64_x86_64, Android 16 (API 36), 2400x1080 landscape
-Date: 2026-10-22
+Date: 2026-10-23
 
 Checks that `verify.mjs` does not run, done on the APK of the verified commit after the verification run. Raw outputs
 in `raw/device-*.txt` (local, git-ignored).
@@ -16,9 +16,9 @@ in `raw/device-*.txt` (local, git-ignored).
 | No advertising ID, few permissions (privacy) | `aapt dump badging <apk>` | PASS: no `AD_ID` / ad services permission; only INTERNET, VIBRATE, ACCESS_NETWORK_STATE, WAKE_LOCK, MODIFY_AUDIO_SETTINGS and the dynamic receiver permission |
 | Nothing sent after « Refuser » (AC-06) | `setprop debug.firebase.analytics.app`, `logcat -c`, `.maestro/smoke.yaml` (fresh install, refuse, new game), then `logcat -s FA FA-SVC` (raw/device-logcat-refused.txt) | PASS: 0 `Logging event` lines |
 | Events sent after « Accepter » (AC-08) | `verify.mjs --telemetry` (REPORT.md step 13, raw/logcat-telemetry.txt) | PASS: game_start, tutorial_complete, puzzle_solved seen |
-| Cold start < 3 s (AC-46) | `verify.mjs` (REPORT.md step 10) | PASS: median 1007 ms |
+| Cold start < 3 s (AC-46) | `verify.mjs` (REPORT.md step 10) | PASS: median 2155 ms |
 | No crash during the flows (AC-47) | `verify.mjs` (REPORT.md step 12: crash buffer cleared before the run, empty after) | PASS: 0 fatal log lines |
-| No ANR during the flows (AC-47) | `dumpsys dropbox --print data_app_anr` and `logcat -b events` `am_anr` (raw/device-anr.txt); the events buffer starts at 10-22 18:38, before this verification run (19:06 UTC) | PASS: 0 ANR entries for the package |
+| No ANR during the flows (AC-47) | `dumpsys dropbox --print data_app_anr` and `logcat -b events` `am_anr` (raw/device-anr.txt); the events buffer starts at 10-22 21:31, before this verification run (2026-10-23 06:22 UTC) | PASS: 0 ANR entries for the package |
 
 Not checked here (on the phone at release): APK size of the arm64 phone build (the universal emulator APK is 135.6 MB
 because it carries 4 ABIs; the phone build is arm64 only, target < 60 MB), the launcher name seen on the phone, the
