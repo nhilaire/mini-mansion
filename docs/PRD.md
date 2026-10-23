@@ -341,17 +341,18 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
 ### Puzzle chain
 
 Puzzle ids keep the draft's numbering (E01-E15), then the lures and the gates (E16-E19), then Act II (E20-E30).
-Needed to finish: E01-E14 and E20-E30, plus one of E16 (doorbell) or E19 (dough) to free the office the first time;
-E15 and E18 are optional (the keypads, the bottle rack and the trunk only accept a code once it is in the notebook, so
-nothing can be guessed).
+Needed to finish: E01-E15, E20, E21 and E23-E30, plus one of E16 (doorbell) or E19 (dough) to free the office the
+first time; E15 is needed since the bottle rack is in the cellar, whose hatch only opens from below with the iron
+bar; E22 (the hose) is needed when Maman already gardens while something is left to get in the garden (while she
+still folds the laundry upstairs the garden is free); E18 is optional (the keypads, the bottle rack and the trunk only
+accept a code once it is in the notebook, so nothing can be guessed).
 
 Dependencies (checked by AC-31; the drawer of E28 only gives N14 once Papa is wary): E02, E03, E16, E17, E18, E19 in any order after E01; E04 after E02; E05 after E04; E06
 after CUT07 (E05); E07 after E06 and (E16 or E19); E08 after E03 and E17; E09 after E08; E10 after E09; E14 after
 (E16 or E19, or later E27: the power cut stays possible until the Pince is taken) and E02; E11 after E14; E12 after E10, E11 and E07; E20 after E10; E21 after E20; E22 after
-E17; CUT13 (the delivery) after E07 (60 s after Papa is wary); E23 after CUT13 and E22; E24 after E23; E25 after E22;
+E17; CUT13 (the delivery) after E07 (60 s after Papa is wary); E23 after CUT13, with the garden free (Maman still folding, or E22); E24 after E23; E25 with the garden free;
 E26 after E24 and the Nerf kit taken (E08's Joint torique); E27 after E26; E28 after E25 and E27; E29 after E28; E13
-after E12, E21 and E29; E30 after E13. E15 (cellar) and E18 (gates) are optional, and only one of E16 and E19 is
-needed.
+after E12, E21 and E29; E30 after E13. E18 (gates) is optional, and only one of E16 and E19 is needed.
 
 Items: Clé de la maison, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du
 Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau,

@@ -57,7 +57,7 @@ const rejected = (s: GameState): Outcome => ({ state: s, beats: [], events: [], 
 const done = (c: Ctx): Outcome => ({ state: c.s, beats: c.beats, events: c.events, accepted: true });
 
 export function interact(state: GameState, input: Input): Outcome {
-  if (state.finished) return rejected(state);
+  if (state.finished || !plausible(state, input)) return rejected(state);
   const c = new Ctx(state);
   switch (input.kind) {
     case 'verb': {
@@ -115,6 +115,26 @@ export function interact(state: GameState, input: Input): Outcome {
       advanceClock(c, Math.max(next, c.s.clock));
       return done(c);
     }
+  }
+}
+
+// Cheap checks that reject an input before the state is copied (the exhaustive search tries many inputs).
+function plausible(s: GameState, input: Input): boolean {
+  switch (input.kind) {
+    case 'verb':
+      return findHotspot(s, input.target)?.verbs.includes(input.verb) === true;
+    case 'item':
+      return s.inventory.includes(input.item) && (input.target.startsWith('item:') || findHotspot(s, input.target) !== undefined);
+    case 'lookItem':
+      return s.inventory.includes(input.item);
+    case 'keypad':
+      return s.place === KEYPAD_PLACE[input.keypad];
+    case 'pad':
+      return s.place === PADS[input.pad].place;
+    case 'chess':
+      return s.place === 'living';
+    default:
+      return true;
   }
 }
 
@@ -820,7 +840,7 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
     case 'hairdryer>florent.strip':
       if (c.state('florent') !== 'riding') c.hero('line.stripNotNow');
       else if (c.is('drawer_open') && c.is('pliers_taken')) c.hero('line.fusesNoNeed');
-      else if (c.state('dad') !== 'at_desk') c.hero('line.fusesNobody');
+      else if (c.state('dad') !== 'at_desk' && c.state('dad') !== 'answering') c.hero('line.fusesNobody');
       else {
         const first = !c.is('fuses_cut');
         c.set('fuses_cut').sfx('fuse');

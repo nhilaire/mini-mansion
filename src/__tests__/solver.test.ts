@@ -1,16 +1,21 @@
 // T-11 / T-35 (AC-31): exhaustive exploration of the story graph from a new game, timers included. From every
 // reachable state the ending stays reachable, no needed item is removed early and no puzzle is solved before the
 // ones it depends on. The search (src/game/explore.ts) prunes inputs that cannot change the story and reduces the
-// side systems (gates, dough, cellar, breaker, Papa's doorbell phases); the "reduction" tests below check each of
-// those claims on a regular sample of the explored states. Takes one to two minutes.
+// side systems (gates, dough, cellar, breaker, Papa's doorbell phases, the hose, the delivery, the items taken on the
+// way, the pieces put together); the "reduction" tests below check each of those claims on a regular sample of the
+// explored states. Takes several minutes.
 import {
   actionInputs,
   allInputs,
   canFinish,
   exploreStory,
+  deliver,
   fire,
   isSideInput,
+  LAZY_ITEMS,
+  lazyItem,
   mixDough,
+  PART_GROUPS,
   REDUCED_ITEMS,
   StoryGraph,
   storyKey,
@@ -18,12 +23,12 @@ import {
   unstick,
 } from '../game/explore';
 import { hasLine } from '../content/index';
-import { interact } from '../game/rules';
+import { interact, playAll } from '../game/rules';
 import { DICTIONARIES, LANGUAGES } from '../i18n';
 import { CharacterStates, Flag, GameState, Input } from '../game/types';
 import { exitsIn, hotspotsIn, ITEMS } from '../game/world';
 
-jest.setTimeout(900_000);
+jest.setTimeout(3_600_000);
 
 // PRD "Dependencies": each puzzle with the puzzles that must be solved before it (E07 and E14 also need E16 or E19).
 const DEPENDS: Record<number, number[]> = {
@@ -43,7 +48,17 @@ const DEPENDS: Record<number, number[]> = {
   14: [2],
   11: [14],
   12: [10, 11, 7],
-  13: [12],
+  13: [12, 21, 29],
+  20: [10],
+  21: [20],
+  22: [17],
+  23: [7],
+  24: [23],
+  26: [24],
+  27: [26],
+  28: [25, 27],
+  29: [28],
+  30: [13],
 };
 
 const has = (s: GameState, i: GameState['inventory'][number]) => s.inventory.includes(i);
@@ -64,13 +79,21 @@ const USED: [Flag, (s: GameState) => boolean][] = [
   ['bar_taken', (s) => has(s, 'bar') || s.flags.hatch_open === true],
   ['milk_taken', (s) => has(s, 'ricemilk') || s.flags.milk_in === true],
   ['flours_taken', (s) => (has(s, 'chestnut') || s.flags.chestnut_in === true) && (has(s, 'riceflour') || s.flags.riceflour_in === true)],
-  ['safe_open', (s) => (has(s, 'oldkey') || s.flags.lab_lock === true) && (has(s, 'scrap') || s.finished) && has(s, 'photo') && has(s, 'note')],
+  ['safe_open', (s) => (has(s, 'oldkey') || s.flags.lab_lock === true) && (has(s, 'scrap') || s.flags.frag1_in === true) && has(s, 'photo') && has(s, 'note')],
+  ['sardines_taken', (s) => has(s, 'sardines') || s.flags.cat_fed === true],
+  ['keyring_taken', (s) => has(s, 'keyring') || s.flags.drawer_open === true],
+  ['patches_taken', (s) => has(s, 'patches') || s.flags.patches_in === true],
+  ['hairdryer_taken', (s) => has(s, 'hairdryer')],
+  ['parcel_taken', (s) => (has(s, 'tonka') || s.flags.tonka_given === true) && (has(s, 'pump') || s.flags.pump_in === true)],
+  ['bottles_done', (s) => has(s, 'scrap2') || s.flags.frag2_in === true],
+  ['trunk_open', (s) => (has(s, 'hat') || s.flags.hat_given === true) && (has(s, 'scrap3') || s.flags.frag3_in === true)],
 ];
 
 const SAMPLE_EVERY = 31;
 const clean = (flags: GameState['flags']) => Object.fromEntries(Object.entries(flags).filter(([, x]) => x)) as GameState['flags'];
 const withChars = (s: GameState, patch: Partial<CharacterStates>): GameState => ({ ...s, chars: { ...s.chars, ...patch } });
-const after = (s: GameState, input: Input) => interact(s, input);
+// An input as the search plays it: the items taken on the way first.
+const after = (s: GameState, input: Input) => interact(lazyItem(s, input), input);
 const isMove = (s: GameState, input: Input) =>
   input.kind === 'exit' || (input.kind === 'verb' && input.verb === 'use' && hotspotsIn(s).some((h) => h.door && h.id === input.target));
 const moves = (s: GameState): Input[] => [
@@ -81,6 +104,11 @@ const moves = (s: GameState): Input[] => [
 ];
 // The story part after the cellar escape (a capture into the stuck cellar is explored after it).
 const settled = (s: GameState) => storyKey(unstick(s).state);
+// The items taken on the way (hair dryer, sardines, keyring) put in the pocket while they are still to be taken.
+const withLazy = (s: GameState): GameState => {
+  const extra = (Object.keys(LAZY_ITEMS) as GameState['inventory']).filter((i) => !s.flags[LAZY_ITEMS[i]!]);
+  return { ...s, inventory: [...s.inventory, ...extra], flags: { ...s.flags, ...Object.fromEntries(extra.map((i) => [LAZY_ITEMS[i], true])) } };
+};
 
 describe('story graph (AC-31)', () => {
   const spoken = new Set<string>();
@@ -97,7 +125,8 @@ describe('story graph (AC-31)', () => {
       for (const [flag, ok] of USED) if (s.flags[flag] && !ok(s)) problems.push(`${flag} lost: ${storyKey(s)}`);
       for (const n of s.solved) for (const d of DEPENDS[n] ?? []) if (!s.solved.includes(d)) problems.push(`E${n} before E${d}: ${storyKey(s)}`);
       if (s.solved.includes(7) && !s.solved.includes(16) && !s.solved.includes(19)) problems.push(`E07 before E16/E19: ${storyKey(s)}`);
-      if (s.solved.includes(14) && !s.solved.includes(16) && !s.solved.includes(19)) problems.push(`E14 before E16/E19 (the pliers are in the office): ${storyKey(s)}`);
+      if (s.solved.includes(14) && !s.solved.includes(16) && !s.solved.includes(19) && !s.solved.includes(27)) problems.push(`E14 before E16/E19/E27 (the pliers are in the office): ${storyKey(s)}`);
+      if (s.solved.includes(28) && !s.flags.dad_wary) problems.push(`E28 before Papa is wary: ${storyKey(s)}`);
     });
   });
 
@@ -148,12 +177,18 @@ describe('story graph (AC-31)', () => {
           const o = after(s, input);
           if (!o.accepted) continue;
           const k = storyKey(o.state);
-          if (input.kind === 'verb' && input.target === 'front.bell') {
-            // Ringing: only Papa, his timer and E16 change.
+          if (input.kind === 'verb' && (input.target === 'front.bell' || input.target === 'pool.tap')) {
+            // Ringing or the hose: only Papa or Maman, the timers and E16 / E22 change (see hoseSteps).
             const back = { ...o.state, chars: s.chars, timers: s.timers, solved: s.solved };
-            if (storyKey(back) !== storyKey(s)) wrong.push(`bell changes more: ${JSON.stringify(input)}`);
+            if (storyKey(back) !== storyKey(s)) wrong.push(`${input.target} changes more: ${JSON.stringify(input)}`);
             continue;
           }
+          // The power cut: only Papa, his timer and E27 change (see fuseSteps).
+          if (input.kind === 'item' && input.target === 'florent.strip' && storyKey({ ...o.state, chars: s.chars, timers: s.timers, solved: s.solved }) === storyKey(s)) continue;
+          // The shed gives the keyring and solves E25 (the keyring is taken on the way, see lazyItem).
+          if (input.kind === 'verb' && input.target === 'garden.shed' && storyKey({ ...o.state, solved: s.solved }) === storyKey(s)) continue;
+          // A piece put in alone: checked with the pieces below.
+          if (input.kind === 'item' && PART_GROUPS.some((g) => g.target === input.target && g.items.includes(input.item))) continue;
           if (k === storyKey(s) || k === bay || (dough && k === storyKey(dough))) continue;
           wrong.push(`side input changes the story: ${JSON.stringify(input)} at ${s.place}`);
         }
@@ -178,11 +213,16 @@ describe('story graph (AC-31)', () => {
           toggled('power_on'),
           // A gate key and dough ingredients in the pocket, half of them in the food processor.
           { ...s, inventory: [...s.inventory.filter((i) => !REDUCED_ITEMS.includes(i)), 'gatekey', 'ricemilk'], flags: { ...s.flags, gatekey_taken: true, milk_taken: true, flours_taken: true, chestnut_in: true, riceflour_in: true } },
+          // The items taken on the way already in the pocket (when still to be taken).
+          withLazy(s),
+          // The first power cut already done (only Papa's line differs).
+          toggled('fuses_cut'),
         ];
         for (const input of actionInputs(s)) {
           if (input.kind === 'verb' && (input.target === 'pool.bay' || input.target === 'living.bay')) continue;
           if (input.kind === 'item' && input.target === 'utility.machine') continue; // the breaker: see machineSteps
           if (input.kind === 'verb' && input.target === 'kitchen.robot') continue; // the half-filled processor answers another line
+          if (input.kind === 'verb' && input.target === 'pool.tap') continue; // the hose: see hoseSteps
           const ref = after(s, input);
           for (const v of variants) {
             const o = after(v, input);
@@ -209,18 +249,19 @@ describe('story graph (AC-31)', () => {
       expect(differs.slice(0, 5)).toEqual([]);
     });
 
-    it('on his way back, Papa guards nothing: the story goes on as when he is outside, except at the front', () => {
+    it('while Papa is away from his desk, only his office opens (and the place he went to closes): elsewhere the story goes on as at his desk', () => {
       const differs: string[] = [];
-      const out = live().filter((s) => s.chars.dad === 'outside');
-      expect(out.length).toBeGreaterThan(50);
-      const asOutside = (x: GameState) => storyKey(x.chars.dad === 'returning' ? withChars(x, { dad: 'outside' }) : x);
-      for (const s of out) {
-        const returning = withChars(s, { dad: 'returning' });
-        for (const input of [...actionInputs(s), ...moves(s)]) {
-          if (input.kind === 'exit' && exitsIn(s).find((e) => e.id === input.exit)?.to === 'front') continue;
-          const ref = after(s, input);
-          const o = after(returning, input);
-          if (o.accepted !== ref.accepted || asOutside(unstick(o.state).state) !== settled(ref.state)) differs.push(`returning differs on ${JSON.stringify(input)} at ${s.place}`);
+      const desk = live().filter((s) => s.chars.dad === 'at_desk' && s.flags.door_unlocked && !['office', 'front', 'kitchen', 'garage', 'corridor0', 'hall', 'music'].includes(s.place));
+      expect(desk.length).toBeGreaterThan(100);
+      const asDesk = (x: GameState) => storyKey(['outside', 'returning', 'cooking', 'fuses'].includes(x.chars.dad) ? { ...withChars(x, { dad: 'at_desk' }), timers: { ...x.timers, dad: null } } : x);
+      for (const s of desk) {
+        for (const dad of ['outside', 'returning', 'cooking', 'fuses'] as const) {
+          const away: GameState = { ...withChars(s, { dad }), timers: { ...s.timers, dad: s.clock + 60_000 } };
+          for (const input of [...actionInputs(s), ...moves(s)]) {
+            const ref = after(s, input);
+            const o = after(away, input);
+            if (o.accepted !== ref.accepted || asDesk(unstick(o.state).state) !== settled(ref.state)) differs.push(`${dad} differs on ${JSON.stringify(input)} at ${s.place}`);
+          }
         }
       }
       expect(differs.slice(0, 5)).toEqual([]);
@@ -270,6 +311,65 @@ describe('story graph (AC-31)', () => {
         if (JSON.stringify(fireThenOut) !== JSON.stringify(outThenFire)) differs.push(`timers do not commute with the cellar escape`);
       }
       expect(differs.slice(0, 5)).toEqual([]);
+    });
+
+    it('while Maman changes after the hose, only the garden opens and her room closes: elsewhere the story goes on as when she gardens', () => {
+      const differs: string[] = [];
+      const gardening = live().filter((s) => s.chars.mom === 'gardening');
+      expect(gardening.length).toBeGreaterThan(100);
+      const asGardening = (x: GameState) => storyKey(x.chars.mom === 'changing' ? withChars(x, { mom: 'gardening' }) : x);
+      for (const s of gardening) {
+        if (s.place === 'garden' || s.place === 'parents' || s.place === 'football' || s.place === 'landing') continue;
+        const changing: GameState = { ...withChars(s, { mom: 'changing' }), timers: { ...s.timers, mom: s.clock + 60_000 } };
+        for (const input of [...actionInputs(s), ...moves(s)]) {
+          if (input.kind === 'verb' && input.target === 'pool.tap') continue;
+          const ref = after(s, input);
+          const o = after(changing, input);
+          if (o.accepted !== ref.accepted || asGardening(unstick(o.state).state) !== settled(ref.state)) differs.push(`changing differs on ${JSON.stringify(input)} at ${s.place}`);
+        }
+      }
+      expect(differs.slice(0, 5)).toEqual([]);
+    });
+
+    it('a parcel on its way changes nothing but its delivery: what can be done meanwhile can be done once delivered', () => {
+      const differs: string[] = [];
+      let checked = 0;
+      for (const s of live()) {
+        if (!s.flags.delivered || s.flags.cat_fed || s.place === 'garden') continue;
+        const pending: GameState = {
+          ...s,
+          flags: clean({ ...s.flags, delivered: undefined }),
+          notes: s.notes.filter((n) => n !== 'n16'),
+          unread: s.unread.filter((n) => n !== 'n16'),
+          cuts: s.cuts.filter((c) => c !== 'cut13'),
+          timers: { ...s.timers, delivery: s.clock + 60_000 },
+        };
+        for (const input of [...actionInputs(pending), ...moves(pending)]) {
+          const o = after(pending, input);
+          if (!o.accepted) continue;
+          checked++;
+          const ref = after(s, input);
+          if (!ref.accepted || settled(deliver(o.state).state) !== settled(ref.state)) differs.push(`pending delivery differs on ${JSON.stringify(input)} at ${s.place}`);
+        }
+      }
+      expect(checked).toBeGreaterThan(50);
+      expect(differs.slice(0, 5)).toEqual([]);
+    });
+
+    it('a piece put in alone only waits for the others: putting them all in, in any order, ends the same', () => {
+      const differs: string[] = [];
+      for (const g of PART_GROUPS) {
+        const s = live().find((x) => g.items.every((i) => x.inventory.includes(i)) || g.items.some((i) => x.inventory.includes(i)));
+        const base: GameState = { ...(s ?? live()[0]), place: g.target === 'garage.bike' ? 'garage' : 'laundry', inventory: [...g.items], flags: { door_unlocked: true, secret_open: true } };
+        const orders = g.items.length === 2 ? [[0, 1], [1, 0]] : [[0, 1, 2], [2, 1, 0], [1, 2, 0]];
+        const ends = orders.map((o) => storyKey(playAll(base, o.map((i) => ({ kind: 'item', item: g.items[i], target: g.target }))).state));
+        if (new Set(ends).size !== 1) differs.push(`${g.target}: the order matters`);
+        for (const i of g.items) {
+          const alone = after(base, { kind: 'item', item: i, target: g.target });
+          if (alone.events.length || alone.state.finished) differs.push(`${g.target}: ${i} alone does more than wait`);
+        }
+      }
+      expect(differs).toEqual([]);
     });
 
     // After the pruning checks, which also collect the lines of every input tried on the samples.

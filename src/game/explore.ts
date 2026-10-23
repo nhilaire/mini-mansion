@@ -28,6 +28,18 @@
 //     player does while it is on its way can be done once it has arrived, so it is fired as soon as Papa is wary;
 //   - the first power cut and the later ones only differ by Papa's line (fuses_cut is left out of the story part),
 //     and the patches are taken with the O-ring (patches_taken repeats oring_taken);
+//   - Papa's keyring (garden shed) can always be fetched until it is taken: the garden is free while Maman folds the
+//     laundry, and once she gardens the hose works as long as the garden holds it; it is only used on the drawer: it
+//     is taken "on the way" too, solving E25;
+//   - while Papa is away from his desk (doorbell, dough, fuse box), only his office opens: the window is explored as
+//     one step (see officeWindow) with what can be done in the office (the computer, the pliers, the drawer), Papa
+//     then back with Sam out of the office or caught in it. What can be done elsewhere meanwhile can be done before
+//     or after (checked by a test);
+//   - the hose is explored as one step (see hoseSteps): the tap, the garden actions of the window (the cat, the
+//     parcel), Maman back with Sam out of the garden or caught there. During the window only the garden opens (and
+//     the parents' room closes), and nothing else depends on Maman: actions elsewhere can be done before or after;
+//   - Florent's bike and the recipe book are explored once all their parts are held: a part put in alone only says a
+//     line and waits for the others (see partSteps);
 // - the timers are explored by firing each running timer next (whatever the deadlines), which covers every order
 //   a player can obtain by choosing when to ring, mix, use the hose or blow the fuses. Papa's doorbell phases are reduced to two: while
 //   he answers he still guards his office, so the story goes on exactly as at his desk (an action done then can be
@@ -67,21 +79,40 @@ export const REDUCED_FLAGS: readonly Flag[] = [
   'power_on',
   'sardines_taken',
   'hairdryer_taken',
+  'keyring_taken',
   'patches_taken',
   'fuses_cut',
 ];
 export const REDUCED_ITEMS: readonly ItemId[] = ['gatekey', 'ricemilk', 'chestnut', 'riceflour', 'bar'];
 // Items taken on the way when used (see above), with the flag their take sets.
-export const LAZY_ITEMS: Readonly<Partial<Record<ItemId, Flag>>> = { hairdryer: 'hairdryer_taken', sardines: 'sardines_taken' };
+export const LAZY_ITEMS: Readonly<Partial<Record<ItemId, Flag>>> = { hairdryer: 'hairdryer_taken', sardines: 'sardines_taken', keyring: 'keyring_taken' };
+// The pieces put together in one step: the bike (E26), the recipe book (E13).
+export const PART_GROUPS: readonly { target: string; items: readonly ItemId[] }[] = [
+  { target: 'garage.bike', items: ['patches', 'pump'] },
+  { target: 'laundry.notebook', items: ['scrap', 'scrap2', 'scrap3'] },
+];
+const isPart = (item: ItemId, target: string) => PART_GROUPS.some((g) => g.target === target && g.items.includes(item));
+export const TAP = 'pool.tap';
 const isLazy = (i: ItemId) => i in LAZY_ITEMS;
 export const REDUCED_PUZZLES: readonly number[] = [15, 18];
 // Inputs of the reduced side systems, not explored one by one.
 export const GATE_TARGETS: readonly string[] = ['front.gateLeft', 'front.gateRight', 'football.gate', 'pool.gate'];
 export const BELL = 'front.bell';
-export const SIDE_TAKES: readonly string[] = ['hall.shoes', 'kitchen.fridge', 'utility.flours', 'cellar.rack', 'cellar.hatch', 'garage.breaker', 'bathroom.hairdryer', 'utility.sardines'];
+export const SIDE_TAKES: readonly string[] = ['hall.shoes', 'kitchen.fridge', 'utility.flours', 'cellar.rack', 'cellar.hatch', 'garage.breaker', 'bathroom.hairdryer', 'utility.sardines', 'garden.shed', TAP];
 const PAD_IDS = Object.keys(PADS) as PadId[];
 
+// Story keys are computed once per state object (states are never mutated once returned by the engine).
+const keyCache = new WeakMap<GameState, string>();
+
 export function storyKey(s: GameState): string {
+  const cached = keyCache.get(s);
+  if (cached !== undefined) return cached;
+  const key = computeStoryKey(s);
+  keyCache.set(s, key);
+  return key;
+}
+
+function computeStoryKey(s: GameState): string {
   const ch = s.chars;
   return [
     s.inventory
@@ -134,7 +165,13 @@ export function allInputs(s: GameState): Input[] {
 // Whether an input belongs to a reduced side system (the gates, the dough ingredients).
 export function isSideInput(input: Input): boolean {
   if (input.kind === 'verb') return SIDE_TAKES.includes(input.target) || GATE_TARGETS.includes(input.target) || input.target === BELL;
-  if (input.kind === 'item') return REDUCED_ITEMS.includes(input.item) || input.target.startsWith('item:') && REDUCED_ITEMS.includes(input.target.slice(5) as ItemId);
+  if (input.kind === 'item')
+    return (
+      REDUCED_ITEMS.includes(input.item) ||
+      isPart(input.item, input.target) ||
+      (input.item === 'hairdryer' && input.target === 'florent.strip') ||
+      (input.target.startsWith('item:') && REDUCED_ITEMS.includes(input.target.slice(5) as ItemId))
+    );
   return false;
 }
 
@@ -156,8 +193,11 @@ export function actionInputs(s: GameState): Input[] {
       const input: Input = { kind: 'verb', verb, target: h.id };
       if (!isSideInput(input)) out.push(input);
     }
-    for (const item of s.inventory) if (USE_RULES.includes(`${item}>${h.id}`) && !REDUCED_ITEMS.includes(item) && !isLazy(item)) out.push({ kind: 'item', item, target: h.id });
-    for (const item of Object.keys(LAZY_ITEMS) as ItemId[]) if (USE_RULES.includes(`${item}>${h.id}`) && lazyAvailable(s, item)) out.push({ kind: 'item', item, target: h.id });
+    for (const item of s.inventory) if (USE_RULES.includes(`${item}>${h.id}`) && !REDUCED_ITEMS.includes(item) && !isLazy(item) && !isPart(item, h.id)) out.push({ kind: 'item', item, target: h.id });
+    for (const item of Object.keys(LAZY_ITEMS) as ItemId[]) {
+      const input: Input = { kind: 'item', item, target: h.id };
+      if (USE_RULES.includes(`${item}>${h.id}`) && lazyAvailable(s, item) && !isSideInput(input)) out.push(input);
+    }
   }
   if (s.inventory.includes('pole') && s.inventory.includes('extension')) out.push({ kind: 'item', item: 'pole', target: 'item:extension' });
   if (s.inventory.includes('note') && lazyAvailable(s, 'hairdryer')) out.push({ kind: 'item', item: 'hairdryer', target: 'item:note' });
@@ -167,16 +207,63 @@ export function actionInputs(s: GameState): Input[] {
   return out;
 }
 
-// A lazy item can be fetched while it is still in its place (the sardines are used up by the cat), once inside.
+// A lazy item can be fetched while it is still in its place (the sardines are used up by the cat), once inside;
+// the keyring once Maman gardens (the hose then gives a window).
 export function lazyAvailable(s: GameState, item: ItemId): boolean {
   if (!s.flags.door_unlocked) return false;
   return s.inventory.includes(item) || !s.flags[LAZY_ITEMS[item]!];
 }
 
-// The state with a lazy item taken on the way (no change when it is already held).
+// The state with a lazy item taken on the way (no change when it is already held). Taking the keyring solves E25.
 export function lazyItem(s: GameState, input: Input): GameState {
   if (input.kind !== 'item' || !isLazy(input.item) || s.inventory.includes(input.item)) return s;
-  return { ...s, inventory: [...s.inventory, input.item], flags: { ...s.flags, [LAZY_ITEMS[input.item]!]: true } };
+  const solved = input.item === 'keyring' && !s.solved.includes(25) ? [...s.solved, 25] : s.solved;
+  return { ...s, inventory: [...s.inventory, input.item], flags: { ...s.flags, [LAZY_ITEMS[input.item]!]: true }, solved };
+}
+
+// The pieces of a group put in together, once all are held (the bike, the recipe book).
+export function partSteps(members: readonly GameState[]): { state: GameState; beats: Beat[] }[] {
+  const out: { state: GameState; beats: Beat[] }[] = [];
+  for (const g of PART_GROUPS) {
+    const m = members.find((x) => g.items.every((i) => x.inventory.includes(i)) && hotspotsIn(x).some((h) => h.id === g.target));
+    if (!m) continue;
+    const r = playAll(m, g.items.map((item) => ({ kind: 'item', item, target: g.target })));
+    out.push({ state: r.state, beats: r.outcomes.flatMap((o) => o.beats) });
+  }
+  return out;
+}
+
+// The hose in one step: the tap from the pool, then in the garden while Maman changes nothing, the cat fed, or the
+// cat fed and the parcel taken; then Maman comes back with Sam out of the garden (football corner) or still in it.
+export function hoseSteps(members: readonly GameState[]): { state: GameState; beats: Beat[] }[] {
+  const pool = members.find((m) => m.place === 'pool');
+  if (!pool || pool.chars.mom !== 'gardening') return [];
+  const soaked = interact(pool, { kind: 'verb', verb: 'use', target: TAP });
+  if (soaked.state.chars.mom !== 'changing') return [];
+  const inGarden = playAll(soaked.state, [{ kind: 'exit', exit: 'pool.toFootball' }, { kind: 'exit', exit: 'football.toGarden' }]);
+  const plans: Input[][] = [[]];
+  const g = inGarden.state;
+  if (g.flags.delivered && !g.flags.cat_fed && lazyAvailable(g, 'sardines')) {
+    const feed: Input = { kind: 'item', item: 'sardines', target: 'garden.cat' };
+    plans.push([feed], [feed, { kind: 'verb', verb: 'take', target: 'garden.parcel' }]);
+  }
+  if (g.flags.cat_fed && !g.flags.parcel_taken) plans.push([{ kind: 'verb', verb: 'take', target: 'garden.parcel' }]);
+  const out: { state: GameState; beats: Beat[] }[] = [];
+  for (const plan of plans) {
+    let s = g;
+    const beats = [...soaked.beats, ...inGarden.outcomes.flatMap((o) => o.beats)];
+    for (const input of plan) {
+      const o = interact(lazyItem(s, input), input);
+      beats.push(...o.beats);
+      s = o.state;
+    }
+    for (const stay of [false, true]) {
+      const where = stay ? s : interact(s, { kind: 'exit', exit: 'garden.toFootball' }).state;
+      const back = fire(where, 'mom');
+      out.push({ state: back.state, beats: [...beats, ...back.beats] });
+    }
+  }
+  return out;
 }
 
 // The dough mixed from the kitchen while Papa is not there: the three ingredients put in the food processor.
@@ -214,6 +301,7 @@ export function timerSteps(s: GameState): { state: GameState; beats: Beat[] }[] 
   const out: { state: GameState; beats: Beat[] }[] = [];
   if (s.timers.dough !== null) out.push(fire(s, 'dough'));
   if (s.timers.mom !== null) out.push(fire(s, 'mom'));
+  if (s.timers.delivery !== null) out.push(fire(s, 'delivery'));
   if (s.timers.dad !== null) {
     let step = fire(s, 'dad');
     const beats = [...step.beats];
@@ -226,25 +314,81 @@ export function timerSteps(s: GameState): { state: GameState; beats: Beat[] }[] 
   return out;
 }
 
-// The doorbell in one step: rung from the front, then Papa comes out while the hero is at any place of the component
-// (members), a capture if it is the front.
-export function bellSteps(members: readonly GameState[]): { state: GameState; beats: Beat[] }[] {
+type Step = { state: GameState; beats: Beat[] };
+const AWAY: readonly GameState['chars']['dad'][] = ['outside', 'returning', 'cooking', 'fuses'];
+
+// Papa's timer fired until he is back at his desk (outside, returning; cooking; the fuse box).
+function backToDesk(s: GameState): Step {
+  let step: Step = { state: s, beats: [] };
+  while (AWAY.includes(step.state.chars.dad) && step.state.timers.dad !== null) {
+    const next = fire(step.state, 'dad');
+    step = { state: next.state, beats: [...step.beats, ...next.beats] };
+  }
+  return step;
+}
+
+// Papa away from his desk: Sam goes to the office and does any of what can be done there (the computer, the pliers,
+// the drawer), then Papa comes back with Sam out of the office or still in it. Caught before reaching the office
+// (or with Papa not away), Papa simply comes back.
+export function officeWindow(away: GameState): Step[] {
+  if (!AWAY.includes(away.chars.dad) || away.place === 'cellar') return [backToDesk(away)];
+  const office: GameState = { ...away, place: 'office', pos: { x: 36, y: 116 }, facing: 'right' };
+  const options: Input[] = [];
+  if (office.notes.includes('n08') && !office.flags.computer_read) options.push({ kind: 'keypad', keypad: 'computer', code: CODES.computer });
+  if (!office.flags.pliers_taken) options.push({ kind: 'verb', verb: 'take', target: 'office.shelf' });
+  if (office.flags.dad_wary && !office.flags.drawer_open && lazyAvailable(office, 'keyring')) options.push({ kind: 'item', item: 'keyring', target: 'office.drawer' });
+  const out: Step[] = [];
+  for (let mask = 0; mask < 1 << options.length; mask++) {
+    let s = office;
+    const beats: Beat[] = [];
+    options.forEach((input, i) => {
+      if (!(mask & (1 << i))) return;
+      const o = interact(lazyItem(s, input), input);
+      beats.push(...o.beats);
+      s = o.state;
+    });
+    for (const stay of [false, true]) {
+      const where: GameState = stay ? s : { ...s, place: 'corridor0', pos: { x: 120, y: 120 }, facing: 'down' };
+      const back = backToDesk(where);
+      out.push({ state: back.state, beats: [...beats, ...back.beats] });
+    }
+  }
+  return out;
+}
+
+// The doorbell in one step: rung from the front, Papa comes out while the hero is at any place of the component
+// (members), a capture if it is the front, then his absence (see officeWindow).
+export function bellSteps(members: readonly GameState[]): Step[] {
   const ringer = members.find((m) => m.place === 'front');
   if (!ringer) return [];
   const rung = interact(ringer, { kind: 'verb', verb: 'use', target: BELL });
   if (rung.state.chars.dad !== 'answering') return [];
-  return members.map((m) => {
+  return members.flatMap((m) => {
     const step = fire({ ...rung.state, place: m.place, pos: m.pos, facing: m.facing }, 'dad');
-    return { state: step.state, beats: [...rung.beats, ...step.beats] };
+    return officeWindow(step.state).map((w) => ({ state: w.state, beats: [...rung.beats, ...step.beats, ...w.beats] }));
   });
 }
 
-// The dough in one step: mixed from the kitchen, then Papa arrives while the hero is at any place of the component.
-export function doughSteps(members: readonly GameState[]): { state: GameState; beats: Beat[] }[] {
+// The dough in one step: mixed from the kitchen, Papa arrives while the hero is at any place of the component, then
+// his absence from the office while he cooks.
+export function doughSteps(members: readonly GameState[]): Step[] {
   const cook = members.find((m) => m.place === 'kitchen');
   const mixed = cook && mixDough(cook);
   if (!mixed) return [];
-  return members.map((m) => fire({ ...mixed, place: m.place, pos: m.pos, facing: m.facing }, 'dough'));
+  return members.flatMap((m) => {
+    const step = fire({ ...mixed, place: m.place, pos: m.pos, facing: m.facing }, 'dough');
+    return officeWindow(step.state).map((w) => ({ state: w.state, beats: [...step.beats, ...w.beats] }));
+  });
+}
+
+// The power cut in one step: the hair dryer on Florent's power strip, then Papa's absence at the fuse box.
+export function fuseSteps(members: readonly GameState[]): Step[] {
+  const room = members.find((m) => m.place === 'florent' && lazyAvailable(m, 'hairdryer'));
+  if (!room) return [];
+  const input: Input = { kind: 'item', item: 'hairdryer', target: 'florent.strip' };
+  const cut = interact(lazyItem(room, input), input);
+  if (cut.state.chars.dad !== 'fuses') return [];
+  return officeWindow(cut.state).map((w) => ({ state: w.state, beats: [...cut.beats, ...w.beats] }));
 }
 
 // Out of the cellar when stuck in it: take the iron bar (if it is still in the rack), unblock the hatch.
@@ -270,6 +414,9 @@ export function sideSteps(members: readonly GameState[]): { state: GameState; be
     ...bellSteps(members).map((t) => ({ ...t, label: '(bell)' })),
     ...doughSteps(members).map((t) => ({ ...t, label: '(dough)' })),
     ...machineSteps(members).map((t) => ({ ...t, label: '(machine)' })),
+    ...hoseSteps(members).map((t) => ({ ...t, label: '(hose)' })),
+    ...fuseSteps(members).map((t) => ({ ...t, label: '(fuses)' })),
+    ...partSteps(members).map((t) => ({ ...t, label: '(parts)' })),
   ];
 }
 
@@ -286,7 +433,7 @@ export interface StoryGraph {
   // Whether each node contains a finished state.
   nodes: Map<string, boolean>;
   edges: Map<string, Set<string>>;
-  // Every beat any explored interaction produced (to check that each line exists in every language).
+  // Every line any explored interaction said (to check that each exists in every language).
   beats: Beat[];
   // How each node was first reached (for counter-examples).
   parent: Map<string, { from: string; input: Input | string }>;
@@ -297,13 +444,15 @@ export interface StoryGraph {
 // keeping hundreds of thousands of states in memory.
 export function exploreStory(onSample: (s: GameState) => void = () => {}, limit = 600_000): StoryGraph {
   const componentOf = new Map<string, Component>();
-  const beatKeys = new Set<string>();
+  // Only the spoken lines are kept (to check that each exists in every language).
+  const lineKeys = new Set<string>();
   const beats: Beat[] = [];
   const addBeats = (bs: readonly Beat[]) => {
     for (const b of bs) {
-      const k = JSON.stringify(b);
-      if (!beatKeys.has(k)) {
-        beatKeys.add(k);
+      if (b.type !== 'say') continue;
+      const k = `${b.speaker}:${b.key}`;
+      if (!lineKeys.has(k)) {
+        lineKeys.add(k);
         beats.push(b);
       }
     }
@@ -322,6 +471,10 @@ export function exploreStory(onSample: (s: GameState) => void = () => {}, limit 
         const o = interact(queue[i], input);
         if (!o.accepted) continue;
         addBeats(o.beats);
+        // Going down to the cellar: the escape is part of the move (so the cellar belongs to the component).
+        const freed = unstick(o.state);
+        addBeats(freed.beats);
+        o.state = freed.state;
         if (storyKey(o.state) !== story) exits.push(o.state);
         else if (!byPlace.has(o.state.place)) {
           byPlace.set(o.state.place, o.state);

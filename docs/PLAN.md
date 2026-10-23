@@ -77,7 +77,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-61 Papa's desk drawer (E28, bills before Papa is wary) and the attic trunk colour padlock (E29) (AC-66) - proof: unit
 - [x] T-62 The finale: three fragments on the recipe notebook (E13, CUT11), the jury (CUT16), finale state, the hat and the tonka bean to Papa (E30, CUT17), game_complete at E30 (AC-67, AC-68, AC-32, AC-50) - proof: unit
 - [x] T-63 Timers advance only while the scene is idle and due events fire in deadline order (AC-69, AC-58) - proof: unit
-- [ ] T-64 Solution and exhaustive explorer extended to E20-E30 (reductions re-proven), every puzzle and refusal (AC-21, AC-31) - proof: unit
+- [x] T-64 Solution and exhaustive explorer extended to E20-E30 (reductions re-proven), every puzzle and refusal (AC-21, AC-31) - proof: unit
 - [x] T-65 Content fr + en: every new line, look, notebook entry, item name and clue; Player copy table (AC-29, AC-30, AC-45) - proof: unit
 - [x] T-66 UI: the sequence pad overlay (bottles, colours) and the new outside views (delivery, garden, ride, power cut, jury), unskippable (AC-49) - proof: unit
 - [x] T-67 Art: cat, parcel, van and driver, jury lady, chef's hat, soaked Maman, Florent on his bike, shed, bottle rack, trunk padlock, drawer, power strip, hair dryer, new item icons, power cut flicker (AC-19, AC-57) - proof: unit
