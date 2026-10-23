@@ -87,6 +87,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-70 Walkthrough flow regenerated for the whole story (AC-41) - proof: e2e
 
 - [x] T-72 Phone feedback: the hair dryer, the sardines, the flours and the pole disappear once taken; a clearer page button for the inventory; Théo stands in front of the chessboard (AC-17, AC-19, AC-57) - proof: unit
+- [x] T-73 The house stays dark during the power cut until Papa has fixed the fuses (AC-64) - proof: unit
 
 ## Notes
 

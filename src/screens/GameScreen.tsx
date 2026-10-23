@@ -21,6 +21,7 @@ import {
   inventoryPage,
   MENU_BUTTON,
   NOTEBOOK_BUTTON,
+  OUTDOOR,
   ROOM_H,
   sceneTransform,
   slotRect,
@@ -525,6 +526,8 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       <View testID={`mom-${game.chars.mom}`} collapsable={false} pointerEvents="none" style={styles.timersIdle} />
       {game.flags.delivered && <View testID="delivered" collapsable={false} pointerEvents="none" style={styles.timersIdle} />}
 
+      {/* The power cut: the house stays dark (dimmed, still playable) until Papa has fixed the fuses; outside is lit. */}
+      {game.chars.dad === 'fuses' && view !== 'dark' && !OUTDOOR.includes(shown) && <View testID="power-cut" style={[StyleSheet.absoluteFill, styles.dark, { opacity: 0.6 }]} pointerEvents="none" />}
       {view === 'dark' && <View testID="view-dark" style={[StyleSheet.absoluteFill, styles.dark, { opacity: Math.floor(clock / 120) % 5 === 0 ? 0.55 : 0.85 }]} pointerEvents="none" />}
       {view && view !== 'dark' && (
         <View testID={`view-${view}`} style={StyleSheet.absoluteFill} pointerEvents="none">

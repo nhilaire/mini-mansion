@@ -152,6 +152,16 @@ describe('GameScreen, Act II', () => {
     await dismissLines();
     expect(screen.queryByTestId('view-dark')).toBeNull();
     expect(screen.getByTestId('dad-fuses')).toBeTruthy();
+    // The house stays dark until Papa has fixed the fuses.
+    expect(screen.getByTestId('power-cut')).toBeTruthy();
+    for (let i = 0; i < 120 && !screen.queryByTestId('dad-at_desk'); i++) {
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+      await dismissLines();
+    }
+    expect(screen.getByTestId('dad-at_desk')).toBeTruthy();
+    expect(screen.queryByTestId('power-cut')).toBeNull();
   });
 });
 
