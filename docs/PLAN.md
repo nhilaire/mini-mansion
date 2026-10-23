@@ -86,6 +86,8 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-71 Sam steps aside when Florent comes to the drums and Théo to the chessboard, so that nobody hides the other (user feedback 2026-10-23) - proof: unit
 - [x] T-70 Walkthrough flow regenerated for the whole story (AC-41) - proof: e2e
 
+- [x] T-72 Phone feedback: the hair dryer, the sardines, the flours and the pole disappear once taken; a clearer page button for the inventory; Théo stands in front of the chessboard (AC-17, AC-19, AC-57) - proof: unit
+
 ## Notes
 
 - Base: the POC engine (`midnight-mansion`) is ported, not copied blindly: new ids (24 places, 17 items, 5 inhabitants

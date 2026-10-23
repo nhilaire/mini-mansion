@@ -225,6 +225,9 @@ means the front of the house (`front`).
 - Spoken lines: shown in the banner in the speaker's colour; dismissed by a tap or after max(2 s, 50 ms x length).
   Input on the scene is ignored while a line, a cutscene or the front door view is playing.
 - An item is removed from the inventory only when it is used up by its puzzle and is no longer needed.
+- An item that is itself the hotspot (the hair dryer on its hook, the sardines, the flours, the pole) disappears from the
+  scene once taken; furniture (shelves, bench, basket...) stays and says it is empty.
+- When more items are held than the band shows, its last slot is a page button: a framed arrow with one dot per page.
 
 ### No conversation
 

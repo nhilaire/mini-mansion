@@ -50,6 +50,25 @@ function Full({ image }: { image: SkImage | null }) {
   return <Image image={image} x={0} y={0} width={image.width()} height={image.height()} sampling={SAMPLING} />;
 }
 
+// The last inventory slot turns the page when more items are held than fit: a gold frame, a big arrow pointing to
+// the next page and one dot per page (the current one lit).
+function MoreButton({ page, pages }: { page: number; pages: number }) {
+  const r = slotRect(SLOTS - 1);
+  const dots = Array.from({ length: pages }, (_, i) => i);
+  return (
+    <Group>
+      <Rect x={r.x} y={r.y} width={r.w} height={r.h} color={hex(C.gold)} />
+      <Rect x={r.x + 1} y={r.y + 1} width={r.w - 2} height={r.h - 2} color={hex(C.wood1)} />
+      {Array.from({ length: 8 }, (_, i) => (
+        <Rect key={i} x={r.x + 8 + i} y={r.y + 3 + i} width={1} height={14 - 2 * i} color={hex(C.gold)} />
+      ))}
+      {dots.map((d) => (
+        <Rect key={`dot${d}`} x={r.x + r.w / 2 - pages * 2 + d * 4 + 1} y={r.y + r.h - 5} width={2} height={2} color={hex(d === page ? C.yellow : C.stone2)} />
+      ))}
+    </Group>
+  );
+}
+
 function SceneView({ state, hero, transform, width, height, speaker, selected, page, unread, clock, guests = [], extras = [] }: Props) {
   const placed = charactersIn(state).filter((c) => !guests.includes(c.id));
   const people: { key: string; y: number; buf: PixelBuffer; x: number; top: number }[] = placed.map((c) => ({
@@ -94,12 +113,7 @@ function SceneView({ state, hero, transform, width, height, speaker, selected, p
             </Group>
           );
         })}
-        {inv.pages > 1 && (
-          <Group>
-            <Rect x={slotRect(SLOTS - 1).x + 8} y={slotRect(SLOTS - 1).y + 6} width={4} height={12} color={hex(C.gold)} />
-            <Rect x={slotRect(SLOTS - 1).x + 12} y={slotRect(SLOTS - 1).y + 9} width={4} height={6} color={hex(C.gold)} />
-          </Group>
-        )}
+        {inv.pages > 1 && <MoreButton page={inv.page} pages={inv.pages} />}
         {unread && <Rect x={n.x + n.w - 6} y={n.y + 1} width={5} height={5} color={hex(C.yellow)} />}
         <Rect x={m.x + 5} y={m.y + 6} width={14} height={2} color={hex(C.gold)} />
         <Rect x={m.x + 5} y={m.y + 11} width={14} height={2} color={hex(C.gold)} />

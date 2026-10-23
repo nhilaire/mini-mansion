@@ -409,3 +409,26 @@ describe('the outside views of Act II cannot be skipped (AC-49)', () => {
     wrapped(taste.beats, 'jury');
   });
 });
+
+describe('items taken from the wall or a shelf leave nothing to tap', () => {
+  it.each([
+    ['bathroom', 'bathroom.hairdryer', 'hairdryer'],
+    ['utility', 'utility.sardines', 'sardines'],
+    ['garage', 'garage.pole', 'pole'],
+  ] as const)('%s', (place, target, item) => {
+    const o = interact(at(place), take(target));
+    expect(o.state.inventory).toEqual([item]);
+    expect(findHotspot(o.state, target)).toBeUndefined();
+  });
+});
+
+it('the flours leave the utility shelf once taken; Théo plays standing in front of the chessboard', () => {
+  const o = interact(at('utility'), take('utility.flours'));
+  expect(o.state.inventory).toEqual(['chestnut', 'riceflour']);
+  expect(findHotspot(o.state, 'utility.flours')).toBeUndefined();
+  const living = at('living', { chars: chars({ theo: 'chess' }) });
+  const theo = characterPlacement('theo', living)!;
+  const board = findHotspot(living, 'living.chess')!.rect;
+  expect(theo.pos.x).toBeGreaterThan(board.x);
+  expect(theo.pos.x).toBeLessThan(board.x + board.w);
+});

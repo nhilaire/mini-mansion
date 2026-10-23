@@ -279,10 +279,10 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('utility.basket', 'utility', r(50, 78, 36, 22), p(68, 110), ['look']),
   hs('utility.machine', 'utility', r(140, 58, 40, 42), p(160, 110), ['look', 'use']),
   hs('utility.shelf', 'utility', r(220, 30, 50, 40), p(245, 108), ['look', 'take']),
-  hs('utility.flours', 'utility', r(220, 72, 50, 28), p(245, 110), ['look', 'take']),
+  hs('utility.flours', 'utility', r(220, 72, 50, 28), p(245, 110), ['look', 'take'], (s) => !has(s, 'flours_taken')),
   hs('utility.broom', 'utility', r(274, 40, 22, 60), p(285, 108), ['look']),
-  hs('utility.sardines', 'utility', r(96, 64, 26, 22), p(109, 108), ['look', 'take']),
-  hs('garage.pole', 'garage', r(60, 24, 22, 76), p(71, 108), ['look', 'take']),
+  hs('utility.sardines', 'utility', r(96, 64, 26, 22), p(109, 108), ['look', 'take'], (s) => !has(s, 'sardines_taken')),
+  hs('garage.pole', 'garage', r(60, 24, 22, 76), p(71, 108), ['look', 'take'], (s) => !has(s, 'pole_taken')),
   hs('garage.crate', 'garage', r(90, 70, 40, 30), p(110, 108), ['look']),
   hs('garage.bike', 'garage', r(136, 60, 38, 40), p(155, 108), ['look', 'use']),
   hs('garage.paint', 'garage', r(186, 24, 40, 30), p(206, 108), ['look']),
@@ -332,7 +332,7 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('bathroom.scale', 'bathroom', r(100, 78, 26, 22), p(113, 110), ['look', 'use']),
   hs('bathroom.bath', 'bathroom', r(140, 64, 90, 36), p(185, 110), ['look']),
   hs('bathroom.duck', 'bathroom', r(240, 72, 22, 22), p(251, 110), ['look', 'use']),
-  hs('bathroom.hairdryer', 'bathroom', r(266, 40, 24, 28), p(278, 108), ['look', 'take']),
+  hs('bathroom.hairdryer', 'bathroom', r(266, 40, 24, 28), p(278, 108), ['look', 'take'], (s) => !has(s, 'hairdryer_taken')),
   hs('theo.poster', 'theo', r(60, 24, 40, 40), p(80, 108), ['look']),
   hs('theo.cube', 'theo', r(160, 70, 24, 22), p(172, 110), ['look', 'use']),
   hs('theo.desk', 'theo', r(196, 66, 50, 34), p(221, 110), ['look', 'use']),
@@ -472,7 +472,7 @@ export function characterPlacement(id: CharacterId, s: GameState): CharacterPlac
       if (st.florent === 'riding') return null;
       return st.florent === 'in_room' ? person('florent', 'florent', 130, 112, false, 'right') : person('florent', 'music', 243, 112, true);
     case 'theo':
-      return st.theo === 'in_room' ? person('theo', 'theo', 130, 112, false, 'right') : person('theo', 'living', 200, 112, true);
+      return st.theo === 'in_room' ? person('theo', 'theo', 130, 112, false, 'right') : person('theo', 'living', 226, 114, true);
   }
 }
 
