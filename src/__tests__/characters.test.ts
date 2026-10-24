@@ -88,7 +88,7 @@ describe('character states (AC-22)', () => {
 describe('the doorbell sequence (AC-51)', () => {
   const rung = () => interact(base('front'), { kind: 'verb', verb: 'use', target: 'front.bell' });
 
-  it('ringing: Papa answers from his desk and stays in his office for 30 s of play time', () => {
+  it('ringing: Papa answers from his desk and stays in his office for 15 s of play time', () => {
     const o = rung();
     expect(o.beats).toContainEqual(said('dad', 'line.dadAnswer'));
     expect(o.state.chars.dad).toBe('answering');
@@ -130,13 +130,20 @@ describe('the doorbell sequence (AC-51)', () => {
     expect(o.state.flags.door_unlocked).toBeUndefined();
   });
 
-  it('walking in front of the house while Papa looks around there: the same salesman, no capture', () => {
+  it('walking in front of the house while Papa looks around there: the same salesman scene (Papa shown next to Charlie, no front door view), no capture', () => {
     const out = interact({ ...rung().state, place: 'hall' }, tick(TIMER_MS.answer)).state;
     expect(out.chars.dad).toBe('outside');
     const o = interact(out, go('hall.toFront'));
     expect(o.state.place).toBe('front');
     expect(o.events).toEqual([]);
     expect(o.beats).toContainEqual(said('dad', 'line.dadSalesman'));
+    expect(o.beats.some((b) => b.type === 'view')).toBe(false);
+    const order = ['captor-dad', 'line.dadSalesman', 'line.dadLocks', 'captor-none'].map((m) =>
+      o.beats.findIndex((b) => (b.type === 'captor' ? `captor-${b.character ?? 'none'}` : b.type === 'say' ? b.key : '') === m),
+    );
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+    expect(o.state.flags.door_unlocked).toBeUndefined();
     expect(o.state.chars.dad).toBe('at_desk');
   });
 

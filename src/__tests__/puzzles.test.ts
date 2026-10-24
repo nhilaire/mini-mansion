@@ -164,7 +164,7 @@ describe('E05: the Rubik\'s Cube', () => {
 });
 
 describe('E17: the breaker and the washing machine', () => {
-  it('needs a fuse in the breaker, the breaker back on and detergent; the cycle ends 2 minutes later and Maman goes to the garden (AC-70)', () => {
+  it('needs a fuse in the breaker, the breaker back on and detergent; the cycle ends 1 minute later and Maman goes to the garden (AC-70)', () => {
     expectRefusal(at('utility'), use('utility.machine'), 'line.machinePower');
     expectRefusal(at('utility', { inventory: ['detergent'] }), item('detergent', 'utility.machine'), 'line.machinePower');
     expect(interact(at('garage'), use('garage.breaker')).beats).toContainEqual({ type: 'say', speaker: 'hero', key: 'line.breakerFuse' });

@@ -332,6 +332,9 @@ describe('the tonka bean and the end (AC-67, AC-68)', () => {
     expect(state.finished).toBe(true);
     const casts = o.beats.flatMap((b) => (b.type === 'cast' ? [b.characters.length] : []));
     expect(casts).toEqual([1, 2, 3, 4, 5]);
+    // In the lab, Charlie in the middle of the floor so that nobody hides anybody.
+    expect(o.beats).toContainEqual({ type: 'room', place: 'laundry', pos: { x: 160, y: 124 }, facing: 'down' });
+    expect(keys(o.beats)).toContain('line.final1');
     expect(o.beats[o.beats.length - 1]).toEqual({ type: 'ending' });
     expect(keys(o.beats).slice(-2)).toEqual(['line.dadThanks', 'line.finalBakery']);
   });
