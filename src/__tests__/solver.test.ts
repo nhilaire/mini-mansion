@@ -54,7 +54,7 @@ const DEPENDS: Record<number, number[]> = {
   22: [17],
   23: [7],
   24: [23],
-  25: [7, 17],
+  25: [7, 22],
   26: [24],
   27: [26],
   28: [25, 27],
@@ -128,6 +128,8 @@ describe('story graph (AC-31)', () => {
       if (s.solved.includes(7) && !s.solved.includes(16) && !s.solved.includes(19)) problems.push(`E07 before E16/E19: ${storyKey(s)}`);
       if (s.solved.includes(14) && !s.solved.includes(16) && !s.solved.includes(19) && !s.solved.includes(27)) problems.push(`E14 before E16/E19/E27 (the pliers are in the office): ${storyKey(s)}`);
       if (s.solved.includes(28) && !s.flags.dad_wary) problems.push(`E28 before Papa is wary: ${storyKey(s)}`);
+      // Only the reunion ends the game: in the lab, once the recipe is complete and the tonka bean is in the dough.
+      if (s.finished && !(s.solved.includes(13) && s.solved.includes(30) && s.place === 'laundry')) problems.push(`ended elsewhere: ${storyKey(s)}`);
     });
   });
 

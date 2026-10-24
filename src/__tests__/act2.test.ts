@@ -327,6 +327,13 @@ describe('the tonka bean and the end (AC-67, AC-68)', () => {
     expect(keys(o.beats).slice(-2)).toEqual(['line.dadThanks', 'line.finalBakery']);
   });
 
+  it('the tonka bean put in the dough after the recipe is complete does not end the game in the kitchen', () => {
+    const o = interact(at('kitchen', { inventory: ['tonka'], flags: flags('dough_mixed'), solved: [13] }), give('tonka', 'kitchen.robot'));
+    expect(o.state.flags.tonka_in).toBe(true);
+    expect(o.state.finished).toBe(false);
+    expect(o.beats.some((b) => b.type === 'ending')).toBe(false);
+  });
+
   it('without it, the recipe asks for the secret touch; the family gathers once Sam is back in the lab with it', () => {
     const done = playAll(lab([]), pieces);
     expect(done.outcomes[2].beats).toContainEqual(said('hero', 'line.recipeTonka'));

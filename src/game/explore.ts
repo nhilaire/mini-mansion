@@ -215,10 +215,11 @@ export function lazyAvailable(s: GameState, item: ItemId): boolean {
   return s.inventory.includes(item) || !s.flags[LAZY_ITEMS[item]!];
 }
 
-// The state with a lazy item taken on the way (no change when it is already held). Taking the keyring solves E25.
+// The state with a lazy item taken on the way (no change when it is already held). Taking the drawer key solves E25,
+// during a hose window (E22).
 export function lazyItem(s: GameState, input: Input): GameState {
   if (input.kind !== 'item' || !isLazy(input.item) || s.inventory.includes(input.item)) return s;
-  const solved = input.item === 'keyring' && !s.solved.includes(25) ? [...s.solved, 25] : s.solved;
+  const solved = input.item === 'keyring' ? [...s.solved, ...[22, 25].filter((n) => !s.solved.includes(n))] : s.solved;
   return { ...s, inventory: [...s.inventory, input.item], flags: { ...s.flags, [LAZY_ITEMS[input.item]!]: true }, solved };
 }
 

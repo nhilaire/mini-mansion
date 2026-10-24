@@ -163,6 +163,12 @@ describe('GameScreen, Act II', () => {
     expect(screen.getByTestId('dad-at_desk')).toBeTruthy();
     expect(screen.queryByTestId('power-cut')).toBeNull();
   });
+
+  it('during the power cut, outside stays lit (AC-64)', async () => {
+    await mount({ ...newGame(), place: 'front', flags: { door_unlocked: true }, chars: chars({ dad: 'fuses' }), timers: { dad: 60_000, dough: null, mom: null, delivery: null }, tutorial: 3 });
+    expect(screen.getByTestId('dad-fuses')).toBeTruthy();
+    expect(screen.queryByTestId('power-cut')).toBeNull();
+  });
 });
 
 describe('GameScreen', () => {
