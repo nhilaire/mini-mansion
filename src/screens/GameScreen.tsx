@@ -525,6 +525,8 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       <View testID={`dad-${game.chars.dad}`} collapsable={false} pointerEvents="none" style={styles.timersIdle} />
       <View testID={`mom-${game.chars.mom}`} collapsable={false} pointerEvents="none" style={styles.timersIdle} />
       {game.flags.delivered && <View testID="delivered" collapsable={false} pointerEvents="none" style={styles.timersIdle} />}
+      {/* The selected inventory item, so that the walkthrough can check its tap was taken. */}
+      {selected && <View testID={`selected-${selected}`} collapsable={false} pointerEvents="none" style={styles.timersIdle} />}
 
       {/* The power cut: the house stays dark (dimmed, still playable) until Papa has fixed the fuses; outside is lit. */}
       {game.chars.dad === 'fuses' && view !== 'dark' && !OUTDOOR.includes(shown) && <View testID="power-cut" style={[StyleSheet.absoluteFill, styles.dark, { opacity: 0.6 }]} pointerEvents="none" />}

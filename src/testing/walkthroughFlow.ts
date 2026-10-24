@@ -15,6 +15,13 @@ const tap = (id: string) => `- tapOn:\n    id: "${id}"`;
 const waitFor = (id: string, timeout = 15000) => `- extendedWaitUntil:\n    visible:\n      id: "${id}"\n    timeout: ${timeout}`;
 const idle = () => waitFor('scene-idle');
 const waitGone = (id: string, timeout = 15000) => `- extendedWaitUntil:\n    notVisible:\n      id: "${id}"\n    timeout: ${timeout}`;
+// Selects an inventory item. A tap that lands just as a timer's line starts is ignored by the game: the item is then
+// tapped again once the scene is idle, and the flow goes on only once it is selected.
+const select = (item: ItemId) => [
+  tap(`inv-${item}`),
+  `- runFlow:\n    when:\n      notVisible:\n        id: "selected-${item}"\n    commands:\n      - extendedWaitUntil:\n          visible:\n            id: "scene-idle"\n          timeout: 15000\n      - tapOn:\n          id: "inv-${item}"`,
+  waitFor(`selected-${item}`, 5000),
+];
 
 // A screenshot for the README, taken once the step at this index is done.
 const SCREENSHOTS: Record<number, string> = {
@@ -57,7 +64,7 @@ function stepFor(input: Input, state: GameState, after: GameState, band: Band): 
       return [...head, idle()];
     }
     case 'item': {
-      const taps = [...band.reach(state, input.item), tap(`inv-${input.item}`)];
+      const taps = [...band.reach(state, input.item), ...select(input.item)];
       if (input.target.startsWith('item:')) {
         const other = input.target.slice(5) as ItemId;
         return [...taps, ...band.reach(state, other), tap(`inv-${other}`), idle()];

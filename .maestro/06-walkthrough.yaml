@@ -34,6 +34,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-key"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-key"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-key"
+- extendedWaitUntil:
+    visible:
+      id: "selected-key"
+    timeout: 5000
 - tapOn:
     id: "hs-front.door"
 - extendedWaitUntil:
@@ -86,6 +101,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-fuse"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-fuse"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-fuse"
+- extendedWaitUntil:
+    visible:
+      id: "selected-fuse"
+    timeout: 5000
 - tapOn:
     id: "hs-garage.breaker"
 - extendedWaitUntil:
@@ -138,6 +168,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-detergent"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-detergent"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-detergent"
+- extendedWaitUntil:
+    visible:
+      id: "selected-detergent"
+    timeout: 5000
 - tapOn:
     id: "hs-utility.machine"
 - extendedWaitUntil:
@@ -172,6 +217,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-gatekey"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-gatekey"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-gatekey"
+- extendedWaitUntil:
+    visible:
+      id: "selected-gatekey"
+    timeout: 5000
 - tapOn:
     id: "hs-front.gateRight"
 - extendedWaitUntil:
@@ -200,6 +260,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-pole"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-pole"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-pole"
+- extendedWaitUntil:
+    visible:
+      id: "selected-pole"
+    timeout: 5000
 - tapOn:
     id: "inv-extension"
 - extendedWaitUntil:
@@ -214,6 +289,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-longpole"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-longpole"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-longpole"
+- extendedWaitUntil:
+    visible:
+      id: "selected-longpole"
+    timeout: 5000
 - tapOn:
     id: "hs-pool.ball"
 - extendedWaitUntil:
@@ -270,6 +360,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-sticks"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-sticks"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-sticks"
+- extendedWaitUntil:
+    visible:
+      id: "selected-sticks"
+    timeout: 5000
 - tapOn:
     id: "hs-music.drums"
 - extendedWaitUntil:
@@ -366,6 +471,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-queen"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-queen"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-queen"
+- extendedWaitUntil:
+    visible:
+      id: "selected-queen"
+    timeout: 5000
 - tapOn:
     id: "hs-living.chess"
 - extendedWaitUntil:
@@ -395,6 +515,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-booklet"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-booklet"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-booklet"
+- extendedWaitUntil:
+    visible:
+      id: "selected-booklet"
+    timeout: 5000
 - tapOn:
     id: "hs-theo.cube"
 - extendedWaitUntil:
@@ -503,6 +638,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-ricemilk"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-ricemilk"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-ricemilk"
+- extendedWaitUntil:
+    visible:
+      id: "selected-ricemilk"
+    timeout: 5000
 - tapOn:
     id: "hs-kitchen.robot"
 - extendedWaitUntil:
@@ -511,6 +661,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-chestnut"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-chestnut"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-chestnut"
+- extendedWaitUntil:
+    visible:
+      id: "selected-chestnut"
+    timeout: 5000
 - tapOn:
     id: "hs-kitchen.robot"
 - extendedWaitUntil:
@@ -519,6 +684,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-riceflour"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-riceflour"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-riceflour"
+- extendedWaitUntil:
+    visible:
+      id: "selected-riceflour"
+    timeout: 5000
 - tapOn:
     id: "hs-kitchen.robot"
 - extendedWaitUntil:
@@ -643,6 +823,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-pliers"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-pliers"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-pliers"
+- extendedWaitUntil:
+    visible:
+      id: "selected-pliers"
+    timeout: 5000
 - tapOn:
     id: "hs-pool.pump"
 - extendedWaitUntil:
@@ -693,6 +888,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-oring"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-oring"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-oring"
+- extendedWaitUntil:
+    visible:
+      id: "selected-oring"
+    timeout: 5000
 - tapOn:
     id: "hs-parents.shower"
 - extendedWaitUntil:
@@ -701,6 +911,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-wrench"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-wrench"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-wrench"
+- extendedWaitUntil:
+    visible:
+      id: "selected-wrench"
+    timeout: 5000
 - tapOn:
     id: "hs-parents.shower"
 - extendedWaitUntil:
@@ -747,6 +972,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-hairdryer"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-hairdryer"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-hairdryer"
+- extendedWaitUntil:
+    visible:
+      id: "selected-hairdryer"
+    timeout: 5000
 - tapOn:
     id: "inv-note"
 - extendedWaitUntil:
@@ -799,6 +1039,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-sardines"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-sardines"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-sardines"
+- extendedWaitUntil:
+    visible:
+      id: "selected-sardines"
+    timeout: 5000
 - tapOn:
     id: "hs-garden.cat"
 - extendedWaitUntil:
@@ -867,6 +1122,21 @@ tags:
     id: "inv-more"
 - tapOn:
     id: "inv-tonka"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-tonka"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-tonka"
+- extendedWaitUntil:
+    visible:
+      id: "selected-tonka"
+    timeout: 5000
 - tapOn:
     id: "hs-kitchen.robot"
 - extendedWaitUntil:
@@ -905,6 +1175,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-patches"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-patches"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-patches"
+- extendedWaitUntil:
+    visible:
+      id: "selected-patches"
+    timeout: 5000
 - tapOn:
     id: "hs-garage.bike"
 - extendedWaitUntil:
@@ -913,6 +1198,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-pump"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-pump"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-pump"
+- extendedWaitUntil:
+    visible:
+      id: "selected-pump"
+    timeout: 5000
 - tapOn:
     id: "hs-garage.bike"
 - extendedWaitUntil:
@@ -947,6 +1247,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-hairdryer"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-hairdryer"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-hairdryer"
+- extendedWaitUntil:
+    visible:
+      id: "selected-hairdryer"
+    timeout: 5000
 - tapOn:
     id: "hs-florent.strip"
 - extendedWaitUntil:
@@ -981,6 +1296,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-keyring"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-keyring"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-keyring"
+- extendedWaitUntil:
+    visible:
+      id: "selected-keyring"
+    timeout: 5000
 - tapOn:
     id: "hs-office.drawer"
 - extendedWaitUntil:
@@ -1023,6 +1353,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-bar"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-bar"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-bar"
+- extendedWaitUntil:
+    visible:
+      id: "selected-bar"
+    timeout: 5000
 - tapOn:
     id: "hs-cellar.stoneLeft"
 - extendedWaitUntil:
@@ -1071,6 +1416,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-thinner"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-thinner"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-thinner"
+- extendedWaitUntil:
+    visible:
+      id: "selected-thinner"
+    timeout: 5000
 - tapOn:
     id: "hs-attic.stain"
 - extendedWaitUntil:
@@ -1079,6 +1439,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-oldkey"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-oldkey"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-oldkey"
+- extendedWaitUntil:
+    visible:
+      id: "selected-oldkey"
+    timeout: 5000
 - tapOn:
     id: "hs-attic.door"
 - extendedWaitUntil:
@@ -1135,6 +1510,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-scrap"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-scrap"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-scrap"
+- extendedWaitUntil:
+    visible:
+      id: "selected-scrap"
+    timeout: 5000
 - tapOn:
     id: "hs-laundry.notebook"
 - extendedWaitUntil:
@@ -1143,6 +1533,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-scrap2"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-scrap2"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-scrap2"
+- extendedWaitUntil:
+    visible:
+      id: "selected-scrap2"
+    timeout: 5000
 - tapOn:
     id: "hs-laundry.notebook"
 - extendedWaitUntil:
@@ -1151,6 +1556,21 @@ tags:
     timeout: 15000
 - tapOn:
     id: "inv-scrap3"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-scrap3"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-scrap3"
+- extendedWaitUntil:
+    visible:
+      id: "selected-scrap3"
+    timeout: 5000
 - tapOn:
     id: "hs-laundry.notebook"
 - extendedWaitUntil:
