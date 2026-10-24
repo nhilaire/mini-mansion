@@ -237,12 +237,12 @@ means the front of the house (`front`).
 - Wrong combinations answer one of 6 generic lines in rotation (`wrong.0-5`), never consume anything and change
   no state.
 - Spoken lines: shown in the banner in the speaker's colour for max(2.5 s, 60 ms x length); a tap never skips them, so
-  that no clue is missed (only the intro cards can be skipped). During a plain line Charlie can still walk on the floor;
-  objects, exits and the inventory wait for its end; scenes without control (captures, outside views, cutscenes) allow
-  nothing.
+  that no clue is missed (only the intro cards can be skipped). A line said outside a scene without control is a caption:
+  the player keeps full control meanwhile (walking, objects, inventory, changing place), and lines said meanwhile follow
+  it in order. A scene without control (capture, outside views such as the front door, the delivery or the power cut,
+  the final gathering) starts once the captions said before it are over and allows no input until its end.
 - The ways between the parts of the garden (the middle path between the football corner and the pool, the way to the
   swing corner) are marked by an open white wicket gate under a wooden arch and stepping stones on the grass.
-  Input on the scene is ignored while a line, a cutscene or the front door view is playing.
 - An item is removed from the inventory only when it is used up by its puzzle and is no longer needed.
 - An item that is itself the hotspot (the hair dryer on its hook, the sardines, the flours, the pole) disappears from the
   scene once taken; furniture (shelves, bench, basket...) stays and says it is empty.
@@ -261,8 +261,8 @@ means the front of the house (`front`).
   on the play-time clock.
 - Durations: doorbell answer 15 s, Papa outside 60 s, Papa coming back 30 s, dough 120 s then Papa cooking 90 s,
   washing machine cycle 60 s, delivery 60 s after Papa becomes wary, Maman changing 90 s, Papa at the fuse box 60 s.
-- Timers advance only while the scene is idle: not during a spoken line, a cutscene, an outside view or a capture
-  scene. When several deadlines are due, they fire one after another in deadline order, each scene playing in full
+- Timers advance while the player has control (captions included), not during a scene without control (capture,
+  outside view, final gathering) nor an overlay (keypad, pad, chess, documents). When several deadlines are due, they fire one after another in deadline order, each scene playing in full
   before the next one.
 - The power cut trips the main fuse of the garage electrical panel (the same panel as the "Cellier" breaker of E17);
   it changes no other object state (washing machine, pool pump, computer, shower keep theirs).
@@ -771,8 +771,8 @@ Puzzles, characters, captures, timers
   fragment, in the kitchen when the tonka bean goes into the dough), Charlie in the middle of the floor and the family
   joining one after the other, nobody hiding anybody, then the Ending; with E13 done but not E30,
   `line.recipeTonka` plays and the game goes on; nothing else ends the game.
-- AC-69 [unit] Given several timer deadlines due at once or during a scene, then timers do not advance while a line,
-  cutscene, outside view or capture plays, and the due events fire one after another in deadline order, each scene
+- AC-69 [unit] Given several timer deadlines due at once or during a scene, then timers do not advance while a scene
+  without control (capture, outside view, final gathering) or an overlay plays, they do while a caption shows, and the due events fire one after another in deadline order, each scene
   in full.
 - AC-33 [e2e] Given the Salon after E01, when the bookshelf is tapped and take chosen, then the Livret du Rubik's Cube
   appears in the inventory.
@@ -807,9 +807,9 @@ Persistence, pause, ending, settings, about
   or the per-language content files, fr and en have the same keys, French uses tu when addressing the player (UI, narration, tutorial; characters
   may say vous to an unknown visitor, as `line.dadAtDoor`), the UI strings match the "Player
   copy" table, and French typography uses a no-break space before `: ; ! ?` and inside « ».
-- AC-49 [unit] Given a spoken line, then it stays max(2.5 s, 60 ms x length) and a tap does not skip it; during a plain
-  line a floor tap still makes Charlie walk while hotspots, exits and the inventory wait for its end, and all other
-  scene input is ignored while a cutscene or an outside view plays; the capture scene and the outside views
+- AC-49 [unit] Given a spoken line, then it stays max(2.5 s, 60 ms x length) and a tap does not skip it; outside a
+  scene without control it is a caption and the player keeps control (walk, objects, inventory, another place), the
+  lines said meanwhile following in order; scene input is ignored while a scene without control plays; the capture scene and the outside views
   (front door, kitchen, delivery, garden, Florent's ride, power cut) cannot be skipped by a tap (their lines
   play their full time).
 - AC-50 [unit] Given a save requested during a cutscene, then the stored state is the state after the cutscene;

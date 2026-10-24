@@ -56,7 +56,16 @@ type Presentation =
   | { kind: 'chess' }
   | { kind: 'documents' }
   | { kind: 'capture'; until: number }
-  | { kind: 'wait'; until: number };
+  | { kind: 'wait'; until: number }
+  // A scene without control waits for the captions said before it.
+  | { kind: 'captions' };
+
+// A line said outside a scene without control: shown as a caption for its whole reading time while the game goes on.
+interface Caption {
+  speaker: Speaker;
+  text: string;
+  left: number;
+}
 
 interface Walk {
   from: Point;
@@ -96,6 +105,9 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   const [present, setPresent] = useState<Presentation | null>(null);
   const presentRef = useRef<Presentation | null>(null);
   const queue = useRef<Beat[]>([]);
+  // Lines said while the player keeps control: shown one after another, each for its whole reading time (AC-49).
+  const captionsRef = useRef<Caption[]>([]);
+  const [caption, setCaption] = useState<Caption | null>(null);
   const [menu, setMenu] = useState<HotspotDef | null>(null);
   const [selected, setSelected] = useState<ItemId | null>(null);
   const [page, setPage] = useState(0);
@@ -166,8 +178,14 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       switch (b.type) {
         case 'say': {
           const text = line(t, b.key);
-          show({ kind: 'line', speaker: b.speaker, text, until: now + lineDurationMs(text) });
-          return;
+          if (cinematicRef.current) {
+            show({ kind: 'line', speaker: b.speaker, text, until: now + lineDurationMs(text) });
+            return;
+          }
+          // Outside a scene without control: a caption, and the player keeps playing.
+          captionsRef.current.push({ speaker: b.speaker, text, left: lineDurationMs(text) });
+          if (captionsRef.current.length === 1) setCaption(captionsRef.current[0]);
+          break;
         }
         case 'keypad':
           show({ kind: 'keypad', keypad: b.keypad });
@@ -189,6 +207,12 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           setView(b.view);
           break;
         case 'cinematic':
+          // A scene without control starts once the captions said before it are over.
+          if (b.on && captionsRef.current.length > 0) {
+            queue.current.unshift(b);
+            show({ kind: 'captions' });
+            return;
+          }
           cinematicRef.current = b.on;
           setCinematic(b.on);
           break;
@@ -293,7 +317,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       if (pausedRef.current) return;
       setClock((c) => c + dt);
       gameRef.current = addPlayTime(gameRef.current, dt, true);
-      // Timers only count the time the scene is not playing something (a line, a scene, a view, a capture, an overlay).
+      // Timers only count the time no scene without control or overlay is on (captions do not stop them).
       if (!presentRef.current) pendingRef.current += dt * timerScale(gameRef.current);
       if (!presentRef.current && !walkRef.current && !notebookRef.current && !gameRef.current.finished) {
         const g = gameRef.current;
@@ -314,6 +338,16 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
       }
       const pr = presentRef.current;
       if (pr && (pr.kind === 'line' || pr.kind === 'capture' || pr.kind === 'wait') && now >= pr.until) runNext();
+      // Captions run while nothing else is shown (or while a scene waits for them), not while the notebook is open.
+      const cap = captionsRef.current[0];
+      if (cap && (!presentRef.current || presentRef.current.kind === 'captions') && !notebookRef.current) {
+        cap.left -= dt;
+        if (cap.left <= 0) {
+          captionsRef.current.shift();
+          setCaption(captionsRef.current[0] ?? null);
+          if (captionsRef.current.length === 0 && presentRef.current?.kind === 'captions') runNext();
+        }
+      }
     }, TICK_MS);
     return () => clearInterval(id);
   }, [runNext]);
@@ -367,12 +401,9 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
 
   const busy = present !== null;
   const blocked = busy || paused || notebook;
-  // During a plain line (not a scene without control), Charlie may walk on the floor; objects, exits and the inventory
-  // wait for the end of the line (AC-49).
-  const canWalk = !paused && !notebook && (!busy || (present?.kind === 'line' && !cinematic && !view));
 
   const onFloor = (e: GestureResponderEvent) => {
-    if (!canWalk) return;
+    if (blocked) return;
     const p = toLogical(transform, e.nativeEvent.locationX, e.nativeEvent.locationY);
     if (p.y >= ROOM_H) return;
     setMenu(null);
@@ -421,7 +452,9 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   const exits = exitsIn(game);
   const inv = inventoryPage(game.inventory, page);
   const bubble = !blocked ? tutorialBubble(game) : null;
-  const speaker = present?.kind === 'line' ? present.speaker : null;
+  // The line on show: the one of a scene without control, else the current caption.
+  const shownLine = present?.kind === 'line' ? present : caption;
+  const speaker = shownLine ? shownLine.speaker : null;
   const idle = !blocked && !walking && !menu;
   const menuRect = toScreenRect(transform, MENU_BUTTON);
   const notebookRect = toScreenRect(transform, NOTEBOOK_BUTTON);
@@ -563,7 +596,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           onClose={() => setMenu(null)}
         />
       )}
-      {present?.kind === 'line' && <LineBanner speaker={present.speaker} text={present.text} />}
+      {shownLine && <LineBanner speaker={shownLine.speaker} text={shownLine.text} />}
       {present?.kind === 'keypad' && (
         <Keypad
           title={t.keypad[present.keypad]}

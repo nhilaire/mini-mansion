@@ -109,7 +109,13 @@ describe('GameScreen, Act II', () => {
     await fireEvent.press(screen.getByTestId('hs-landing.theoDoor'));
     await fireEvent.press(screen.getByTestId('verb-use'));
     expect(screen.getByText(line(t, 'capture.theo'))).toBeTruthy();
-    await dismissLines();
+    // Until the scene is over (the narrator's caption in the cellar follows it), no timer time passes.
+    for (let i = 0; i < 200 && !screen.queryByText(line(t, 'capture.cellar')); i++) {
+      await act(async () => {
+        jest.advanceTimersByTime(20);
+      });
+    }
+    expect(screen.getByText(line(t, 'capture.cellar'))).toBeTruthy();
     expect(screen.getByTestId('dad-answering')).toBeTruthy();
     for (let i = 0; i < 20 && !screen.queryByTestId('view-door'); i++) {
       await act(async () => {
@@ -119,22 +125,13 @@ describe('GameScreen, Act II', () => {
     expect(screen.getByTestId('view-door')).toBeTruthy();
   });
 
-  it('no timer time passes while a line plays: the doorbell timer waits, without catching up afterwards (AC-69)', async () => {
-    // Papa answers the door 5 s of timer time from now (fast mode: 30 times faster, about 170 ms while idle).
+  it('a caption does not stop the timers: the player keeps control, Papa answers the door meanwhile (AC-49, AC-69)', async () => {
+    // Papa answers the door 5 s of timer time from now (fast mode: 30 times faster, about 170 ms).
     await mount({ ...newGame(), place: 'hall', flags: { door_unlocked: true }, chars: chars({ dad: 'answering' }), timers: { dad: 5000, dough: null, mom: null, delivery: null, machine: null }, tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-hall.coats'));
     await fireEvent.press(screen.getByTestId('verb-look'));
     expect(screen.getByTestId('line-banner')).toBeTruthy();
-    await act(async () => {
-      jest.advanceTimersByTime(240);
-    });
-    expect(screen.getByTestId('dad-answering')).toBeTruthy();
-    // The line is gone: the 250 ms it played are not added to the timers.
-    await act(async () => {
-      jest.advanceTimersByTime(70);
-    });
-    expect(screen.queryByTestId('line-banner')).toBeNull();
-    expect(screen.getByTestId('dad-answering')).toBeTruthy();
+    expect(screen.getByTestId('scene-idle')).toBeTruthy();
     for (let i = 0; i < 20 && !screen.queryByTestId('view-door'); i++) {
       await act(async () => {
         jest.advanceTimersByTime(50);
@@ -232,17 +229,13 @@ describe('GameScreen', () => {
     expect(screen.queryByTestId('inv-pole')).toBeNull();
   });
 
-  it('a spoken line stays for its whole delay: a tap does not skip it, and scene taps are ignored meanwhile (AC-49)', async () => {
+  it('a spoken line stays for its whole delay: a tap does not skip it (AC-49)', async () => {
     resetFastModeForTests();
-    const props = await mount({ ...newGame(), tutorial: 3 });
+    await mount({ ...newGame(), tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-front.hedge'));
     await fireEvent.press(screen.getByTestId('verb-look'));
     const text = line(t, 'front.hedge.look');
     expect(screen.getByText(text)).toBeTruthy();
-    const before = props.onChange.mock.calls.length;
-    await fireEvent.press(screen.getByTestId('hs-front.bell'));
-    expect(screen.queryByTestId('action-menu')).toBeNull();
-    expect(props.onChange.mock.calls.length).toBe(before);
     await fireEvent.press(screen.getByTestId('line-banner'));
     expect(screen.getByText(text)).toBeTruthy();
     const duration = Math.max(2500, 60 * text.length);
@@ -256,7 +249,7 @@ describe('GameScreen', () => {
     expect(screen.queryByText(text)).toBeNull();
   });
 
-  it('Charlie can walk while a plain line plays; the line goes on, objects wait for its end (AC-49)', async () => {
+  it('the player keeps control while a plain line plays: walking, objects, the inventory, another place; the line goes on (AC-49)', async () => {
     const props = await mount({ ...newGame(), tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-front.hedge'));
     await fireEvent.press(screen.getByTestId('verb-look'));
@@ -266,8 +259,16 @@ describe('GameScreen', () => {
     await fireEvent.press(screen.getByTestId('scene-floor'), { nativeEvent: { locationX: 300, locationY: 230 } });
     expect(lastSaved(props).pos).not.toEqual(before);
     expect(screen.getByText(text)).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('hs-front.bell'));
-    expect(screen.queryByTestId('action-menu')).toBeNull();
+    await fireEvent.press(screen.getByTestId('hs-front.doormat'));
+    expect(screen.getByTestId('action-menu')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('verb-take'));
+    expect(lastSaved(props).inventory).toEqual(['key']);
+    // The first line still shows; the new one comes after it.
+    expect(screen.getByText(text)).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('inv-key'));
+    await fireEvent.press(screen.getByTestId('hs-front.door'));
+    expect(lastSaved(props).place).toBe('hall');
+    expect(screen.getByTestId('exit-hall.toLiving')).toBeTruthy();
   });
 
   it('an inhabitant can only be looked at; "Écouter" at an occupied door plays the overheard line (AC-20)', async () => {
