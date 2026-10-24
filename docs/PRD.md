@@ -237,7 +237,9 @@ means the front of the house (`front`).
 - Wrong combinations answer one of 6 generic lines in rotation (`wrong.0-5`), never consume anything and change
   no state.
 - Spoken lines: shown in the banner in the speaker's colour for max(2.5 s, 60 ms x length); a tap never skips them, so
-  that no clue is missed (only the intro cards can be skipped).
+  that no clue is missed (only the intro cards can be skipped). During a plain line Charlie can still walk on the floor;
+  objects, exits and the inventory wait for its end; scenes without control (captures, outside views, cutscenes) allow
+  nothing.
 - The ways between the parts of the garden (the middle path between the football corner and the pool, the way to the
   swing corner) are marked by an open white wicket gate under a wooden arch and stepping stones on the grass.
   Input on the scene is ignored while a line, a cutscene or the front door view is playing.
@@ -805,8 +807,9 @@ Persistence, pause, ending, settings, about
   or the per-language content files, fr and en have the same keys, French uses tu when addressing the player (UI, narration, tutorial; characters
   may say vous to an unknown visitor, as `line.dadAtDoor`), the UI strings match the "Player
   copy" table, and French typography uses a no-break space before `: ; ! ?` and inside « ».
-- AC-49 [unit] Given a spoken line, then it stays max(2.5 s, 60 ms x length) and a tap does not skip it, and
-  scene input is ignored while a line, a cutscene or an outside view plays; the capture scene and the outside views
+- AC-49 [unit] Given a spoken line, then it stays max(2.5 s, 60 ms x length) and a tap does not skip it; during a plain
+  line a floor tap still makes Charlie walk while hotspots, exits and the inventory wait for its end, and all other
+  scene input is ignored while a cutscene or an outside view plays; the capture scene and the outside views
   (front door, kitchen, delivery, garden, Florent's ride, power cut) cannot be skipped by a tap (their lines
   play their full time).
 - AC-50 [unit] Given a save requested during a cutscene, then the stored state is the state after the cutscene;

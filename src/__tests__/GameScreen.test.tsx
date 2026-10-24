@@ -256,6 +256,20 @@ describe('GameScreen', () => {
     expect(screen.queryByText(text)).toBeNull();
   });
 
+  it('Charlie can walk while a plain line plays; the line goes on, objects wait for its end (AC-49)', async () => {
+    const props = await mount({ ...newGame(), tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('hs-front.hedge'));
+    await fireEvent.press(screen.getByTestId('verb-look'));
+    const text = line(t, 'front.hedge.look');
+    expect(screen.getByText(text)).toBeTruthy();
+    const before = lastSaved(props).pos;
+    await fireEvent.press(screen.getByTestId('scene-floor'), { nativeEvent: { locationX: 300, locationY: 230 } });
+    expect(lastSaved(props).pos).not.toEqual(before);
+    expect(screen.getByText(text)).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('hs-front.bell'));
+    expect(screen.queryByTestId('action-menu')).toBeNull();
+  });
+
   it('an inhabitant can only be looked at; "Écouter" at an occupied door plays the overheard line (AC-20)', async () => {
     await mount({ ...newGame(), place: 'football', flags: { door_unlocked: true }, chars: chars({ julien: 'football' }), tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-julien'));

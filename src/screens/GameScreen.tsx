@@ -367,9 +367,12 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
 
   const busy = present !== null;
   const blocked = busy || paused || notebook;
+  // During a plain line (not a scene without control), Charlie may walk on the floor; objects, exits and the inventory
+  // wait for the end of the line (AC-49).
+  const canWalk = !paused && !notebook && (!busy || (present?.kind === 'line' && !cinematic && !view));
 
   const onFloor = (e: GestureResponderEvent) => {
-    if (blocked) return;
+    if (!canWalk) return;
     const p = toLogical(transform, e.nativeEvent.locationX, e.nativeEvent.locationY);
     if (p.y >= ROOM_H) return;
     setMenu(null);
