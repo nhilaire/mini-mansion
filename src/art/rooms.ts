@@ -854,7 +854,8 @@ function paintExit(b: PixelBuffer, id: string, r: Rect, s: GameState) {
   if (id === 'garage.toCellar' || id === 'attic.toGarage') return hatch(b, r, id === 'attic.toGarage');
   if (id === 'attic.toLaundry') return doorway(b, r, C.wine0);
   if (id === 'living.toPool' || id === 'pool.toLiving') return doorway(b, r, C.night1);
-  if (id === 'football.toPool' || id === 'pool.toFootball') return b.rect(r.x + 4, r.y + r.h - 30, r.w - 8, 30, C.ipe).frame(r.x + 2, r.y + r.h - 34, r.w - 4, 34, C.wood3);
+  // The ways between the parts of the garden (the middle path, the swing corner): a wicket gate and stepping stones.
+  if (id === 'football.toPool' || id === 'pool.toFootball' || id === 'football.toGarden' || id === 'garden.toFootball') return wicket(b, r, id === 'pool.toFootball');
   const outdoor = s.place === 'front' || s.place === 'football' || s.place === 'pool' || s.place === 'garden';
   if (outdoor) {
     // An open gate, or a path to the next part of the garden.
@@ -867,6 +868,32 @@ function paintExit(b: PixelBuffer, id: string, r: Rect, s: GameState) {
   }
   if (r.x <= 4 || r.x >= 286) return doorway(b, r);
   door(b, r);
+}
+
+// An open white wicket gate under a wooden arch, with stepping stones on the grass leading to it, so that the way to
+// another part of the garden is seen at once.
+function wicket(b: PixelBuffer, r: Rect, leafRight = false) {
+  const left = r.x + 2;
+  const right = r.x + r.w - 3;
+  const cx = (left + right) / 2;
+  const half = (right - left) / 2;
+  const top = r.y + 14;
+  // The posts and the arch.
+  b.rect(left, top, 3, FLOOR_Y - top, C.wood1).rect(right - 2, top, 3, FLOOR_Y - top, C.wood1);
+  for (let x = left; x <= right; x++) {
+    const d = (x - cx) / half;
+    b.rect(x, top - 8 + Math.round(6 * d * d), 1, 3, C.wood3);
+  }
+  // The gate leaf, swung open against a post (the right one where the pool tap stands in front of the left one).
+  const l0 = leafRight ? right - 11 : left + 3;
+  for (let x = l0 + 1; x < l0 + 8; x += 3) b.rect(x, FLOOR_Y - 22, 2, 20, C.white);
+  b.hline(l0, l0 + 8, FLOOR_Y - 18, C.white).hline(l0, l0 + 8, FLOOR_Y - 8, C.white);
+  // Stepping stones from the front of the scene to the gate.
+  for (let i = 0; i < 4; i++) {
+    const sx = Math.round(cx) + (i % 2 === 0 ? -3 : 3);
+    const sy = FLOOR_Y + 6 + i * 11;
+    b.ellipse(sx, sy, 7, 4, C.stone1).ellipse(sx, sy - 1, 6, 3, C.stone3);
+  }
 }
 
 // ---------- places ----------

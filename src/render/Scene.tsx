@@ -69,6 +69,20 @@ function MoreButton({ page, pages }: { page: number; pages: number }) {
   );
 }
 
+// Guests stand on both sides of Charlie, 26 px apart, the first one on the side with more room; a spot off the screen
+// is skipped, so that nobody hides anybody.
+export function guestSpots(hero: Point, count: number): Point[] {
+  const side = hero.x > 160 ? -1 : 1;
+  const spots: Point[] = [];
+  for (let step = 1; spots.length < count && step < 24; step++) {
+    for (const dir of [side, -side]) {
+      const x = hero.x + dir * step * 26;
+      if (spots.length < count && x >= 14 && x <= 306) spots.push({ x, y: hero.y + (spots.length % 2 === 0 ? 0 : 3) });
+    }
+  }
+  return spots;
+}
+
 function SceneView({ state, hero, transform, width, height, speaker, selected, page, unread, clock, guests = [], extras = [] }: Props) {
   const placed = charactersIn(state).filter((c) => !guests.includes(c.id));
   const people: { key: string; y: number; buf: PixelBuffer; x: number; top: number }[] = placed.map((c) => ({
@@ -80,14 +94,9 @@ function SceneView({ state, hero, transform, width, height, speaker, selected, p
   }));
   const frame = heroFrame(heroSprites(), hero.facing, hero.frame, speaker === 'hero' && Math.floor(clock / 140) % 2 === 0);
   const heroBuf = frame.flip ? flippedOf(frame.image) : frame.image;
-  // Guests stand on both sides of Charlie, the first one on the side with more room.
-  const side = hero.pos.x > 160 ? -1 : 1;
-  guests.forEach((g, i) => {
-    const step = Math.floor(i / 2) + 1;
-    const dir = i % 2 === 0 ? side : -side;
-    const gx = Math.max(14, Math.min(306, hero.pos.x + dir * step * 26));
-    const gy = hero.pos.y + (i % 2 === 0 ? 0 : 3);
-    people.push({ key: g, y: gy, buf: personFrame(personSprites(g), g, { talking: speaker === g, busy: false, clock }), x: gx - 12, top: gy - 48 });
+  guestSpots(hero.pos, guests.length).forEach((spot, i) => {
+    const g = guests[i];
+    people.push({ key: g, y: spot.y, buf: personFrame(personSprites(g), g, { talking: speaker === g, busy: false, clock }), x: spot.x - 12, top: spot.y - 48 });
   });
   for (const e of extras) people.push({ key: `extra-${e.key}`, y: e.y + e.buf.h, buf: e.buf, x: e.x, top: e.y });
   const drawables = [...people, { key: 'hero', y: hero.pos.y, buf: heroBuf, x: hero.pos.x - 12, top: hero.pos.y - 48 }].sort((a, b) => a.y - b.y);

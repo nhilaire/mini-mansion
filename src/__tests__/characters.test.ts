@@ -364,8 +364,8 @@ describe('the capture scene (AC-23)', () => {
     expect(kitchen.beats.slice(k)).toContainEqual({ type: 'cinematic', on: false });
   });
 
-  it('the PRD durations: answer 30 s, outside 60 s, back 30 s, dough 120 s, cooking 90 s, changing 90 s, delivery 60 s, fuse box 60 s, washing machine 120 s', () => {
-    expect(TIMER_MS).toEqual({ answer: 30_000, outside: 60_000, back: 30_000, dough: 120_000, cook: 90_000, change: 90_000, delivery: 60_000, fuses: 60_000, machine: 120_000 });
+  it('the PRD durations: answer 15 s, outside 60 s, back 30 s, dough 120 s, cooking 90 s, changing 90 s, delivery 60 s, fuse box 60 s, washing machine 60 s', () => {
+    expect(TIMER_MS).toEqual({ answer: 15_000, outside: 60_000, back: 30_000, dough: 120_000, cook: 90_000, change: 90_000, delivery: 60_000, fuses: 60_000, machine: 60_000 });
   });
 });
 
@@ -420,13 +420,28 @@ describe('the cellar hatch (AC-24)', () => {
     expect(interact(down, go('cellar.toGarage')).accepted).toBe(false);
   });
 
-  it('a later capture says "Encore toi ?!" and Charlie can walk straight up', () => {
+  it('a later capture says "Encore toi ?!"; the hatch has locked again and one press on the free stone opens it', () => {
     const open = playAll(caught(), [take('cellar.rack'), { kind: 'item', item: 'bar', target: 'cellar.stoneLeft' }, { kind: 'verb', verb: 'use', target: 'cellar.stoneRight' }]).state;
     const again = interact({ ...open, place: 'landing' }, enter('florent'));
     expect(again.beats).toContainEqual(said('dad', 'line.captureAgain'));
+    expect(again.beats).toContainEqual(said('narrator', 'capture.cellarOpen'));
     expect(again.state.captures).toBe(2);
     expect(again.events).toEqual([{ type: 'capture', room: 'florent', count: 2 }]);
-    expect(interact(again.state, go('cellar.toGarage')).state.place).toBe('garage');
+    expect(again.state.flags.hatch_open).toBeUndefined();
+    expect(interact(again.state, go('cellar.toGarage')).accepted).toBe(false);
+    const press = interact(again.state, { kind: 'verb', verb: 'use', target: 'cellar.stoneRight' });
+    expect(press.beats).toContainEqual(said('hero', 'cellar.stone.unlock'));
+    expect(press.events).toEqual([]);
+    expect(interact(press.state, go('cellar.toGarage')).state.place).toBe('garage');
+  });
+
+  it('going back down by the garage, the hatch locks again behind Charlie', () => {
+    const open = playAll(caught(), [take('cellar.rack'), { kind: 'item', item: 'bar', target: 'cellar.stoneLeft' }, { kind: 'verb', verb: 'use', target: 'cellar.stoneRight' }, go('cellar.toGarage')]).state;
+    expect(open.place).toBe('garage');
+    const down = interact(open, go('garage.toCellar')).state;
+    expect(down.flags.hatch_open).toBeUndefined();
+    expect(interact(down, go('cellar.toGarage')).accepted).toBe(false);
+    expect(interact(interact(down, { kind: 'verb', verb: 'use', target: 'cellar.stoneRight' }).state, go('cellar.toGarage')).state.place).toBe('garage');
   });
 });
 

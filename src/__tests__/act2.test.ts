@@ -4,6 +4,7 @@ import { interact, newGame, PADS, playAll, TIMER_MS } from '../game/rules';
 import { Beat, CharacterStates, Flag, GameEvent, GameState, Input, ItemId, PlaceId } from '../game/types';
 import { characterPlacement, findHotspot, occupant } from '../game/world';
 import { line } from '../content/index';
+import { guestSpots } from '../render/Scene';
 import { fr as frStrings } from '../i18n/fr';
 
 const flags = (...names: Flag[]) => Object.fromEntries(['door_unlocked', ...names].map((n) => [n, true])) as GameState['flags'];
@@ -335,23 +336,26 @@ describe('the tonka bean and the end (AC-67, AC-68)', () => {
     expect(keys(o.beats).slice(-2)).toEqual(['line.dadThanks', 'line.finalBakery']);
   });
 
-  it('the tonka bean put in the dough after the recipe is complete does not end the game in the kitchen', () => {
+  it('the tonka bean put in the dough after the recipe is complete: the family gathers in the kitchen, then the Ending', () => {
     const o = interact(at('kitchen', { inventory: ['tonka'], flags: flags('dough_mixed'), solved: [13] }), give('tonka', 'kitchen.robot'));
     expect(o.state.flags.tonka_in).toBe(true);
-    expect(o.state.finished).toBe(false);
-    expect(o.beats.some((b) => b.type === 'ending')).toBe(false);
+    expect(o.state.finished).toBe(true);
+    expect(o.state.place).toBe('kitchen');
+    expect(o.beats).toContainEqual({ type: 'room', place: 'kitchen', pos: { x: 160, y: 124 }, facing: 'down' });
+    expect(keys(o.beats)).toEqual(expect.arrayContaining(['e30.tonka', 'line.final1Kitchen', 'line.final2Kitchen', 'line.final8']));
+    expect(keys(o.beats)).not.toContain('line.final1');
+    const casts = o.beats.flatMap((b) => (b.type === 'cast' ? [b.characters.length] : []));
+    expect(casts).toEqual([1, 2, 3, 4, 5]);
+    expect(o.beats[o.beats.length - 1]).toEqual({ type: 'ending' });
   });
 
-  it('without it, the recipe asks for the secret touch; the family gathers once Charlie is back in the lab with it', () => {
+  it('without it, the recipe asks for the secret touch, and coming back to the lab does not end the game', () => {
     const done = playAll(lab([]), pieces);
     expect(done.outcomes[2].beats).toContainEqual(said('hero', 'line.recipeTonka'));
     expect(done.state.finished).toBe(false);
     expect(done.state.solved).toContain(13);
     const away = interact(done.state, go('laundry.toAttic')).state;
     expect(interact({ ...away, place: 'attic' }, go('attic.toLaundry')).state.finished).toBe(false);
-    const back = interact({ ...away, flags: { ...away.flags, tonka_in: true } }, go('attic.toLaundry'));
-    expect(back.state.finished).toBe(true);
-    expect(back.beats[back.beats.length - 1]).toEqual({ type: 'ending' });
   });
 });
 
@@ -478,7 +482,17 @@ describe('the 2026-10-24 amendment', () => {
     expect(keys(interact(at('wc1'), look('wc1.comics')).beats)).toEqual(['wc1.comics.look']);
     expect(fr('wc1.comics.look')).toMatch(/citron/);
     expect(fr('wc1.comics.look')).toMatch(/chauffe/);
-    expect(fr('item.note.look')).toMatch(/sent drôlement le citron/);
+    expect(fr('item.note.look')).toMatch(/sent fortement le citron/);
+    // Found in the safe: Charlie says it at once.
+    const safe = interact(at('parents', { notes: ['n01', 'n11'], flags: flags('safe_found'), chars: chars({ mom: 'gardening' }) }), { kind: 'keypad', keypad: 'safe', code: '1987' });
+    expect(keys(safe.beats)).toContain('line.noteLemon');
+    expect(fr('line.noteLemon')).toMatch(/sent fortement le citron/);
+  });
+
+  it('warming the note reads the revealed message aloud', () => {
+    const o = interact(at('hall', { inventory: ['hairdryer', 'note'] }), give('hairdryer', 'item:note'));
+    expect(keys(o.beats)).toEqual(['e20.ink', 'e20.read']);
+    expect(fr('e20.read')).toMatch(/de la plus vieille à la plus jeune/);
   });
 
   it('the bottles: the revealed ink says how to sort them, the bottles look like a mechanism', () => {
@@ -496,5 +510,32 @@ describe('the 2026-10-24 amendment', () => {
     expect(keys(interact(taken, look('hall.console')).beats)).toEqual(['hall.console.lookEmpty']);
     expect(interact({ ...taken, place: 'garage' }, give('fuse', 'garage.breaker')).state.flags.fuse_in).toBe(true);
     expect(interact({ ...taken, place: 'utility' }, give('fuse', 'utility.machine')).state.inventory).toEqual(['fuse']);
+  });
+});
+
+describe('phone feedback of 2026-10-24 (evening)', () => {
+  it('the salesman scene: Papa comes out next to Charlie in front of the house (no front door view), then goes back in', () => {
+    const rung = interact(at('front', { solved: [1] }), use('front.bell')).state;
+    const o = interact(rung, tick(TIMER_MS.answer));
+    expect(o.beats.some((b) => b.type === 'view')).toBe(false);
+    const captor = o.beats.findIndex((b) => b.type === 'captor' && b.character === 'dad');
+    const sales = o.beats.findIndex((b) => b.type === 'say' && b.key === 'line.dadSalesman');
+    const locks = o.beats.findIndex((b) => b.type === 'say' && b.key === 'line.dadLocks');
+    const gone = o.beats.findIndex((b) => b.type === 'captor' && b.character === null);
+    expect(captor).toBeGreaterThanOrEqual(0);
+    expect(captor).toBeLessThan(sales);
+    expect(sales).toBeLessThan(locks);
+    expect(locks).toBeLessThan(gone);
+    expect(o.state.place).toBe('front');
+  });
+
+  it('nobody hides anybody in a scene with guests, wherever Charlie stands', () => {
+    for (let x = 14; x <= 306; x += 4) {
+      const spots = guestSpots({ x, y: 124 }, 5);
+      expect(spots).toHaveLength(5);
+      const xs = [x, ...spots.map((s) => s.x)].sort((a, b) => a - b);
+      for (let i = 1; i < xs.length; i++) expect(xs[i] - xs[i - 1]).toBeGreaterThanOrEqual(26);
+      for (const s of spots) expect(s.x >= 14 && s.x <= 306).toBe(true);
+    }
   });
 });

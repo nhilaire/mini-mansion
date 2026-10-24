@@ -38,8 +38,8 @@ export function resetFastModeForTests(): void {
   fast = false;
 }
 
-// How long a spoken line stays on screen without a tap (PRD: max(2 s, 50 ms x length)).
+// How long a spoken line stays on screen; it cannot be tapped away (PRD AC-49: max(2.5 s, 60 ms x length)).
 export function lineDurationMs(text: string): number {
   if (fast) return 250;
-  return Math.max(2000, 50 * text.length);
+  return Math.max(2500, 60 * text.length);
 }

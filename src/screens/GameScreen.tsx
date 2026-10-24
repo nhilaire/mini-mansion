@@ -112,7 +112,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   // Play time not yet given to the engine's timers (held while a line, a walk or the notebook is on).
   const pendingRef = useRef(0);
   const notebookRef = useRef(false);
-  // Scenes that cannot be skipped (captures, the front door and kitchen views): lines ignore taps meanwhile.
+  // Scenes played without control (captures, the front door and kitchen views). No line can be tapped away (PRD AC-49).
   const cinematicRef = useRef(false);
   const [cinematic, setCinematic] = useState(false);
   // The adult shown next to Charlie during a capture scene.
@@ -558,7 +558,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           onClose={() => setMenu(null)}
         />
       )}
-      {present?.kind === 'line' && <LineBanner speaker={present.speaker} text={present.text} onPress={cinematic ? () => {} : runNext} />}
+      {present?.kind === 'line' && <LineBanner speaker={present.speaker} text={present.text} />}
       {present?.kind === 'keypad' && (
         <Keypad
           title={t.keypad[present.keypad]}

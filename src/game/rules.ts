@@ -28,7 +28,7 @@ export const PADS: Record<PadId, { buttons: readonly string[]; code: readonly st
 };
 
 // Timer durations in ms of the timer clock (PRD "Timers").
-export const TIMER_MS = { answer: 30_000, outside: 60_000, back: 30_000, dough: 120_000, cook: 90_000, change: 90_000, delivery: 60_000, fuses: 60_000, machine: 120_000 } as const;
+export const TIMER_MS = { answer: 15_000, outside: 60_000, back: 30_000, dough: 120_000, cook: 90_000, change: 90_000, delivery: 60_000, fuses: 60_000, machine: 60_000 } as const;
 
 export function newGame(): GameState {
   return {
@@ -181,9 +181,10 @@ function dadTimer(c: Ctx): void {
       c.move('dad', 'outside');
       c.s.timers.dad = now + TIMER_MS.outside;
       c.sfx('door');
-      view(c, 'door', (k) => k.say('dad', 'line.dadAtDoor'));
-      // Charlie still in front of the house: Papa takes Charlie for a salesman and goes straight back in.
+      // Charlie still in front of the house: Papa comes out next to Charlie, takes Charlie for a salesman and goes
+      // straight back in. Otherwise the front door view shows him looking around.
       if (c.s.place === 'front') salesman(c);
+      else view(c, 'door', (k) => k.say('dad', 'line.dadAtDoor'));
       return;
     case 'outside':
       c.move('dad', 'returning');
@@ -206,8 +207,9 @@ function dadTimer(c: Ctx): void {
 
 // Papa meets Charlie in front of the house while he is outside: no capture, he goes back to his desk.
 function salesman(c: Ctx): void {
-  c.say('dad', 'line.dadSalesman');
+  c.cinematic(true).captor('dad').say('dad', 'line.dadSalesman');
   lockDoor(c);
+  c.captor(null).cinematic(false);
   backAtDesk(c);
 }
 
@@ -284,6 +286,8 @@ function arrival(c: Ctx, place: GuardedRoom): void {
 // to their room when the hero leaves it, the washing machine's end of cycle, then a capture if the destination is
 // guarded by its occupant.
 function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
+  // The cellar hatch locks again behind Charlie (E15: the stones open it from below).
+  if (to === 'cellar') c.clear('hatch_open');
   const from = c.s.place;
   // Florent and Théo go back to their room once Charlie has left it: heard from the landing, after the place change.
   const after: ((k: Ctx) => void)[] = [];
@@ -300,8 +304,6 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
     c.move('florent', 'riding');
     after.push((k) => k.cut('cut15', (q) => view(q, 'ride', (v) => v.sfx('bikebell').say('florent', 'line.florentBike'))));
   }
-  // Back in the lab with the recipe complete and the tonka bean in the dough: the reunion.
-  if (to === 'laundry' && c.isSolved(13) && c.is('tonka_in')) after.push((k) => reunion(k));
   // Walking in front of the house while Papa looks around there: he takes Charlie for a salesman.
   if (to === 'front' && c.state('dad') === 'outside') after.push((k) => salesman(k));
   if (isGuardedRoom(to)) {
@@ -328,7 +330,9 @@ export const SCENE_MS = { call: 2000, beforeCellar: 1500, leave: 3000, view: 150
 function capture(c: Ctx, room: GuardedRoom, who: CharacterId): void {
   // "Encore toi ?!" only from the second capture on; the narrator says whether the hatch opens from below.
   const again = c.s.captures > 0;
-  const open = c.is('hatch_open');
+  // The hatch locks again behind Charlie; once a stone is wedged, pressing the other one opens it.
+  const wedged = c.is('stone_left') || c.is('stone_right');
+  c.clear('hatch_open');
   const adult: CharacterId = who === 'mom' ? 'mom' : 'dad';
   c.sfx('capture').cinematic(true);
   if (who !== adult) c.say(who, `capture.${who}`).wait(SCENE_MS.call).captor(adult);
@@ -341,7 +345,7 @@ function capture(c: Ctx, room: GuardedRoom, who: CharacterId): void {
   c.s.facing = 'down';
   c.beats.push({ type: 'room', place: 'cellar' });
   c.captor(adult).say(adult, 'capture.keep').wait(SCENE_MS.leave).captor(null).cinematic(false);
-  c.narrator(open ? 'capture.cellarOpen' : 'capture.cellar');
+  c.narrator(wedged ? 'capture.cellarOpen' : 'capture.cellar');
 }
 
 // Nobody can be talked to: an inhabitant can only be looked at.
@@ -717,7 +721,7 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       const other: Flag = mine === 'stone_left' ? 'stone_right' : 'stone_left';
       if (c.is('hatch_open')) c.hero('cellar.stone.useOpen');
       else if (c.is(mine)) c.hero('cellar.stone.useWedged');
-      else if (c.is(other)) c.set('hatch_open').sfx('secret').hero('e15.open').solve(15);
+      else if (c.is(other)) c.set('hatch_open').sfx('secret').hero(c.isSolved(15) ? 'cellar.stone.unlock' : 'e15.open').solve(15);
       else c.sfx('gag').hero('line.stoneAlone');
       return;
     }
@@ -801,7 +805,11 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
   // E30: the tonka bean grated into Papa's dough, in the food processor.
   if (item === 'tonka' && target === 'kitchen.robot') {
     if (!c.is('dough_mixed')) c.hero('line.tonkaNoDough');
-    else c.remove('tonka').set('tonka_in').sfx('robot').hero('e30.tonka').solve(30);
+    else {
+      c.remove('tonka').set('tonka_in').sfx('robot').hero('e30.tonka').solve(30);
+      // The recipe already complete in the lab: the family gathers here, in the kitchen.
+      if (c.isSolved(13)) reunion(c);
+    }
     return;
   }
   switch (`${item}>${target}`) {
@@ -901,7 +909,7 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
     // E15: the iron bar wedges one stone pressed in; pressing the other one then unlocks the hatch.
     case 'bar>cellar.stoneLeft':
     case 'bar>cellar.stoneRight':
-      if (c.is('stone_left') || c.is('stone_right') || c.is('hatch_open')) break;
+      if (c.is('stone_left') || c.is('stone_right')) break;
       c.remove('bar').set(target === 'cellar.stoneLeft' ? 'stone_left' : 'stone_right').sfx('gag').hero('line.stoneWedged');
       return;
   }
@@ -916,14 +924,22 @@ function recipeComplete(c: Ctx): void {
   else c.hero('line.recipeTonka');
 }
 
-// CUT11, the end: in the lab, Papa then the whole family join Charlie one after the other; then the Ending.
+// CUT11, the end: where the last step was made (the lab, or the kitchen when the tonka bean came last), Papa then the
+// whole family join Charlie one after the other, Charlie in the middle so that everybody is seen; then the Ending.
+// Where Charlie stands for the final scene: the middle of the floor, room for three people on each side.
+const REUNION_SPOT: Point = { x: 160, y: 124 };
+
 function reunion(c: Ctx): void {
+  const kitchen = c.s.place === 'kitchen';
   c.finish();
   c.cut('cut11', (k) => {
     const cast = (characters: CharacterId[]) => k.beats.push({ type: 'cast', characters });
-    k.cinematic(true).narrator('line.final1');
+    k.s.pos = { ...REUNION_SPOT };
+    k.s.facing = 'down';
+    k.beats.push({ type: 'room', place: k.s.place, pos: { ...REUNION_SPOT }, facing: 'down' });
+    k.cinematic(true).narrator(kitchen ? 'line.final1Kitchen' : 'line.final1');
     cast(['dad']);
-    k.say('dad', 'line.final2').hero('line.final3').say('dad', 'line.final4');
+    k.say('dad', kitchen ? 'line.final2Kitchen' : 'line.final2').hero('line.final3').say('dad', 'line.final4');
     cast(['dad', 'mom']);
     k.say('mom', 'line.final5');
     cast(['dad', 'mom', 'theo']);
@@ -966,7 +982,7 @@ function combine(c: Ctx, a: ItemId, b: ItemId): void {
   // E20: the hair dryer warms Papa's note: invisible ink written with lemon juice appears.
   if (pair === 'hairdryer+note') {
     if (c.is('ink_revealed')) c.hero('item.note.lookInk');
-    else c.set('ink_revealed').hero('e20.ink').note('n13').solve(20);
+    else c.set('ink_revealed').hero('e20.ink').hero('e20.read').note('n13').solve(20);
     return;
   }
   c.wrong();
@@ -985,7 +1001,7 @@ function keypad(c: Ctx, id: KeypadId, code: string): boolean {
     c.beats.push({ type: 'documents' });
     c.note('n09').note('n10').note('n15').solve(7);
   } else if (id === 'safe') {
-    c.set('safe_open').narrator('e10.open');
+    c.set('safe_open').narrator('e10.open').hero('line.noteLemon');
     for (const item of ['oldkey', 'photo', 'scrap', 'note'] as const) c.give(item);
     c.note('n12').solve(10);
   } else {

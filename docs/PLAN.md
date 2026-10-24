@@ -96,6 +96,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-79 Cellar escape: two wall stones to press together, the iron bar wedges one (AC-24) - proof: unit
 - [x] T-80 Clearer clues: the drawer only says it is locked, a science magazine upstairs explains lemon ink, the note smells of lemon, the revealed ink says how to sort the bottles, the strange colour code, shuffled trunk buttons; the pump fills the drained pool again (AC-28, AC-30, AC-65, AC-66) - proof: unit
 - [x] T-81 Save format v4 (migration of v0.2 beta saves) and the walkthrough flow regenerated (AC-35, AC-41) - proof: unit, e2e
+- [x] T-82 Phone feedback (evening): Papa seen next to Charlie for the salesman scene; the cellar hatch locks again each time Charlie comes down; the note smells strongly of lemon when found and the warmed message is read aloud; the end in the kitchen or the lab with everybody seen; lines cannot be tapped away; washing machine 60 s, doorbell answered in 15 s; wicket gates and stepping stones on the garden ways (AC-24, AC-49, AC-51, AC-57, AC-65, AC-68, AC-70) - proof: unit, e2e
 
 ## Notes
 

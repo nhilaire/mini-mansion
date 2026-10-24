@@ -18,7 +18,10 @@ Last updated: 2026-10-24
 > Florent's bike and a power cut, and the rule that an inhabitant lured out twice needs a second
 > reason that only becomes possible later; 2026-10-24, phone tests of v0.2.0: the sardines in the fridge, the flours
 > taken one by one, a fuse for the breaker, the pump refilling the pool, a doorbell that never catches Charlie in front
-> of the house and a front door that Papa locks again, the house key kept), which amend this PRD: timed doorbell sequence, kitchen/garden/front captures, side gates, merged music corner and dining
+> of the house and a front door that Papa locks again, the house key kept; the same evening: Papa seen coming out to
+> the salesman, the hatch locking again behind Charlie, the lemon smell and the warmed message said aloud, the whole
+> family seen at the end, in the kitchen or in the lab, lines that cannot be tapped away, the washing machine in 1 min,
+> the doorbell answered in 15 s, the garden ways marked by wicket gates), which amend this PRD: timed doorbell sequence, kitchen/garden/front captures, side gates, merged music corner and dining
 > room, breaker, cellar hatch, lab door code, optional kitchen recipe, art from the author's room photos. Every rule
 > kept is restated here: this PRD is the only source of truth.
 
@@ -35,7 +38,7 @@ safe, one hidden in the wine cellar, one in an old trunk of the attic) and its s
 Charlie reads invisible ink, wins the parcel back from the neighbours' cat, puts the cellar bottles in order, opens the
 trunk and the father's lab behind a painted-over door in the attic. The truth: a gluten-free, lactose-free chocolate
 cake for the town baking contest, whose secret touch, the delivered tonka bean, Charlie grates into the dough before the
-whole family gathers in the lab, one after the other. The fun
+whole family gathers, one after the other, where the last step was made (the lab or the kitchen). The fun
 is in observing, sneaking, a few tense timed escapes and the "aha" of each puzzle, with family humour; being caught
 only sends Charlie to the wine cellar, never loses progress, and there is no hint system.
 
@@ -209,7 +212,9 @@ means the front of the house (`front`).
   Two stones stick out of the cellar wall, too far apart for one person: both must be pressed at the same time to
   unlock the hatch. Pressing one alone: `line.stoneAlone` (a mechanism seems to act on the hatch, but the stone springs
   back). The Barre de fer (in a wine rack) used on either stone wedges it pressed in (the bar stays there); pressing
-  the other stone then unlocks the hatch (E15), which works both ways for good.
+  the other stone then unlocks the hatch (E15). The hatch locks again whenever Charlie comes down to the cellar (caught
+  or by the garage): with the bar still wedging a stone, one press on the other stone (`cellar.stone.unlock`) opens it
+  again.
 - Richer rooms: every place except the corridors (corridor0, landing) has at least 5 hotspots, of which at least 2
   do more than a look line (a takeable item, a usable object or a gag); the corridors have at least 3; the attic has
   at least 8. Optional gags (no story effect): the Japanese toilet (wc0: the button
@@ -231,7 +236,10 @@ means the front of the house (`front`).
   item = look at it.
 - Wrong combinations answer one of 6 generic lines in rotation (`wrong.0-5`), never consume anything and change
   no state.
-- Spoken lines: shown in the banner in the speaker's colour; dismissed by a tap or after max(2 s, 50 ms x length).
+- Spoken lines: shown in the banner in the speaker's colour for max(2.5 s, 60 ms x length); a tap never skips them, so
+  that no clue is missed (only the intro cards can be skipped).
+- The ways between the parts of the garden (the middle path between the football corner and the pool, the way to the
+  swing corner) are marked by an open white wicket gate under a wooden arch and stepping stones on the grass.
   Input on the scene is ignored while a line, a cutscene or the front door view is playing.
 - An item is removed from the inventory only when it is used up by its puzzle and is no longer needed.
 - An item that is itself the hotspot (the hair dryer on its hook, the sardines, the flours, the pole) disappears from the
@@ -249,8 +257,8 @@ means the front of the house (`front`).
 
 - Timers count play time only (Game screen active, not paused, not in background), stored in the save as deadlines
   on the play-time clock.
-- Durations: doorbell answer 30 s, Papa outside 60 s, Papa coming back 30 s, dough 120 s then Papa cooking 90 s,
-  washing machine cycle 120 s, delivery 60 s after Papa becomes wary, Maman changing 90 s, Papa at the fuse box 60 s.
+- Durations: doorbell answer 15 s, Papa outside 60 s, Papa coming back 30 s, dough 120 s then Papa cooking 90 s,
+  washing machine cycle 60 s, delivery 60 s after Papa becomes wary, Maman changing 90 s, Papa at the fuse box 60 s.
 - Timers advance only while the scene is idle: not during a spoken line, a cutscene, an outside view or a capture
   scene. When several deadlines are due, they fire one after another in deadline order, each scene playing in full
   before the next one.
@@ -263,14 +271,14 @@ means the front of the house (`front`).
 | Character | State | Place | Leaves it when | Next state |
 |---|---|---|---|---|
 | dad | at_desk | office | E16: Charlie rings the doorbell (after E01, Papa not wary) | answering |
-| dad | answering | office (still at his desk) | 30 s later: the front door view plays | outside |
+| dad | answering | office (still at his desk) | 15 s later: the front door view plays (or the salesman scene, Charlie in front) | outside |
 | dad | outside | front | 60 s later: `line.dadGoingBack` is heard; or at once when Charlie is in `front` (`line.dadSalesman`) | returning; at_desk when he met Charlie |
 | dad | returning | none (on his way back) | 30 s later | at_desk |
 | dad | at_desk, answering, outside or returning | - | E19: 120 s after the dough is mixed (Papa not wary), Papa comes to the kitchen (CUT12) | cooking (kitchen) |
 | dad | cooking | kitchen | 90 s later: `line.dadOven` (the dough is in the oven) | at_desk |
 | dad | at_desk (wary) | office | E27: the power cut | fuses (garage) |
 | dad | fuses | garage | 60 s later: `line.dadFusesDone` | at_desk |
-| mom | folding | parents | E17: the washing machine's cycle ends, 120 s after it was started (`line.machineDing` heard wherever Charlie is) | gardening (garden) |
+| mom | folding | parents | E17: the washing machine's cycle ends, 60 s after it was started (`line.machineDing` heard wherever Charlie is) | gardening (garden) |
 | mom | gardening | garden | E22: the garden hose soaks her (CUT14) | changing (parents) |
 | mom | changing | parents | 90 s later: `line.momBack` | gardening |
 | julien | in_room | julien | E02: the ball rolls to the football corner | football (football) until CUT11 |
@@ -280,12 +288,14 @@ means the front of the house (`front`).
 | theo | in_room | theo | E04: the white queen is put back on the chessboard | chess (living) |
 | theo | chess | living | the Rubik's Cube is solved and Charlie leaves `theo` | in_room (theo) again, CUT07 plays |
 
-- The end: CUT11 gathers the whole family in the lab whatever their state, then the Ending.
-- The doorbell sequence: ringing shows `line.dadAnswer` (Papa heard from inside); Charlie has 30 s to go away from the
+- The end: CUT11 gathers the whole family whatever their state, where the last of E13 and E30 was made (the lab or
+  the kitchen), Charlie in the middle of the floor so that everybody is seen; then the Ending.
+- The doorbell sequence: ringing shows `line.dadAnswer` (Papa heard from inside); Charlie has 15 s to go away from the
   front door. Then the front door view plays (no control, cannot be skipped): Papa in front of the house says
-  `line.dadAtDoor`. If Charlie is still in `front` at that moment, or walks into `front` while Papa is outside, Papa does
-  not catch Charlie: he takes Charlie for a door-to-door seller (`line.dadSalesman`, « Je n'achète rien aux vendeurs ! »)
-  and goes straight back to his desk. Otherwise Papa stays 60 s in front of the house (the office is free), then
+  `line.dadAtDoor`. If Charlie is still in `front` at that moment, there is no front door view: Papa comes out next to
+  Charlie (seen on the front scene, no control), takes Charlie for a door-to-door seller (`line.dadSalesman`, « Je
+  n'achète rien aux vendeurs ! »), locks the door and goes straight back to his desk; walking into `front` while Papa is
+  outside plays the same scene. Otherwise Papa stays 60 s in front of the house (the office is free), then
   `line.dadGoingBack` is heard; 30 s later Papa is back at his desk, and if Charlie is in the office then, Papa catches
   Charlie. Whenever Papa goes back in, he locks the front door (`line.dadLocks`). The doorbell can be rung again once Papa is back at his desk (`line.bellBusy` meanwhile),
   until Papa is wary.
@@ -345,7 +355,7 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
   Charlie is put in `cellar`. Inventory, flags, character states, timers, notebook and solved puzzles never
   change because of a capture. `captures` is incremented.
 - In the cellar the hatch is locked from below until the two stones are pressed together, one wedged with the Barre de
-  fer (E15, once for good). From the second capture
+  fer (E15); it locks again each time Charlie comes down, and one press on the free stone opens it again. From the second capture
   on, the adult says `line.captureAgain` instead of the capture line (the first one asks who Charlie is: « Qui es-tu et que
   fais-tu là ? On n'aime pas trop les intrus par ici… »); after E15 Charlie can walk straight up to the garage.
 
@@ -363,7 +373,7 @@ after CUT07 (E05); E07 after E06 and (E16 or E19); E08 after E03 and E17; E09 af
 (E16 or E19, or later E27: the power cut stays possible until the Pince is taken) and E02; E11 after E14; E12 after E10, E11 and E07; E20 after E10; E21 after E20; E22 after
 E17; CUT13 (the delivery) after E07 (60 s after Papa is wary); E23 after CUT13, with the garden free (Maman still folding, or E22); E24 after E23; E25 after E22 and Papa wary (E07);
 E26 after E24 and the Nerf kit taken (E08's Joint torique); E27 after E26; E28 after E25 and E27; E29 after E28; E13
-after E12, E21 and E29; E30 after E19 and E24; the end (CUT11) once E13 and E30 are done, in the lab. E16 and E18 are
+after E12, E21 and E29; E30 after E19 and E24; the end (CUT11) once E13 and E30 are done, where the last of them was made. E16 and E18 are
 optional.
 
 Items: Clé de la maison, Fusible, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du
@@ -384,7 +394,7 @@ copy).
 | E16 | Ring the doorbell (front): the doorbell sequence (see Character states) | before E01: `line.bellRefuse`; Papa not at his desk: `line.bellBusy`; Papa cooking: `line.bellNobody`; Papa wary: `line.bellIgnored` | dad -> answering; the timers run |
 | E19 | Mix the Lait de riz, the Farine de châtaigne and the Farine de riz in the food processor (kitchen) | an ingredient used twice: "already in" line; fewer than three: `line.doughMissing` | ingredients used up; E19 solved at the third ingredient; 120 s later CUT12, Papa cooks 90 s (not if wary: `line.doughIgnored`) |
 | E07 | Use the computer (office, Papa away), type 7867 | N08 not in the notebook: `line.codeUnknown`; wrong code: `line.codeWrong`, unlimited tries | documents shown (`docs`); notebook N09, N10 (the lab is reached through the attic; door code 2510), N15 (Papa's order, delivered today) |
-| E17 | Take the Fusible (hall cabinet drawer), put it in the circuit breaker (garage) and switch it back on; take the Lessive (utility shelf), use it on the washing machine | breaker switched without a fuse: `line.breakerFuse` (a fuse is missing); no power: `line.machinePower` (the Lessive is kept); no detergent: `line.machineEmpty`; after E17: `line.machineDone` | - Fusible; - Lessive; the machine runs; 120 s later: `line.machineDing`, mom -> gardening |
+| E17 | Take the Fusible (hall cabinet drawer), put it in the circuit breaker (garage) and switch it back on; take the Lessive (utility shelf), use it on the washing machine | breaker switched without a fuse: `line.breakerFuse` (a fuse is missing); no power: `line.machinePower` (the Lessive is kept); no detergent: `line.machineEmpty`; after E17: `line.machineDone` | - Fusible; - Lessive; the machine runs; 60 s later: `line.machineDing`, mom -> gardening |
 | E08 | Repair the shower (parents, Maman away): the Joint torique (florent: the Nerf modding kit, which also holds the Rustines), then the Clé à molette (garage workbench) | shower states: broken (look « Il manque un joint. », use `line.showerBroken`, wrench `line.wrenchNothing`); joint fitted (Joint used up, flag `shower_joint`, look `parents.shower.lookLoose`, use `line.showerLoose`); repaired (wrench used up) | taking the kit: + Joint torique, + Rustines; - Joint, - Clé à molette; shower repaired (E08 solved at the wrench) |
 | E09 | Use the shower: hot water runs, the steam reveals a code on the mirror (CUT08) | shower not repaired: the lines above | notebook N11 (safe code 1987) at the end of CUT08; the digits stay on the mirror for good |
 | E10 | Look at the crooked painting (parents): it hides the safe; use the safe, type 1987 | N11 not in the notebook: `line.codeUnknown`; wrong code: `line.codeWrong` | + Clé ancienne, + Photo du gâteau, + Fragment n° 1, + Mot de Papa; notebook N12 |
@@ -401,7 +411,7 @@ copy).
 | E27 | Plug the Sèche-cheveux into Florent's overloaded power strip (florent, Florent riding) | Florent not riding: `line.stripNotNow`; Papa not at his desk: `line.fusesNobody`; nothing left to get in the office: `line.fusesNoNeed` | the power cut (CUT18): dad -> fuses (garage) for 60 s; the Sèche-cheveux is kept |
 | E28 | Open Papa's desk drawer (office) with the Clé du tiroir: his sketchbook, « Rouge, jaune, bleu, vert… C'est vraiment étrange, ce code couleur. » (`e28.open`) | drawer looked at: `office.drawer.look` (« Le tiroir du bureau de Papa. Fermé à clé. »); used without the key: `line.drawerLocked` (« C'est fermé à clé. »), nothing about the key | - Clé du tiroir; Papa's sketchbook: notebook N14 (the trunk colours) |
 | E29 | Open the attic trunk: the colour padlock on the sequence pad (red, yellow, blue, green), its six colour buttons shown in a mixed order (blue, orange, green, red, purple, yellow) | N14 not in the notebook: `line.trunkUnknown`; wrong colours: `line.codeWrong`, unlimited tries | + Fragment n° 3 |
-| E13 | In the laundry, put the three fragments on Papa's recipe notebook, in any order | fewer than three yet: `line.recipeMore` (the fragment is kept in the notebook) | - Fragments; the recipe is complete: with the tonka bean already in the dough, CUT11 and the Ending; otherwise `line.recipeTonka` (the secret touch is missing), and CUT11 plays when Charlie is back in the lab once it is in |
+| E13 | In the laundry, put the three fragments on Papa's recipe notebook, in any order | fewer than three yet: `line.recipeMore` (the fragment is kept in the notebook) | - Fragments; the recipe is complete: with the tonka bean already in the dough, CUT11 and the Ending; otherwise `line.recipeTonka` (the secret touch is missing), and CUT11 plays in the kitchen when the tonka bean goes into the dough (E30) |
 | E30 | Grate the Fève tonka into Papa's dough in the food processor (kitchen) | no dough yet: `line.tonkaNoDough` | - Fève tonka; flag `tonka_in` (`e30.tonka`) |
 | E15 | Unlock the cellar hatch from below: wedge one of the two wall stones with the Barre de fer, then press the other one | hatch used: `line.hatchStuck`; one stone pressed alone: `line.stoneAlone`; the bar on the hatch: `line.hatchStuck` | - Barre de fer (wedged in the stone, `line.stoneWedged`); pressing the other stone: the hatch unlocks (`e15.open`), open both ways for good |
 
@@ -449,7 +459,7 @@ CUT12, CUT13, CUT14, CUT15, CUT18) play wherever Charlie is, without control, an
 | CUT14 | E22 (each time) | the garden view: the hose writhes and soaks Maman (`line.momSoaked`, later `line.momSoakedAgain`); she runs inside to change |
 | CUT15 | Charlie leaves the garage after E26 | the front view: Florent runs out to his bike, `line.florentBike`, and rides away down the street |
 | CUT18 | E27 (each time) | the power cut: the scene goes dark and flickers, `sfx` fuse pop, Papa heard: `line.dadFuses` (the first time) or `line.fusesAgain`; he goes down to the garage; the house then stays dark (dimmed, still playable; outside stays lit) until he has fixed the fuses |
-| CUT11 | E13 and E30 done, in the lab | Papa climbs into his lab (`line.final1-8`), then Maman, Théo, Julien and Florent join one after the other until the whole family stands around Charlie: the "disaster" is a gluten-free, lactose-free chocolate cake for the town baking contest, and its secret touch is the tonka bean; Papa thanks Charlie (`line.dadThanks`), the narrator ends (`line.finalBakery`: tomorrow every bakery in town will be empty); then the Ending |
+| CUT11 | E13 and E30 done: in the lab (the third fragment last) or in the kitchen (the tonka bean last) | Papa climbs into his lab (`line.final1-8`; in the kitchen he walks in, `line.final1Kitchen`, `line.final2Kitchen`), then Maman, Théo, Julien and Florent join one after the other until the whole family stands around Charlie: the "disaster" is a gluten-free, lactose-free chocolate cake for the town baking contest, and its secret touch is the tonka bean; Papa thanks Charlie (`line.dadThanks`), the narrator ends (`line.finalBakery`: tomorrow every bakery in town will be empty); then the Ending |
 
 ### Clue notebook
 
@@ -671,12 +681,14 @@ Puzzles, characters, captures, timers
   then no capture happens; the garage (Papa at the fuse box) and the parents' room (Maman changing) are guarded too.
 - AC-24 [unit] Given Charlie in the cellar, then the hatch is locked from below; pressing one wall stone alone answers
   `line.stoneAlone` and changes nothing; the Barre de fer on a stone wedges it, and pressing the other stone then
-  unlocks the hatch (E15), which leads up to the garage for good; going down from the garage is always possible; the first
+  unlocks the hatch (E15), which leads up to the garage; the hatch locks again each time Charlie comes down (caught or
+  by the garage) and one press on the free stone (`cellar.stone.unlock`) opens it again; going down from the garage is
+  always possible; the first
   capture says the capture line (who are you, what are you doing here) and every later one `line.captureAgain`.
 - AC-51 [unit] Given the doorbell rung after E01 with Papa at his desk, then `line.dadAnswer` plays and Papa stays
-  in the office (guarded) for 30 s of play time; then the front door view plays `line.dadAtDoor`; with Charlie in
-  `front` then, or walking into it while Papa is outside, nobody is caught: `line.dadSalesman` plays and Papa goes
-  straight back to his desk; otherwise Papa stays outside 60 s (the office is free); then `line.dadGoingBack` plays and
+  in the office (guarded) for 15 s of play time; then the front door view plays `line.dadAtDoor`; with Charlie in
+  `front` then, or walking into it while Papa is outside, nobody is caught and there is no front door view: Papa is
+  shown next to Charlie, `line.dadSalesman` and `line.dadLocks` play and Papa goes straight back to his desk; otherwise Papa stays outside 60 s (the office is free); then `line.dadGoingBack` plays and
   30 s later Papa is back at his desk, Charlie being caught if in the office; each time Papa goes back in, the front
   door is locked again (`line.dadLocks`) and the Clé de la maison, kept in the inventory, opens it again from outside; meanwhile the doorbell answers
   `line.bellBusy`, and it can be rung again once Papa is back, until Papa is wary (AC-59).
@@ -753,8 +765,9 @@ Puzzles, characters, captures, timers
 - AC-67 [unit] Given the tonka bean, then the food processor refuses it without dough (`line.tonkaNoDough`) and with
   the dough takes it (E30); given the recipe notebook, then it takes the three fragments in any order
   (`line.recipeMore` before the third), the third completes the recipe (E13).
-- AC-68 [unit] Given E13 and E30 both done, then CUT11 plays in the lab (at the third fragment, or when Charlie comes
-  back to the lab), the family joins one after the other, then the Ending; with E13 done but not E30,
+- AC-68 [unit] Given E13 and E30 both done, then CUT11 plays where the last of them was made (in the lab at the third
+  fragment, in the kitchen when the tonka bean goes into the dough), Charlie in the middle of the floor and the family
+  joining one after the other, nobody hiding anybody, then the Ending; with E13 done but not E30,
   `line.recipeTonka` plays and the game goes on; nothing else ends the game.
 - AC-69 [unit] Given several timer deadlines due at once or during a scene, then timers do not advance while a line,
   cutscene, outside view or capture plays, and the due events fire one after another in deadline order, each scene
@@ -792,7 +805,7 @@ Persistence, pause, ending, settings, about
   or the per-language content files, fr and en have the same keys, French uses tu when addressing the player (UI, narration, tutorial; characters
   may say vous to an unknown visitor, as `line.dadAtDoor`), the UI strings match the "Player
   copy" table, and French typography uses a no-break space before `: ; ! ?` and inside « ».
-- AC-49 [unit] Given a spoken line, then it stays until tapped or until max(2 s, 50 ms x length) has elapsed, and
+- AC-49 [unit] Given a spoken line, then it stays max(2.5 s, 60 ms x length) and a tap does not skip it, and
   scene input is ignored while a line, a cutscene or an outside view plays; the capture scene and the outside views
   (front door, kitchen, delivery, garden, Florent's ride, power cut) cannot be skipped by a tap (their lines
   play their full time).
@@ -810,7 +823,7 @@ Technical and feel
 - AC-57 [manual] Given the APK on the user's phone, then the photographed rooms are recognisable from the photos
   (layout, colours, characteristic objects), the stairs are seen from the front in a doorway, the attic is cluttered,
   Florent drums and Théo plays chess seen from the back, Julien's ball lies on the grass, Théo's chess set is electronic,
-  the whole family gathers in the lab at the end, and the Act II scenes (delivery, cat, soaked Maman, Florent's ride,
+  the whole family gathers at the end (lab or kitchen), the garden ways are seen at once, and the Act II scenes (delivery, cat, soaked Maman, Florent's ride,
   power cut, the family gathering one after the other) are readable and funny.
 
 ## Player copy

@@ -130,9 +130,9 @@ describe('gags (AC-54)', () => {
 describe('spoken lines (AC-49)', () => {
   afterEach(resetFastModeForTests);
 
-  it('stay max(2 s, 50 ms x length) unless tapped', () => {
-    expect(lineDurationMs('Salut')).toBe(2000);
-    expect(lineDurationMs('x'.repeat(100))).toBe(5000);
+  it('stay max(2.5 s, 60 ms x length), and cannot be tapped away', () => {
+    expect(lineDurationMs('Salut')).toBe(2500);
+    expect(lineDurationMs('x'.repeat(100))).toBe(6000);
   });
 
   it('are short only in the testing fast mode', () => {

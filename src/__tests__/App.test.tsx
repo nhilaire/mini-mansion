@@ -1,6 +1,6 @@
 // T-19 / T-20 / T-21: the app flow - consent, languages, home, intro, continue, settings, about, persistence.
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import App from '../App';
 import { appName } from '../config/app';
@@ -231,7 +231,8 @@ describe('App', () => {
     await fireEvent.press(screen.getByTestId('hs-front.doormat'));
     await fireEvent.press(screen.getByTestId('verb-look'));
     expect(await screen.findByText(en.story.lines['front.doormat.look'])).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('line-banner'));
+    // The line cannot be tapped away: it goes after its reading time.
+    await waitFor(() => expect(screen.queryByTestId('line-banner')).toBeNull(), { timeout: 8000 });
     await fireEvent.press(screen.getByTestId('game-notebook'));
     expect(screen.getByText(`• ${en.story.notes.n01}`)).toBeTruthy();
   });

@@ -51,12 +51,13 @@ export function ActionMenu({ title, verbs, anchor, screenW, screenH, onVerb, onC
   );
 }
 
-export function LineBanner({ speaker, text, onPress }: { speaker: Speaker; text: string; onPress: () => void }) {
+// A spoken line: it cannot be tapped away, so that nothing is missed; it stays for its reading time (AC-49).
+export function LineBanner({ speaker, text }: { speaker: Speaker; text: string }) {
   const { t } = useI18n();
   // The narrator has no name tag.
   const name = speaker === 'narrator' ? null : speakerName(t, speaker);
   return (
-    <Pressable testID="line-banner" accessibilityRole="button" accessibilityHint={t.game.tapToContinue} onPress={onPress} style={StyleSheet.absoluteFill}>
+    <Pressable testID="line-banner" accessibilityRole="text" style={StyleSheet.absoluteFill}>
       <View style={[styles.panel, styles.banner]}>
         {name ? <Text style={[styles.speaker, { color: speakerColors[speaker] }]}>{name}</Text> : null}
         <Text style={[styles.lineText, { color: speakerColors[speaker] }, speaker === 'narrator' && styles.italic]}>{text}</Text>

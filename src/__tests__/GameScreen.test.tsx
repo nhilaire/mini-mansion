@@ -5,7 +5,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { AppState } from 'react-native';
 
 import { hotspotName, itemName, line } from '../content/index';
-import { newGame, playAll } from '../game/rules';
+import { interact, newGame, playAll } from '../game/rules';
 import { SOLUTION } from '../game/solution';
 import { CharacterStates, GameState, Input } from '../game/types';
 import { fr } from '../i18n/fr';
@@ -232,7 +232,7 @@ describe('GameScreen', () => {
     expect(screen.queryByTestId('inv-pole')).toBeNull();
   });
 
-  it('a spoken line stays until tapped or its delay, and scene taps are ignored meanwhile (AC-49)', async () => {
+  it('a spoken line stays for its whole delay: a tap does not skip it, and scene taps are ignored meanwhile (AC-49)', async () => {
     resetFastModeForTests();
     const props = await mount({ ...newGame(), tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-front.hedge'));
@@ -243,7 +243,9 @@ describe('GameScreen', () => {
     await fireEvent.press(screen.getByTestId('hs-front.bell'));
     expect(screen.queryByTestId('action-menu')).toBeNull();
     expect(props.onChange.mock.calls.length).toBe(before);
-    const duration = Math.max(2000, 50 * text.length);
+    await fireEvent.press(screen.getByTestId('line-banner'));
+    expect(screen.getByText(text)).toBeTruthy();
+    const duration = Math.max(2500, 60 * text.length);
     await act(async () => {
       jest.advanceTimersByTime(duration - 150);
     });
@@ -394,14 +396,11 @@ describe('GameScreen', () => {
   });
 
   it('the doorbell: Papa answers, then the front door view plays with his line, unskippable; the timers wait while paused (AC-51, AC-58)', async () => {
-    const props = await mount({ ...newGame(), place: 'front', flags: { door_unlocked: true }, tutorial: 3 });
-    await fireEvent.press(screen.getByTestId('hs-front.bell'));
-    await fireEvent.press(screen.getByTestId('verb-use'));
-    expect(screen.getByText(line(t, 'line.dadAnswer'))).toBeTruthy();
-    await dismissLines();
+    // The doorbell rung from the front of the house (AC-51 engine tests), Charlie gone into the hall since.
+    const rung = interact({ ...newGame(), place: 'front', flags: { door_unlocked: true }, tutorial: 3 }, { kind: 'verb', verb: 'use', target: 'front.bell' });
+    expect(rung.beats).toContainEqual({ type: 'say', speaker: 'dad', key: 'line.dadAnswer' });
+    const props = await mount({ ...rung.state, place: 'hall', pos: { x: 160, y: 124 } });
     expect(screen.queryByTestId('timers-idle')).toBeNull();
-    await fireEvent.press(screen.getByTestId('exit-front.toHall'));
-    await dismissLines();
     // Paused: no timer moves (fast mode: 30 times faster than play time).
     await fireEvent.press(screen.getByTestId('game-menu'));
     await act(async () => {
@@ -409,9 +408,9 @@ describe('GameScreen', () => {
     });
     expect(lastSaved(props).chars.dad).toBe('answering');
     await fireEvent.press(screen.getByTestId('pause-resume'));
-    // 30 s of play time, 30 times faster in fast mode: about 1 s.
+    // 15 s of play time, 30 times faster in fast mode: about 0.5 s.
     await act(async () => {
-      jest.advanceTimersByTime(1100);
+      jest.advanceTimersByTime(560);
     });
     expect(screen.getByTestId('view-door')).toBeTruthy();
     expect(screen.getByText(line(t, 'line.dadAtDoor'))).toBeTruthy();
