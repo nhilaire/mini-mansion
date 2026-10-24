@@ -67,6 +67,7 @@ export const ITEMS: readonly ItemId[] = [
   'scrap2',
   'scrap3',
   'hat',
+  'fuse',
 ];
 
 export const CHARACTERS: readonly CharacterId[] = ['dad', 'mom', 'julien', 'florent', 'theo'];
@@ -140,6 +141,12 @@ export const FLAGS: readonly Flag[] = [
   'frag3_in',
   'finale',
   'tonka_in',
+  'chestnut_taken',
+  'riceflour_taken',
+  'fuse_taken',
+  'fuse_in',
+  'stone_left',
+  'stone_right',
   'hat_given',
   'tonka_given',
   'ending',
@@ -243,7 +250,8 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   // Ground floor.
   hs('hall.umbrella', 'hall', r(36, 76, 22, 24), p(47, 108), ['look']),
   hs('hall.coats', 'hall', r(60, 40, 30, 60), p(75, 108), ['look']),
-  hs('hall.console', 'hall', r(96, 52, 40, 48), p(116, 108), ['look']),
+  // The small cabinet: a spare fuse in its drawer (E17).
+  hs('hall.console', 'hall', r(96, 52, 40, 48), p(116, 108), ['look', 'take']),
   hs('hall.shoes', 'hall', r(100, 80, 30, 22), p(115, 110), ['look', 'take']),
   hs('hall.mirror', 'hall', r(186, 36, 24, 32), p(198, 108), ['look', 'use']),
   hs('living.bookshelf', 'living', r(58, 14, 52, 40), p(84, 108), ['look', 'take']),
@@ -261,7 +269,10 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('music.drums', 'music', r(222, 54, 42, 46), p(243, 112), ['look', 'use']),
   hs('music.xylo', 'music', r(264, 78, 22, 22), p(275, 110), ['look']),
   hs('kitchen.oven', 'kitchen', r(40, 50, 40, 50), p(60, 108), ['look', 'use']),
-  hs('kitchen.fridge', 'kitchen', r(90, 24, 30, 76), p(105, 108), ['look', 'use', 'take']),
+  hs('kitchen.fridge', 'kitchen', r(90, 24, 30, 76), p(105, 108), ['look', 'use']),
+  // Inside the open fridge, each taken on its own.
+  hs('kitchen.milk', 'kitchen', r(94, 30, 22, 26), p(105, 108), ['look', 'take'], (s) => has(s, 'fridge_open') && !has(s, 'milk_taken')),
+  hs('kitchen.sardines', 'kitchen', r(94, 64, 22, 22), p(105, 108), ['look', 'take'], (s) => has(s, 'fridge_open') && !has(s, 'sardines_taken')),
   hs('kitchen.sink', 'kitchen', r(126, 56, 40, 26), p(146, 108), ['look']),
   hs('kitchen.robot', 'kitchen', r(176, 46, 24, 26), p(188, 108), ['look', 'use']),
   hs('kitchen.bowl', 'kitchen', r(206, 50, 26, 22), p(219, 108), ['look']),
@@ -282,9 +293,11 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('utility.basket', 'utility', r(50, 78, 36, 22), p(68, 110), ['look']),
   hs('utility.machine', 'utility', r(140, 58, 40, 42), p(160, 110), ['look', 'use']),
   hs('utility.shelf', 'utility', r(220, 30, 50, 40), p(245, 108), ['look', 'take']),
-  hs('utility.flours', 'utility', r(220, 72, 50, 28), p(245, 110), ['look', 'take'], (s) => !has(s, 'flours_taken')),
+  // The flours cupboard stays; the two packets are taken one at a time.
+  hs('utility.flours', 'utility', r(220, 72, 50, 28), p(245, 110), ['look']),
+  hs('utility.chestnut', 'utility', r(222, 74, 22, 24), p(233, 110), ['look', 'take'], (s) => !has(s, 'chestnut_taken')),
+  hs('utility.riceflour', 'utility', r(246, 74, 22, 24), p(257, 110), ['look', 'take'], (s) => !has(s, 'riceflour_taken')),
   hs('utility.broom', 'utility', r(274, 40, 22, 60), p(285, 108), ['look']),
-  hs('utility.sardines', 'utility', r(96, 64, 26, 22), p(109, 108), ['look', 'take'], (s) => !has(s, 'sardines_taken')),
   hs('garage.pole', 'garage', r(60, 24, 22, 76), p(71, 108), ['look', 'take'], (s) => !has(s, 'pole_taken')),
   hs('garage.crate', 'garage', r(90, 70, 40, 30), p(110, 108), ['look']),
   hs('garage.bike', 'garage', r(136, 60, 38, 40), p(155, 108), ['look', 'use']),
@@ -295,6 +308,9 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('cellar.rack', 'cellar', r(30, 40, 60, 60), p(60, 108), ['look', 'take']),
   hs('cellar.barrel', 'cellar', r(96, 70, 30, 30), p(111, 108), ['look']),
   hs('cellar.hatch', 'cellar', r(130, 10, 40, 40), p(150, 108), ['look', 'use'], (s) => !has(s, 'hatch_open')),
+  // Two stones of the wall, too far apart for one person: pressed together, they unlock the hatch (E15).
+  hs('cellar.stoneLeft', 'cellar', r(96, 36, 22, 22), p(107, 108), ['look', 'use']),
+  hs('cellar.stoneRight', 'cellar', r(244, 56, 22, 22), p(255, 108), ['look', 'use']),
   hs('cellar.bottles', 'cellar', r(190, 50, 40, 50), p(210, 108), ['look', 'use']),
   hs('cellar.cobweb', 'cellar', r(250, 20, 30, 24), p(265, 108), ['look']),
   // The attic is cluttered with junk.
@@ -411,8 +427,6 @@ export function occupant(room: GuardedRoom, chars: CharacterStates): CharacterId
   switch (room) {
     case 'office':
       return chars.dad === 'at_desk' || chars.dad === 'answering' ? 'dad' : null;
-    case 'front':
-      return chars.dad === 'outside' ? 'dad' : null;
     case 'kitchen':
       return chars.dad === 'cooking' ? 'dad' : null;
     case 'garage':
@@ -430,7 +444,7 @@ export function occupant(room: GuardedRoom, chars: CharacterStates): CharacterId
   }
 }
 
-export const GUARDED: readonly GuardedRoom[] = ['office', 'front', 'kitchen', 'parents', 'garden', 'julien', 'florent', 'theo', 'garage'];
+export const GUARDED: readonly GuardedRoom[] = ['office', 'kitchen', 'parents', 'garden', 'julien', 'florent', 'theo', 'garage'];
 
 export function isGuardedRoom(place: PlaceId): place is GuardedRoom {
   return (GUARDED as readonly PlaceId[]).includes(place);

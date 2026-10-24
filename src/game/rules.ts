@@ -24,15 +24,15 @@ const KEYPAD_PLACE: Record<KeypadId, PlaceId> = { computer: 'office', safe: 'par
 // The sequence pads: the buttons shown (in this order) and the expected sequence, once its notebook entry is known.
 export const PADS: Record<PadId, { buttons: readonly string[]; code: readonly string[]; note: NoteId; place: PlaceId }> = {
   bottles: { buttons: ['2003', '1987', '2011', '1994'], code: ['1987', '1994', '2003', '2011'], note: 'n13', place: 'cellar' },
-  trunk: { buttons: ['red', 'yellow', 'blue', 'green', 'purple', 'orange'], code: ['red', 'yellow', 'blue', 'green'], note: 'n14', place: 'attic' },
+  trunk: { buttons: ['blue', 'orange', 'green', 'red', 'purple', 'yellow'], code: ['red', 'yellow', 'blue', 'green'], note: 'n14', place: 'attic' },
 };
 
 // Timer durations in ms of the timer clock (PRD "Timers").
-export const TIMER_MS = { answer: 30_000, outside: 60_000, back: 30_000, dough: 120_000, cook: 90_000, change: 90_000, delivery: 60_000, fuses: 60_000 } as const;
+export const TIMER_MS = { answer: 30_000, outside: 60_000, back: 30_000, dough: 120_000, cook: 90_000, change: 90_000, delivery: 60_000, fuses: 60_000, machine: 120_000 } as const;
 
 export function newGame(): GameState {
   return {
-    v: 3,
+    v: 4,
     place: 'front',
     pos: { ...START_POS },
     facing: 'right',
@@ -47,7 +47,7 @@ export function newGame(): GameState {
     tutorial: 0,
     playMs: 0,
     clock: 0,
-    timers: { dad: null, dough: null, mom: null, delivery: null },
+    timers: { dad: null, dough: null, mom: null, delivery: null, machine: null },
     finished: false,
     wrongIdx: 0,
   };
@@ -137,7 +137,7 @@ function plausible(s: GameState, input: Input): boolean {
 
 type TimerId = keyof GameState['timers'];
 // Order among timers ending at the same time.
-const TIMER_ORDER: readonly TimerId[] = ['dough', 'dad', 'mom', 'delivery'];
+const TIMER_ORDER: readonly TimerId[] = ['dough', 'dad', 'mom', 'delivery', 'machine'];
 
 export function nextDeadline(s: GameState): number | null {
   const ds = TIMER_ORDER.map((id) => s.timers[id]).filter((d): d is number => d !== null);
@@ -159,7 +159,8 @@ function advanceClock(c: Ctx, to: number): void {
     if (id === 'dough') doughReady(c);
     else if (id === 'dad') dadTimer(c);
     else if (id === 'mom') momBack(c);
-    else deliveryArrives(c);
+    else if (id === 'delivery') deliveryArrives(c);
+    else machineDone(c);
   }
   c.s.clock = Math.max(c.s.clock, to);
 }
@@ -181,7 +182,8 @@ function dadTimer(c: Ctx): void {
       c.s.timers.dad = now + TIMER_MS.outside;
       c.sfx('door');
       view(c, 'door', (k) => k.say('dad', 'line.dadAtDoor'));
-      arrival(c, 'front');
+      // Charlie still in front of the house: Papa takes Charlie for a salesman and goes straight back in.
+      if (c.s.place === 'front') salesman(c);
       return;
     case 'outside':
       c.move('dad', 'returning');
@@ -197,8 +199,29 @@ function dadTimer(c: Ctx): void {
       backAtDesk(c);
       return;
     default:
+      lockDoor(c);
       backAtDesk(c);
   }
+}
+
+// Papa meets Charlie in front of the house while he is outside: no capture, he goes back to his desk.
+function salesman(c: Ctx): void {
+  c.say('dad', 'line.dadSalesman');
+  lockDoor(c);
+  backAtDesk(c);
+}
+
+// Papa going back in after the doorbell locks the front door; the house key opens it again from outside.
+function lockDoor(c: Ctx): void {
+  c.clear('door_unlocked').sfx('door').say('dad', 'line.dadLocks');
+}
+
+// E17 ends: the washing machine's cycle is over; Maman goes down to the garden.
+function machineDone(c: Ctx): void {
+  c.s.timers.machine = null;
+  c.clear('machine_running').set('machine_done').sfx('ding').narrator('line.machineDing').say('mom', 'mom.machine');
+  c.move('mom', 'gardening').solve(17);
+  arrival(c, 'garden');
 }
 
 // Papa back at his desk. The first time after the computer was used, he notices it and becomes wary: no more doorbell
@@ -221,6 +244,8 @@ function doughReady(c: Ctx): void {
     c.say('dad', 'line.doughIgnored');
     return;
   }
+  // Called away from the front of the house, he goes back in and locks the door.
+  if (c.state('dad') === 'outside' || c.state('dad') === 'returning') lockDoor(c);
   c.move('dad', 'cooking');
   c.s.timers.dad = c.s.clock + TIMER_MS.cook;
   c.cut('cut12', (k) => view(k, 'kitchen', (q) => q.say('dad', 'line.dadDough')));
@@ -277,10 +302,8 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
   }
   // Back in the lab with the recipe complete and the tonka bean in the dough: the reunion.
   if (to === 'laundry' && c.isSolved(13) && c.is('tonka_in')) after.push((k) => reunion(k));
-  if (c.is('machine_running')) {
-    c.clear('machine_running').set('machine_done').sfx('ding').narrator('line.machineDing').say('mom', 'mom.machine');
-    c.move('mom', 'gardening').solve(17);
-  }
+  // Walking in front of the house while Papa looks around there: he takes Charlie for a salesman.
+  if (to === 'front' && c.state('dad') === 'outside') after.push((k) => salesman(k));
   if (isGuardedRoom(to)) {
     const who = occupant(to, c.s.chars);
     if (who) {
@@ -406,15 +429,18 @@ const TAKES: Readonly<Record<string, readonly [Flag, ItemId | readonly ItemId[],
   'garage.pole': ['pole_taken', 'pole', 'garage.pole.take'],
   'football.bench': ['extension_taken', 'extension', 'football.bench.take'],
   'cellar.rack': ['bar_taken', 'bar', 'cellar.rack.take'],
-  'kitchen.fridge': ['milk_taken', 'ricemilk', 'kitchen.fridge.take'],
-  'utility.sardines': ['sardines_taken', 'sardines', 'utility.sardines.take'],
+  'kitchen.milk': ['milk_taken', 'ricemilk', 'kitchen.milk.take'],
+  'kitchen.sardines': ['sardines_taken', 'sardines', 'kitchen.sardines.take'],
+  'utility.chestnut': ['chestnut_taken', 'chestnut', 'utility.chestnut.take'],
+  'utility.riceflour': ['riceflour_taken', 'riceflour', 'utility.riceflour.take'],
+  'hall.console': ['fuse_taken', 'fuse', 'hall.console.take'],
   'bathroom.hairdryer': ['hairdryer_taken', 'hairdryer', 'bathroom.hairdryer.take'],
   // E25: the drawer key in Maman's gardening basket, left in the garden while she changes.
   'garden.basket': ['keyring_taken', 'keyring', 'garden.basket.take', 25],
 };
 
 function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
-  // The fridge opens and closes; the rice milk can only be taken while it is open.
+  // The fridge opens and closes; the rice milk and the sardines inside are taken one at a time while it is open.
   if (id === 'kitchen.fridge') {
     const open = c.is('fridge_open');
     if (verb === 'use') {
@@ -422,14 +448,8 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       else c.set('fridge_open').sfx('door').hero('kitchen.fridge.open');
       return;
     }
-    if (verb === 'look') {
-      c.hero(!open ? 'kitchen.fridge.lookClosed' : c.is('milk_taken') ? 'kitchen.fridge.lookEmpty' : 'kitchen.fridge.look');
-      return;
-    }
-    if (!open) {
-      c.hero('kitchen.fridge.closed');
-      return;
-    }
+    c.hero(!open ? 'kitchen.fridge.lookClosed' : c.is('milk_taken') && c.is('sardines_taken') ? 'kitchen.fridge.lookEmpty' : 'kitchen.fridge.look');
+    return;
   }
   const take = TAKES[id];
   if (take) {
@@ -467,7 +487,7 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       return;
     // E16: the doorbell starts Papa's doorbell sequence; it can be rung again once he is back at his desk.
     case 'front.bell:use':
-      if (!c.is('door_unlocked')) c.hero('line.bellRefuse');
+      if (!c.isSolved(1) && !c.is('door_unlocked')) c.hero('line.bellRefuse');
       else if (c.is('dad_wary')) c.sfx('bell').say('dad', 'line.bellIgnored');
       else if (c.state('dad') === 'cooking') c.hero('line.bellNobody');
       else if (c.state('dad') !== 'at_desk') c.hero('line.bellBusy');
@@ -513,10 +533,11 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
     case 'pool.pump:look':
       c.hero(c.is('plug_fixed') ? 'pool.pump.lookFixed' : 'pool.pump.look');
       return;
+    // The pump drains the pool, and fills it again when used on the drained pool (a gag).
     case 'pool.pump:use':
       if (!c.is('plug_fixed')) c.hero('line.pumpPlug');
       else if (!c.is('cover_open')) c.hero('line.pumpCover');
-      else if (c.is('pool_drained')) c.hero('pool.pump.done');
+      else if (c.is('pool_drained')) c.clear('pool_drained').sfx('water').narrator('pool.fill');
       else c.set('pool_drained').sfx('pump').narrator('pool.drain');
       return;
     case 'pool.bottle:look':
@@ -568,10 +589,11 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       return;
     // E17: the circuit breaker and the washing machine.
     case 'garage.breaker:look':
-      c.hero(c.is('power_on') ? 'garage.breaker.lookOn' : 'garage.breaker.look');
+      c.hero(c.is('power_on') ? 'garage.breaker.lookOn' : c.is('fuse_in') ? 'garage.breaker.lookFuse' : 'garage.breaker.look');
       return;
     case 'garage.breaker:use':
       if (c.is('power_on')) c.hero('garage.breaker.already');
+      else if (!c.is('fuse_in')) c.sfx('breaker').hero('line.breakerFuse');
       else c.set('power_on').sfx('breaker').hero('garage.breaker.on');
       return;
     case 'utility.machine:look':
@@ -681,10 +703,24 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
     case 'florent.strip:use':
       c.hero('florent.strip.use');
       return;
-    // E15: the cellar hatch, stuck from below.
+    // E15: the cellar hatch, locked from below; the two wall stones, pressed together, unlock it.
     case 'cellar.hatch:use':
       c.hero('line.hatchStuck');
       return;
+    case 'cellar.stoneLeft:look':
+    case 'cellar.stoneRight:look':
+      c.hero(c.is(id === 'cellar.stoneLeft' ? 'stone_left' : 'stone_right') ? 'cellar.stone.lookWedged' : 'cellar.stone.look');
+      return;
+    case 'cellar.stoneLeft:use':
+    case 'cellar.stoneRight:use': {
+      const mine: Flag = id === 'cellar.stoneLeft' ? 'stone_left' : 'stone_right';
+      const other: Flag = mine === 'stone_left' ? 'stone_right' : 'stone_left';
+      if (c.is('hatch_open')) c.hero('cellar.stone.useOpen');
+      else if (c.is(mine)) c.hero('cellar.stone.useWedged');
+      else if (c.is(other)) c.set('hatch_open').sfx('secret').hero('e15.open').solve(15);
+      else c.sfx('gag').hero('line.stoneAlone');
+      return;
+    }
     case 'wc0.toilet:look':
       c.hero(c.is('wc_wet') ? 'wc0.toilet.lookWet' : 'wc0.toilet.look');
       return;
@@ -710,6 +746,9 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
 // to prune the exhaustive search).
 export const USE_RULES: readonly string[] = [
   'key>front.door',
+  'fuse>garage.breaker',
+  'bar>cellar.stoneLeft',
+  'bar>cellar.stoneRight',
   ...GATES.map((g) => `gatekey>${g}`),
   'pole>pool.ball',
   'longpole>pool.ball',
@@ -723,7 +762,6 @@ export const USE_RULES: readonly string[] = [
   'thinner>attic.stain',
   'oldkey>attic.door',
   'scrap>laundry.notebook',
-  'bar>cellar.hatch',
   'ricemilk>kitchen.robot',
   'chestnut>kitchen.robot',
   'riceflour>kitchen.robot',
@@ -767,10 +805,15 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
     return;
   }
   switch (`${item}>${target}`) {
+    // E01: the house key opens the front door; it is kept (Papa locks the door again after each doorbell).
     case 'key>front.door':
-      c.remove('key').set('door_unlocked').sfx('door').solve(1);
+      c.set('door_unlocked').sfx('door').solve(1);
       c.cut('cut01', (k) => k.narrator('cut01'));
       goTo(c, 'hall', { x: 160, y: 114 }, 'down');
+      return;
+    // E17: the spare fuse in the circuit breaker.
+    case 'fuse>garage.breaker':
+      c.remove('fuse').set('fuse_in').sfx('breaker').hero('garage.breaker.fuse');
       return;
     case 'pole>pool.ball':
       c.hero('line.poleShort');
@@ -800,6 +843,7 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
         return;
       }
       c.remove('detergent').set('machine_running').sfx('machine').hero('e17.start');
+      c.s.timers.machine = c.s.clock + TIMER_MS.machine;
       return;
     case 'oring>parents.shower':
       c.remove('oring').set('oring_fitted').hero('e08.oring');
@@ -854,8 +898,11 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
       if (c.is('drawer_open')) break;
       c.remove('keyring').set('drawer_open').sfx('door').hero('e28.open').note('n14').solve(28);
       return;
-    case 'bar>cellar.hatch':
-      c.remove('bar').set('hatch_open').sfx('door').hero('e15.open').solve(15);
+    // E15: the iron bar wedges one stone pressed in; pressing the other one then unlocks the hatch.
+    case 'bar>cellar.stoneLeft':
+    case 'bar>cellar.stoneRight':
+      if (c.is('stone_left') || c.is('stone_right') || c.is('hatch_open')) break;
+      c.remove('bar').set(target === 'cellar.stoneLeft' ? 'stone_left' : 'stone_right').sfx('gag').hero('line.stoneWedged');
       return;
   }
   c.wrong();

@@ -208,6 +208,7 @@ const ICONS: Record<ItemId, string[]> = {
   scrap2: [E, '...pppppppp.....', '...pkkkkkpppp...', '...pppppppppp...', '...pkkkkkkkpp...', '...pppppppppp...', '...pkkkkpppp....', '...ppppppppp....', '...pkkkkkkp.....', '...pppppppp.....', '....pp.ppp......', '.........kk.....', '........k..k....', '..........k.....', '.........kkkk...', E],
   scrap3: [E, '...pppppppp.....', '...pkkkkkpppp...', '...pppppppppp...', '...pkkkkkkkpp...', '...pppppppppp...', '...pkkkkpppp....', '...ppppppppp....', '...pkkkkkkp.....', '...pppppppp.....', '....pp.ppp......', '.........kkk....', '...........k....', '.........kkk....', '...........k....', '.........kkk....'],
   hat: [E, '....ww.ww.ww....', '...wwwwwwwwww...', '..wwwwwwwwwwww..', '..wwwwwcwwwwww..', '..wwwwwwwwwcww..', '...wwwwwwwwww...', '....wwwwwwww....', '....wcccccccw...', '....wwwwwwww....', '....wrrrrrrw....', '....wwwwwwww....', E, E, E, E],
+  fuse: [E, E, '......kkkk......', '......IIII......', '.....wwwwww.....', '.....wrrrrw.....', '.....wwwwww.....', '.....wrrrrw.....', '.....wwwwww.....', '......IIII......', '......kkkk......', E, E, E, E, E],
   bar: [
     E,
     '.............ii.',

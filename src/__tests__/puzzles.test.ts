@@ -1,7 +1,8 @@
 // T-06 / T-08 / T-30: each puzzle E01-E19 - refusals with the rule's line and no change, effects exactly once,
 // puzzle_solved once with the right number (AC-21); keypads (AC-27); the pool (AC-28); the ending (AC-32).
-import { interact, newGame, playAll } from '../game/rules';
+import { interact, newGame, playAll, TIMER_MS } from '../game/rules';
 import { SOLUTION } from '../game/solution';
+import { findHotspot } from '../game/world';
 import { CharacterStates, GameState, Input, ItemId, PlaceId } from '../game/types';
 
 const hero = (key: string) => ({ type: 'say', speaker: 'hero', key });
@@ -49,12 +50,12 @@ describe('the whole solution (AC-21, AC-32)', () => {
 });
 
 describe('E01: the key under the doormat', () => {
-  it('the door is locked without the key; the key opens it once and Charlie slips in', () => {
+  it('the door is locked without the key; the key opens it, stays in the inventory, and Charlie slips in', () => {
     expectRefusal(at('front'), use('front.door'), 'front.door.locked');
     const { state, outcomes } = playAll(at('front'), [{ kind: 'verb', verb: 'take', target: 'front.doormat' }, item('key', 'front.door')]);
     expect(outcomes[1].events).toEqual([{ type: 'puzzle', puzzle: 1 }]);
     expect(state.place).toBe('hall');
-    expect(state.inventory).toEqual([]);
+    expect(state.inventory).toEqual(['key']);
     expectRefusal({ ...state, place: 'front' }, { kind: 'verb', verb: 'take', target: 'front.doormat' }, 'front.doormat.empty');
   });
 });
@@ -95,14 +96,22 @@ describe('E18: the side gates (AC-53)', () => {
 });
 
 describe('E19: the dough', () => {
-  it('the rice milk in the fridge, the two flours in the utility room; the processor waits for all three', () => {
-    expectRefusal(at('kitchen'), { kind: 'verb', verb: 'take', target: 'kitchen.fridge' }, 'kitchen.fridge.closed');
+  it('the rice milk and the sardines in the fridge, the two flours in the cupboard, each taken on its own (AC-71); the processor waits for all three', () => {
+    expect(findHotspot(at('kitchen'), 'kitchen.milk')).toBeUndefined();
     const opened = interact(at('kitchen'), use('kitchen.fridge')).state;
     expect(opened.flags.fridge_open).toBe(true);
-    const milk = interact(opened, { kind: 'verb', verb: 'take', target: 'kitchen.fridge' });
+    const milk = interact(opened, { kind: 'verb', verb: 'take', target: 'kitchen.milk' });
     expect(milk.state.inventory).toEqual(['ricemilk']);
-    const flours = interact(at('utility'), { kind: 'verb', verb: 'take', target: 'utility.flours' });
+    expect(findHotspot(milk.state, 'kitchen.milk')).toBeUndefined();
+    expect(findHotspot(milk.state, 'kitchen.sardines')).toBeDefined();
+    const both = interact(milk.state, { kind: 'verb', verb: 'take', target: 'kitchen.sardines' });
+    expect(both.state.inventory).toEqual(['ricemilk', 'sardines']);
+    expect(findHotspot(both.state, 'kitchen.sardines')).toBeUndefined();
+    const chestnut = interact(at('utility'), { kind: 'verb', verb: 'take', target: 'utility.chestnut' });
+    expect(chestnut.state.inventory).toEqual(['chestnut']);
+    const flours = interact(chestnut.state, { kind: 'verb', verb: 'take', target: 'utility.riceflour' });
     expect(flours.state.inventory).toEqual(['chestnut', 'riceflour']);
+    expect(findHotspot(flours.state, 'utility.flours')?.verbs).toEqual(['look']);
     expectRefusal(at('kitchen'), use('kitchen.robot'), 'kitchen.robot.empty');
     const half = interact(at('kitchen', { inventory: ['ricemilk'] }), item('ricemilk', 'kitchen.robot')).state;
     expectRefusal(half, use('kitchen.robot'), 'line.doughMissing');
@@ -155,10 +164,17 @@ describe('E05: the Rubik\'s Cube', () => {
 });
 
 describe('E17: the breaker and the washing machine', () => {
-  it('needs the breaker back on and detergent; ends at the next place change and Maman goes to the garden for good', () => {
+  it('needs a fuse in the breaker, the breaker back on and detergent; the cycle ends 2 minutes later and Maman goes to the garden (AC-70)', () => {
     expectRefusal(at('utility'), use('utility.machine'), 'line.machinePower');
     expectRefusal(at('utility', { inventory: ['detergent'] }), item('detergent', 'utility.machine'), 'line.machinePower');
-    const power = interact(at('garage'), use('garage.breaker'));
+    expect(interact(at('garage'), use('garage.breaker')).beats).toContainEqual({ type: 'say', speaker: 'hero', key: 'line.breakerFuse' });
+    expect(interact(at('garage'), use('garage.breaker')).state.flags.power_on).toBeUndefined();
+    const fuse = interact(at('hall'), { kind: 'verb', verb: 'take', target: 'hall.console' }).state;
+    expect(fuse.inventory).toEqual(['fuse']);
+    const fitted = interact({ ...fuse, place: 'garage' }, item('fuse', 'garage.breaker')).state;
+    expect(fitted.flags.fuse_in).toBe(true);
+    expect(fitted.inventory).toEqual([]);
+    const power = interact(fitted, use('garage.breaker'));
     expect(power.state.flags.power_on).toBe(true);
     expectRefusal(power.state, use('garage.breaker'), 'garage.breaker.already');
     expectRefusal(at('utility', { flags: flags('power_on') }), use('utility.machine'), 'line.machineEmpty');
@@ -166,7 +182,9 @@ describe('E17: the breaker and the washing machine', () => {
     expect(started.events).toEqual([]);
     expect(started.state.flags.machine_running).toBe(true);
     expect(started.state.chars.mom).toBe('folding');
-    const ding = interact(started.state, { kind: 'exit', exit: 'utility.toCorridor' });
+    expect(interact(started.state, { kind: 'exit', exit: 'utility.toCorridor' }).state.chars.mom).toBe('folding');
+    expect(interact(started.state, { kind: 'tick', ms: TIMER_MS.machine - 1 }).state.chars.mom).toBe('folding');
+    const ding = interact(started.state, { kind: 'tick', ms: TIMER_MS.machine });
     expect(ding.events).toEqual([{ type: 'puzzle', puzzle: 17 }]);
     expect(ding.state.chars.mom).toBe('gardening');
     expect(ding.beats).toContainEqual({ type: 'sfx', sfx: 'ding' });

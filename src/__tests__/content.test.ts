@@ -247,6 +247,7 @@ describe('French typography and tone (AC-45)', () => {
       'Fragment n° 2',
       'Fragment n° 3',
       'Toque de Papa',
+      'Fusible',
     ]);
   });
 
@@ -299,6 +300,7 @@ describe('French typography and tone (AC-45)', () => {
       'Scrap no. 2',
       'Scrap no. 3',
       "Papa's chef's hat",
+      'Fuse',
     ]);
     expect(en.intro.cards[2]).toBe('Charlie heard it in the playground and decided to investigate.');
     expect(en.intro.cards[3]).toBe('Your goal: find where this famous recipe is hidden, and what it really is. It is somewhere in this house…');

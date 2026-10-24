@@ -1,8 +1,10 @@
 // T-54..T-63: Act II rules - lures and wariness, the delivery, the hose, the cat and the parcel, Florent's bike, the
 // power cut, invisible ink and bottles, the drawer and the trunk, the finale and the timer order (AC-59..AC-69).
-import { interact, newGame, playAll, TIMER_MS } from '../game/rules';
+import { interact, newGame, PADS, playAll, TIMER_MS } from '../game/rules';
 import { Beat, CharacterStates, Flag, GameEvent, GameState, Input, ItemId, PlaceId } from '../game/types';
 import { characterPlacement, findHotspot, occupant } from '../game/world';
+import { line } from '../content/index';
+import { fr as frStrings } from '../i18n/fr';
 
 const flags = (...names: Flag[]) => Object.fromEntries(['door_unlocked', ...names].map((n) => [n, true])) as GameState['flags'];
 const chars = (patch: Partial<CharacterStates>): CharacterStates => ({ ...newGame().chars, ...patch });
@@ -38,11 +40,11 @@ describe('lures and wariness (AC-59)', () => {
     const rung = interact(at('front'), use('front.bell')).state;
     const s = interact({ ...rung, place: 'hall' }, tick(TIMER_MS.answer + TIMER_MS.outside + TIMER_MS.back));
     expect(keys(s.beats)).not.toContain('line.dadWary');
-    expect(interact({ ...s.state, place: 'front' }, use('front.bell')).state.chars.dad).toBe('answering');
+    expect(interact({ ...s.state, place: 'front', solved: [1] }, use('front.bell')).state.chars.dad).toBe('answering');
   });
 
   it('back from cooking after E07, he becomes wary as well', () => {
-    const s = at('music', { flags: flags('computer_read', 'dough_mixed'), chars: chars({ dad: 'cooking' }), timers: { dad: 5000, dough: null, mom: null, delivery: null } });
+    const s = at('music', { flags: flags('computer_read', 'dough_mixed'), chars: chars({ dad: 'cooking' }), timers: { dad: 5000, dough: null, mom: null, delivery: null, machine: null } });
     const o = interact(s, tick(5000));
     expect(keys(o.beats)).toEqual(['line.dadOven', 'line.dadWary', 'line.dadKey']);
     expect(o.state.flags.dad_wary).toBe(true);
@@ -68,7 +70,7 @@ describe('lures and wariness (AC-59)', () => {
   });
 
   it('a dough timer ending once Papa is wary plays his refusal instead of CUT12', () => {
-    const s = wary('music', { flags: flags('computer_read', 'dad_wary', 'dough_mixed'), timers: { dad: null, dough: 1000, mom: null, delivery: null } });
+    const s = wary('music', { flags: flags('computer_read', 'dad_wary', 'dough_mixed'), timers: { dad: null, dough: 1000, mom: null, delivery: null, machine: null } });
     const o = interact(s, tick(1000));
     expect(o.beats).toEqual([said('dad', 'line.doughIgnored')]);
     expect(o.state.chars.dad).toBe('at_desk');
@@ -77,7 +79,7 @@ describe('lures and wariness (AC-59)', () => {
 });
 
 describe('the delivery (AC-60)', () => {
-  const pending = (place: PlaceId) => wary(place, { timers: { dad: null, dough: null, mom: null, delivery: TIMER_MS.delivery } });
+  const pending = (place: PlaceId) => wary(place, { timers: { dad: null, dough: null, mom: null, delivery: TIMER_MS.delivery, machine: null } });
 
   it('60 s after Papa is wary, CUT13 plays wherever Charlie is: the parcel lands in the garden under the cat', () => {
     expect(interact(pending('hall'), tick(TIMER_MS.delivery - 1)).state.flags.delivered).toBeUndefined();
@@ -171,8 +173,9 @@ describe('the cat, the parcel and the shed (AC-62)', () => {
     expect(findHotspot(garden(), 'garden.shed')?.verbs).toEqual(['look']);
   });
 
-  it('the sardines are on the utility shelf', () => {
-    expect(interact(at('utility'), take('utility.sardines')).state.inventory).toEqual(['sardines']);
+  it('the sardines are in the fridge, next to the rice milk', () => {
+    const open = interact(at('kitchen'), use('kitchen.fridge')).state;
+    expect(interact(open, take('kitchen.sardines')).state.inventory).toEqual(['sardines']);
   });
 });
 
@@ -349,14 +352,14 @@ describe('the tonka bean and the end (AC-67, AC-68)', () => {
 
 describe('the timer order (AC-69)', () => {
   it('due timers fire one after another in deadline order within one tick', () => {
-    const s = wary('hall', { chars: chars({ mom: 'changing' }), timers: { dad: null, dough: null, mom: 20_000, delivery: 5_000 } });
+    const s = wary('hall', { chars: chars({ mom: 'changing' }), timers: { dad: null, dough: null, mom: 20_000, delivery: 5_000, machine: null } });
     const o = interact(s, tick(30_000));
     const order = keys(o.beats).filter((k) => k === 'cut13' || k === 'line.momBack');
     expect(order).toEqual(['cut13', 'line.momBack']);
   });
 
   it('timers ending at the same time fire in a fixed order: dough, Papa, Maman, delivery', () => {
-    const s = wary('hall', { chars: chars({ mom: 'changing', dad: 'fuses' }), flags: flags('computer_read', 'dad_wary', 'dough_mixed'), timers: { dad: 1000, dough: 1000, mom: 1000, delivery: 1000 } });
+    const s = wary('hall', { chars: chars({ mom: 'changing', dad: 'fuses' }), flags: flags('computer_read', 'dad_wary', 'dough_mixed'), timers: { dad: 1000, dough: 1000, mom: 1000, delivery: 1000, machine: null } });
     const o = interact(s, tick(1000));
     expect(keys(o.beats).filter((k) => ['line.doughIgnored', 'line.dadFusesDone', 'line.momBack', 'cut13'].includes(k))).toEqual([
       'line.doughIgnored',
@@ -388,7 +391,7 @@ describe('the notebook entries of Act II (AC-29)', () => {
   it('N15 comes with the computer (E07); N16 at the end of CUT13, after both views', () => {
     const computer = interact(wary('office', { flags: flags(), notes: ['n01', 'n08'], chars: chars({ dad: 'outside' }) }), { kind: 'keypad', keypad: 'computer', code: '7867' });
     expect(computer.state.notes).toEqual(['n01', 'n08', 'n09', 'n10', 'n15']);
-    const o = interact(wary('hall', { timers: { dad: null, dough: null, mom: null, delivery: 1000 } }), tick(1000));
+    const o = interact(wary('hall', { timers: { dad: null, dough: null, mom: null, delivery: 1000, machine: null } }), tick(1000));
     const lastView = o.beats.map((b) => b.type).lastIndexOf('view');
     const note = o.beats.findIndex((b) => b.type === 'note' && b.note === 'n16');
     expect(note).toBeGreaterThan(lastView);
@@ -413,7 +416,8 @@ describe('the outside views of Act II cannot be skipped (AC-49)', () => {
 describe('items taken from the wall or a shelf leave nothing to tap', () => {
   it.each([
     ['bathroom', 'bathroom.hairdryer', 'hairdryer'],
-    ['utility', 'utility.sardines', 'sardines'],
+    ['utility', 'utility.chestnut', 'chestnut'],
+    ['utility', 'utility.riceflour', 'riceflour'],
     ['garage', 'garage.pole', 'pole'],
   ] as const)('%s', (place, target, item) => {
     const o = interact(at(place), take(target));
@@ -422,13 +426,70 @@ describe('items taken from the wall or a shelf leave nothing to tap', () => {
   });
 });
 
-it('the flours leave the utility shelf once taken; Théo plays standing in front of the chessboard', () => {
-  const o = interact(at('utility'), take('utility.flours'));
+it('the flour cupboard stays once both flours are taken; Théo plays standing in front of the chessboard', () => {
+  const o = playAll(at('utility'), [take('utility.chestnut'), take('utility.riceflour')]);
   expect(o.state.inventory).toEqual(['chestnut', 'riceflour']);
-  expect(findHotspot(o.state, 'utility.flours')).toBeUndefined();
+  expect(findHotspot(o.state, 'utility.flours')).toBeDefined();
+  expect(findHotspot(o.state, 'utility.flours')?.verbs).toEqual(['look']);
   const living = at('living', { chars: chars({ theo: 'chess' }) });
   const theo = characterPlacement('theo', living)!;
   const board = findHotspot(living, 'living.chess')!.rect;
   expect(theo.pos.x).toBeGreaterThan(board.x);
   expect(theo.pos.x).toBeLessThan(board.x + board.w);
+});
+
+// T-76..T-80: the 2026-10-24 amendment (AC-70, AC-71 and the clue rewrites).
+describe('the 2026-10-24 amendment', () => {
+  const look = (target: string): Input => ({ kind: 'verb', verb: 'look', target });
+  const fr = (key: string) => line(frStrings, key);
+
+  it('the drained pool fills up again when the pump is used once more (a gag, nothing else changes)', () => {
+    const drained = at('pool', { flags: flags('plug_fixed', 'cover_open', 'pool_drained') });
+    const o = interact(drained, use('pool.pump'));
+    expect(o.beats).toContainEqual(said('narrator', 'pool.fill'));
+    expect(o.state.flags.pool_drained).toBeUndefined();
+    expect(o.events).toEqual([]);
+    expect(interact(o.state, use('pool.pump')).state.flags.pool_drained).toBe(true);
+  });
+
+  it('the trunk buttons are shuffled against the code', () => {
+    expect(PADS.trunk.buttons).toHaveLength(6);
+    expect([...PADS.trunk.buttons].sort()).toEqual(['blue', 'green', 'orange', 'purple', 'red', 'yellow']);
+    expect(PADS.trunk.buttons.slice(0, 4)).not.toEqual(PADS.trunk.code);
+    expect(PADS.trunk.buttons.filter((b) => PADS.trunk.code.includes(b))).not.toEqual(PADS.trunk.code);
+  });
+
+  it('the desk drawer only says it is locked, never which key opens it', () => {
+    for (const s of [at('office'), wary('office')]) {
+      for (const input of [look('office.drawer'), use('office.drawer')]) {
+        const said = interact(s, input).beats.flatMap((b) => (b.type === 'say' ? [fr(b.key)] : []));
+        expect(said.join(' ')).toMatch(/fermé à clé/i);
+        expect(said.join(' ')).not.toMatch(/petite clé|trousseau/i);
+      }
+    }
+  });
+
+  it('lemon ink: the science magazine upstairs explains it, the note smells of lemon', () => {
+    expect(keys(interact(at('wc1'), look('wc1.comics')).beats)).toEqual(['wc1.comics.look']);
+    expect(fr('wc1.comics.look')).toMatch(/citron/);
+    expect(fr('wc1.comics.look')).toMatch(/chauffe/);
+    expect(fr('item.note.look')).toMatch(/sent drôlement le citron/);
+  });
+
+  it('the bottles: the revealed ink says how to sort them, the bottles look like a mechanism', () => {
+    expect(fr('item.note.lookInk')).toMatch(/de la plus vieille à la plus jeune/);
+    expect(fr('cellar.bottles.look')).toMatch(/mécanisme/);
+  });
+
+  it('the colour code of the sketchbook is called strange', () => {
+    expect(fr('e28.open')).toMatch(/vraiment étrange, ce code couleur/);
+  });
+
+  it('the spare fuse waits in the hall cabinet drawer, then only the breaker takes it', () => {
+    expect(fr('hall.console.look')).toMatch(/fusible/);
+    const taken = interact(at('hall'), take('hall.console')).state;
+    expect(keys(interact(taken, look('hall.console')).beats)).toEqual(['hall.console.lookEmpty']);
+    expect(interact({ ...taken, place: 'garage' }, give('fuse', 'garage.breaker')).state.flags.fuse_in).toBe(true);
+    expect(interact({ ...taken, place: 'utility' }, give('fuse', 'utility.machine')).state.inventory).toEqual(['fuse']);
+  });
 });

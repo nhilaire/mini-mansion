@@ -19,8 +19,10 @@
 //     hatch, which commute with the timers (nobody guards the cellar): a state that gets stuck is explored after
 //     those two steps (see unstick). Once the hatch is unblocked, nothing but the cellar's own access depends on it
 //     (a later capture says another line), so the hatch, the iron bar and E15 are left out of the story part too;
-//   - the circuit breaker only matters to the washing machine: it is explored together with starting the machine
-//     (see machineSteps), and left out of the story part;
+//   - the circuit breaker (and the spare fuse it needs, from the hall cabinet) only matters to the washing machine: it
+//     is explored together with starting the machine (see machineSteps), and left out of the story part;
+//   - once Charlie has the house key and has been in (E01), the front door that Papa locks again only matters at the
+//     door, which the key opens: the lock is left out of the story part;
 //   - the hair dryer (corridor bathroom) and the sardines (utility room) lie in places nobody guards and are never
 //     needed before they are used: holding them changes nothing else, so they are left out of the story part and
 //     taken "on the way" when used (see lazyItem);
@@ -78,12 +80,18 @@ export const REDUCED_FLAGS: readonly Flag[] = [
   'bar_taken',
   'power_on',
   'sardines_taken',
+  'chestnut_taken',
+  'riceflour_taken',
+  'fuse_taken',
+  'fuse_in',
+  'stone_left',
+  'stone_right',
   'hairdryer_taken',
   'keyring_taken',
   'patches_taken',
   'fuses_cut',
 ];
-export const REDUCED_ITEMS: readonly ItemId[] = ['gatekey', 'ricemilk', 'chestnut', 'riceflour', 'bar'];
+export const REDUCED_ITEMS: readonly ItemId[] = ['gatekey', 'ricemilk', 'chestnut', 'riceflour', 'bar', 'fuse'];
 // Items taken on the way when used (see above), with the flag their take sets.
 export const LAZY_ITEMS: Readonly<Partial<Record<ItemId, Flag>>> = { hairdryer: 'hairdryer_taken', sardines: 'sardines_taken', keyring: 'keyring_taken' };
 // The pieces put together in one step: the bike (E26), the recipe book (E13).
@@ -98,7 +106,7 @@ export const REDUCED_PUZZLES: readonly number[] = [15, 18];
 // Inputs of the reduced side systems, not explored one by one.
 export const GATE_TARGETS: readonly string[] = ['front.gateLeft', 'front.gateRight', 'football.gate', 'pool.gate'];
 export const BELL = 'front.bell';
-export const SIDE_TAKES: readonly string[] = ['hall.shoes', 'kitchen.fridge', 'utility.flours', 'cellar.rack', 'cellar.hatch', 'garage.breaker', 'bathroom.hairdryer', 'utility.sardines', 'garden.basket', TAP];
+export const SIDE_TAKES: readonly string[] = ['hall.shoes', 'kitchen.fridge', 'utility.flours', 'cellar.rack', 'cellar.hatch', 'cellar.stoneLeft', 'cellar.stoneRight', 'garage.breaker', 'hall.console', 'kitchen.milk', 'kitchen.sardines', 'utility.chestnut', 'utility.riceflour', 'bathroom.hairdryer', 'garden.basket', TAP];
 const PAD_IDS = Object.keys(PADS) as PadId[];
 
 // Story keys are computed once per state object (states are never mutated once returned by the engine).
@@ -112,6 +120,9 @@ export function storyKey(s: GameState): string {
   return key;
 }
 
+// The house key is kept after E01: the front door lock no longer matters (see above).
+const keyKept = (s: GameState) => s.solved.includes(1) && s.inventory.includes('key');
+
 function computeStoryKey(s: GameState): string {
   const ch = s.chars;
   return [
@@ -120,7 +131,7 @@ function computeStoryKey(s: GameState): string {
       .sort()
       .join(','),
     (Object.keys(s.flags) as Flag[])
-      .filter((f) => !REDUCED_FLAGS.includes(f))
+      .filter((f) => !REDUCED_FLAGS.includes(f) && !(f === 'door_unlocked' && keyKept(s)))
       .sort()
       .join(','),
     s.flags.bay_open || s.flags.gates_open ? 'out' : 'in',
@@ -210,7 +221,7 @@ export function actionInputs(s: GameState): Input[] {
 // A lazy item can be fetched while it is still in its place (the sardines are used up by the cat), once inside;
 // the drawer key once Papa gave it to Maman and she gardens (the hose then gives a window).
 export function lazyAvailable(s: GameState, item: ItemId): boolean {
-  if (!s.flags.door_unlocked) return false;
+  if (!s.solved.includes(1)) return false;
   if (item === 'keyring' && !s.inventory.includes(item) && !(s.flags.dad_wary && s.flags.machine_done)) return false;
   return s.inventory.includes(item) || !s.flags[LAZY_ITEMS[item]!];
 }
@@ -274,7 +285,7 @@ export function mixDough(s: GameState): GameState | null {
   const ready: GameState = {
     ...s,
     inventory: [...s.inventory.filter((i) => i !== 'ricemilk' && i !== 'chestnut' && i !== 'riceflour'), 'ricemilk', 'chestnut', 'riceflour'],
-    flags: { ...s.flags, milk_taken: true, flours_taken: true, milk_in: undefined, chestnut_in: undefined, riceflour_in: undefined },
+    flags: { ...s.flags, milk_taken: true, chestnut_taken: true, riceflour_taken: true, milk_in: undefined, chestnut_in: undefined, riceflour_in: undefined },
   };
   ready.flags = Object.fromEntries(Object.entries(ready.flags).filter(([, v]) => v)) as GameState['flags'];
   const items = ['ricemilk', 'chestnut', 'riceflour'] as const;
@@ -282,7 +293,7 @@ export function mixDough(s: GameState): GameState | null {
 }
 
 type TimerId = keyof GameState['timers'];
-const TIMERS: readonly TimerId[] = ['dad', 'dough', 'mom', 'delivery'];
+const TIMERS: readonly TimerId[] = ['dad', 'dough', 'mom', 'delivery', 'machine'];
 
 // Fires one timer now, whatever the deadlines (the other running ones are pushed after it).
 export function fire(s: GameState, timer: TimerId): { state: GameState; beats: Beat[] } {
@@ -304,6 +315,7 @@ export function timerSteps(s: GameState): { state: GameState; beats: Beat[] }[] 
   if (s.timers.dough !== null) out.push(fire(s, 'dough'));
   if (s.timers.mom !== null) out.push(fire(s, 'mom'));
   if (s.timers.delivery !== null) out.push(fire(s, 'delivery'));
+  if (s.timers.machine !== null) out.push(fire(s, 'machine'));
   if (s.timers.dad !== null) {
     let step = fire(s, 'dad');
     const beats = [...step.beats];
@@ -393,11 +405,14 @@ export function fuseSteps(members: readonly GameState[]): Step[] {
   return officeWindow(cut.state).map((w) => ({ state: w.state, beats: [...cut.beats, ...w.beats] }));
 }
 
-// Out of the cellar when stuck in it: take the iron bar (if it is still in the rack), unblock the hatch.
+// Out of the cellar when stuck in it: take the iron bar (if it is still in the rack), wedge a wall stone with it, press
+// the other stone: the hatch unlocks.
 export function unstick(s: GameState): { state: GameState; beats: Beat[] } {
   if (s.place !== 'cellar' || s.flags.hatch_open) return { state: s, beats: [] };
   const inputs: Input[] = s.flags.bar_taken ? [] : [{ kind: 'verb', verb: 'take', target: 'cellar.rack' }];
-  const r = playAll(s, [...inputs, { kind: 'item', item: 'bar', target: 'cellar.hatch' }]);
+  if (!s.flags.stone_left && !s.flags.stone_right) inputs.push({ kind: 'item', item: 'bar', target: 'cellar.stoneLeft' });
+  inputs.push({ kind: 'verb', verb: 'use', target: s.flags.stone_left || !s.flags.stone_right ? 'cellar.stoneRight' : 'cellar.stoneLeft' });
+  const r = playAll(s, inputs);
   return { state: r.state, beats: r.outcomes.flatMap((o) => o.beats) };
 }
 
@@ -405,7 +420,7 @@ export function unstick(s: GameState): { state: GameState; beats: Beat[] } {
 export function machineSteps(members: readonly GameState[]): { state: GameState; beats: Beat[] }[] {
   const m = members.find((x) => x.place === 'utility' && x.inventory.includes('detergent') && !x.flags.machine_running && !x.flags.machine_done);
   if (!m) return [];
-  const o = interact({ ...m, flags: { ...m.flags, power_on: true } }, { kind: 'item', item: 'detergent', target: 'utility.machine' });
+  const o = interact({ ...m, flags: { ...m.flags, fuse_taken: true, fuse_in: true, power_on: true }, inventory: m.inventory.filter((i) => i !== 'fuse') }, { kind: 'item', item: 'detergent', target: 'utility.machine' });
   return [{ state: o.state, beats: o.beats }];
 }
 

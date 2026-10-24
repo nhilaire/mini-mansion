@@ -49,6 +49,14 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
+    id: "hs-hall.console"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
     id: "exit-hall.toCorridor"
 - extendedWaitUntil:
     visible:
@@ -72,6 +80,14 @@ tags:
     id: "hs-garage.bench"
 - tapOn:
     id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-fuse"
+- tapOn:
+    id: "hs-garage.breaker"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
@@ -105,7 +121,7 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "hs-utility.flours"
+    id: "hs-utility.chestnut"
 - tapOn:
     id: "verb-take"
 - extendedWaitUntil:
@@ -113,7 +129,7 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "hs-utility.sardines"
+    id: "hs-utility.riceflour"
 - tapOn:
     id: "verb-take"
 - extendedWaitUntil:
@@ -128,6 +144,14 @@ tags:
     visible:
       id: "scene-idle"
     timeout: 15000
+- extendedWaitUntil:
+    visible:
+      id: "mom-gardening"
+    timeout: 90000
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 60000
 - tapOn:
     id: "exit-utility.toCorridor"
 - extendedWaitUntil:
@@ -267,7 +291,15 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "hs-kitchen.fridge"
+    id: "hs-kitchen.milk"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-kitchen.sardines"
 - tapOn:
     id: "verb-take"
 - extendedWaitUntil:
@@ -832,6 +864,8 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
+    id: "inv-more"
+- tapOn:
     id: "inv-tonka"
 - tapOn:
     id: "hs-kitchen.robot"
@@ -990,7 +1024,15 @@ tags:
 - tapOn:
     id: "inv-bar"
 - tapOn:
-    id: "hs-cellar.hatch"
+    id: "hs-cellar.stoneLeft"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-cellar.stoneRight"
+- tapOn:
+    id: "verb-use"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"

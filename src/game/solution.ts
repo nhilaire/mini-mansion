@@ -19,18 +19,21 @@ export const SOLUTION: readonly Input[] = [
   take('front.doormat'),
   give('key', 'front.door'), // E01
   take('hall.shoes'),
+  take('hall.console'), // the spare fuse
   go('hall.toCorridor'),
   go('corridor0.toGarage'),
   take('garage.pole'),
   take('garage.bench'),
+  give('fuse', 'garage.breaker'),
   use('garage.breaker'),
   go('garage.toCorridor'),
   go('corridor0.toUtility'),
   take('utility.shelf'),
-  take('utility.flours'),
-  take('utility.sardines'),
+  take('utility.chestnut'),
+  take('utility.riceflour'),
   give('detergent', 'utility.machine'),
-  go('utility.toCorridor'), // E17
+  wait(), // E17: two minutes later the machine is done, Maman goes down to the garden
+  go('utility.toCorridor'),
   go('corridor0.toHall'),
   go('hall.toFront'),
   give('gatekey', 'front.gateRight'), // E18
@@ -50,7 +53,8 @@ export const SOLUTION: readonly Input[] = [
   give('sticks', 'music.drums'), // E03
   go('music.toKitchen'),
   use('kitchen.fridge'),
-  take('kitchen.fridge'),
+  take('kitchen.milk'),
+  take('kitchen.sardines'),
   go('kitchen.toMusic'),
   go('music.toLiving'),
   go('living.toHall'),
@@ -150,7 +154,8 @@ export const SOLUTION: readonly Input[] = [
   go('corridor0.toGarage'),
   go('garage.toCellar'),
   take('cellar.rack'),
-  give('bar', 'cellar.hatch'), // E15
+  give('bar', 'cellar.stoneLeft'),
+  use('cellar.stoneRight'), // E15: the hatch unlocks
   use('cellar.bottles'),
   pad('bottles', ['1987', '1994', '2003', '2011']), // E21
   go('cellar.toGarage'),

@@ -1,11 +1,12 @@
 // Serialisation of the single autosaved game. Anything that does not match the current format exactly is rejected
-// (the caller then ignores the save and reports a non-fatal error). A v0.1 save (format 2) is migrated: it has no
-// hose or delivery timer, and Papa cooking had no end then.
+// (the caller then ignores the save and reports a non-fatal error). Older saves are migrated: format 2 (v0.1) has no
+// hose or delivery timer and Papa cooking had no end; formats 2 and 3 have no washing machine timer, gave the house
+// key away at E01, took both flours at once and had no fuse in the breaker.
 import { CHARACTERS, FLAGS, ITEMS, PLACES } from './world';
 import { TIMER_MS } from './rules';
 import { CharacterStates, CutId, GameState, NoteId } from './types';
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 export function serialize(s: GameState): string {
   return JSON.stringify(s);
@@ -38,8 +39,9 @@ export function deserialize(json: string): GameState {
     throw new SaveError('save is not JSON');
   }
   if (!isObj(raw)) throw new SaveError('save is not an object');
-  if (raw.v !== SAVE_VERSION && raw.v !== 2) throw new SaveError(`unknown save version ${String(raw.v)}`);
+  if (raw.v !== SAVE_VERSION && raw.v !== 2 && raw.v !== 3) throw new SaveError(`unknown save version ${String(raw.v)}`);
   const v2 = raw.v === 2;
+  const old = raw.v !== SAVE_VERSION;
   const chars = raw.chars;
   const ok =
     typeof raw.place === 'string' &&
@@ -69,26 +71,34 @@ export function deserialize(json: string): GameState {
     isNum(raw.clock) &&
     raw.clock >= 0 &&
     isObj(raw.timers) &&
-    Object.keys(raw.timers).length === (v2 ? 2 : 4) &&
+    Object.keys(raw.timers).length === (v2 ? 2 : old ? 4 : 5) &&
     isDeadline(raw.timers.dad) &&
     isDeadline(raw.timers.dough) &&
     (v2 || (isDeadline(raw.timers.mom) && isDeadline(raw.timers.delivery))) &&
+    (old || isDeadline(raw.timers.machine)) &&
     typeof raw.finished === 'boolean' &&
     isNat(raw.wrongIdx) &&
     (raw.wrongIdx as number) < 6;
   if (!ok) throw new SaveError('save has an invalid shape');
   const c = chars as unknown as CharacterStates;
+  const flags = { ...(raw.flags as GameState['flags']) };
+  const inventory = [...(raw.inventory as GameState['inventory'])];
+  if (old) {
+    if (flags.door_unlocked && !inventory.includes('key')) inventory.unshift('key');
+    if (flags.flours_taken) Object.assign(flags, { chestnut_taken: true, riceflour_taken: true });
+    if (flags.power_on) Object.assign(flags, { fuse_taken: true, fuse_in: true });
+  }
   const t = raw.timers as Partial<GameState['timers']>;
   const clock = raw.clock as number;
   // v0.1: Papa cooked for good; he now cooks 90 s, counted from the load.
   const dad = v2 && c.dad === 'cooking' && t.dad === null ? clock + TIMER_MS.cook : (t.dad as number | null);
   return {
-    v: 3,
+    v: 4,
     place: raw.place as GameState['place'],
     pos: { x: (raw.pos as { x: number }).x, y: (raw.pos as { y: number }).y },
     facing: raw.facing as GameState['facing'],
-    inventory: [...(raw.inventory as GameState['inventory'])],
-    flags: { ...(raw.flags as GameState['flags']) },
+    inventory,
+    flags,
     chars: { dad: c.dad, mom: c.mom, julien: c.julien, florent: c.florent, theo: c.theo },
     notes: [...(raw.notes as NoteId[])],
     unread: [...(raw.unread as NoteId[])],
@@ -98,7 +108,14 @@ export function deserialize(json: string): GameState {
     tutorial: raw.tutorial as GameState['tutorial'],
     playMs: raw.playMs as number,
     clock: raw.clock as number,
-    timers: { dad, dough: t.dough as number | null, mom: v2 ? null : (t.mom as number | null), delivery: v2 ? null : (t.delivery as number | null) },
+    timers: {
+      dad,
+      dough: t.dough as number | null,
+      mom: v2 ? null : (t.mom as number | null),
+      delivery: v2 ? null : (t.delivery as number | null),
+      // A machine running in an older save ends at once (it used to end at the next place change).
+      machine: old ? (flags.machine_running ? clock : null) : (t.machine as number | null),
+    },
     finished: raw.finished as boolean,
     wrongIdx: raw.wrongIdx as number,
   };

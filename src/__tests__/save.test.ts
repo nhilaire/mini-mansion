@@ -5,7 +5,7 @@ import { deserialize, SaveError, serialize } from '../game/save';
 import { SOLUTION } from '../game/solution';
 import { GameState } from '../game/types';
 
-describe('save format v3 (AC-35, AC-58)', () => {
+describe('save format v4 (AC-35, AC-58)', () => {
   it('restores every state of the walkthrough identically', () => {
     let s: GameState = newGame();
     for (const input of SOLUTION) {
@@ -43,17 +43,37 @@ describe('save format v3 (AC-35, AC-58)', () => {
   });
 
   it('keeps the running timers and the timer clock', () => {
-    const s = { ...newGame(), clock: 5000, timers: { dad: 125000, dough: 65000, mom: 30000, delivery: 70000 }, chars: { ...newGame().chars, dad: 'answering' as const } };
+    const s = { ...newGame(), clock: 5000, timers: { dad: 125000, dough: 65000, mom: 30000, delivery: 70000, machine: null }, chars: { ...newGame().chars, dad: 'answering' as const } };
     expect(deserialize(serialize(s))).toEqual(s);
   });
 
   it('migrates a v0.1 save (format 2): no hose or delivery timer, and Papa cooking for good now cooks 90 s from the load', () => {
     const old = { ...newGame(), v: 2, clock: 5000, timers: { dad: null, dough: null }, chars: { ...newGame().chars, dad: 'cooking' } };
     const back = deserialize(JSON.stringify(old));
-    expect(back.v).toBe(3);
-    expect(back.timers).toEqual({ dad: 5000 + TIMER_MS.cook, dough: null, mom: null, delivery: null });
+    expect(back.v).toBe(4);
+    expect(back.timers).toEqual({ dad: 5000 + TIMER_MS.cook, dough: null, mom: null, delivery: null, machine: null });
     const ringing = { ...old, chars: newGame().chars, timers: { dad: 9000, dough: 20000 } };
-    expect(deserialize(JSON.stringify(ringing)).timers).toEqual({ dad: 9000, dough: 20000, mom: null, delivery: null });
+    expect(deserialize(JSON.stringify(ringing)).timers).toEqual({ dad: 9000, dough: 20000, mom: null, delivery: null, machine: null });
+  });
+
+  it('migrates a v0.2 beta save (format 3): the house key back once used, the flours, the fuse, the running machine', () => {
+    const { machine: _m, ...timers } = newGame().timers;
+    const old = {
+      ...newGame(),
+      v: 3,
+      clock: 8000,
+      timers,
+      inventory: ['pole'],
+      flags: { door_unlocked: true, flours_taken: true, power_on: true, machine_running: true },
+    };
+    const back = deserialize(JSON.stringify(old));
+    expect(back.v).toBe(4);
+    expect(back.inventory).toEqual(['key', 'pole']);
+    expect(back.flags).toMatchObject({ chestnut_taken: true, riceflour_taken: true, fuse_taken: true, fuse_in: true });
+    expect(back.timers.machine).toBe(8000);
+    const idle = deserialize(JSON.stringify({ ...old, flags: {}, inventory: [] }));
+    expect(idle.inventory).toEqual([]);
+    expect(idle.timers.machine).toBeNull();
   });
 
   const valid = JSON.parse(serialize(newGame()));
@@ -72,7 +92,7 @@ describe('save format v3 (AC-35, AC-58)', () => {
     ['an unknown cutscene', JSON.stringify({ ...valid, cuts: ['cut99'] })],
     ['an out-of-range puzzle', JSON.stringify({ ...valid, solved: [31] })],
     ['a bad timer', JSON.stringify({ ...valid, timers: { ...valid.timers, dad: -5 } })],
-    ['a missing hose timer', JSON.stringify({ ...valid, timers: { dad: null, dough: null, delivery: null } })],
+    ['a missing hose timer', JSON.stringify({ ...valid, timers: { dad: null, dough: null, delivery: null, machine: null } })],
     ['a v2 save with v3 states', JSON.stringify({ ...valid, v: 2, timers: { dad: null, dough: null }, chars: { ...valid.chars, florent: 'riding', theo: 'sleeping' } })],
     ['a missing timer clock', JSON.stringify({ ...valid, clock: undefined })],
     ['negative captures', JSON.stringify({ ...valid, captures: -1 })],

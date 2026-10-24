@@ -45,7 +45,7 @@ describe('items (AC-18)', () => {
   it('a valid use runs its effect', () => {
     const o = interact(at('front', ['key'], { flags: {} }), { kind: 'item', item: 'key', target: 'front.door' });
     expect(o.state.flags.door_unlocked).toBe(true);
-    expect(o.state.inventory).toEqual([]);
+    expect(o.state.inventory).toEqual(['key']);
     expect(o.state.place).toBe('hall');
   });
 

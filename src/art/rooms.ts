@@ -377,9 +377,12 @@ const PROPS: Record<string, Prop> = {
     b.rect(r.x + 13, r.y, 4, r.h, C.wood1).hline(r.x + 4, r.x + 26, r.y + 4, C.wood1);
     b.rect(r.x + 2, r.y + 6, 10, 22, C.blue).rect(r.x + 18, r.y + 6, 10, 18, C.red).rect(r.x + 9, r.y + 2, 12, 5, C.orange);
   },
-  'hall.console': (b, r) => {
+  'hall.console': (b, r, s) => {
     table(b, r, C.oak);
     b.rect(r.x + 4, r.y, 8, 3, C.ink).rect(r.x + 16, r.y + 1, 6, 2, C.chrome).rect(r.x + 26, r.y, 7, 3, C.paper);
+    // The drawer, half open on the spare fuse until it is taken.
+    b.rect(r.x + 10, r.y + 6, 20, 6, C.oakDark).rect(r.x + 18, r.y + 8, 4, 2, C.brass);
+    if (!on(s, 'fuse_taken')) b.rect(r.x + 12, r.y + 4, 6, 3, C.white).rect(r.x + 14, r.y + 4, 2, 3, C.red);
   },
   'hall.shoes': (b, r, s) => {
     for (let i = 0; i < 5; i++) b.rect(r.x + 2 + i * 6, r.y + 12 - (i % 2) * 3, 5, 3, [C.white, C.ink, C.red, C.blue, C.green3][i]);
@@ -486,8 +489,7 @@ const PROPS: Record<string, Prop> = {
     // Open: the lit inside with its shelves, the door swung to the left.
     b.rect(r.x, r.y, r.w, r.h, C.steelDark).rect(r.x + 2, r.y + 2, r.w - 4, r.h - 4, C.white);
     for (let y = r.y + 16; y < r.y + r.h - 4; y += 14) b.hline(r.x + 2, r.x + r.w - 3, y, C.glass);
-    b.rect(r.x + 4, r.y + 8, 5, 8, C.cream).rect(r.x + 12, r.y + 10, 5, 6, C.green3).rect(r.x + 5, r.y + 36, 8, 6, C.red).rect(r.x + 18, r.y + 34, 6, 8, C.yellow);
-    if (!on(s, 'milk_taken')) b.rect(r.x + 18, r.y + 20, 7, 10, C.white).rect(r.x + 19, r.y + 23, 5, 3, C.water1);
+    b.rect(r.x + 3, r.y + 8, 4, 6, C.cream).rect(r.x + 22, r.y + 9, 4, 6, C.green3).rect(r.x + 3, r.y + 44, 5, 5, C.red);
     b.rect(r.x - 10, r.y, 10, r.h, C.steel).frame(r.x - 10, r.y, 10, r.h, C.steelDark);
   },
   'kitchen.sink': (b, r) => {
@@ -557,12 +559,13 @@ const PROPS: Record<string, Prop> = {
   'utility.flours': (b, r, s) => {
     b.rect(r.x, r.y, r.w, r.h, C.white).frame(r.x, r.y, r.w, r.h, C.stone3).hline(r.x, r.x + r.w - 1, r.y + r.h - 2, C.stone3);
     b.rect(r.x + 4, r.y + 14, 14, 12, C.water1).rect(r.x + 4, r.y + 4, 10, 8, C.red);
-    if (!on(s, 'flours_taken')) b.rect(r.x + 24, r.y + 8, 9, 16, C.wood3).rect(r.x + 26, r.y + 12, 5, 5, C.cream).rect(r.x + 36, r.y + 8, 9, 16, C.paper).rect(r.x + 38, r.y + 12, 5, 5, C.water1);
   },
-  'utility.sardines': (b, r, s) => {
-    b.hline(r.x, r.x + r.w - 1, r.y + r.h - 4, C.wood2).rect(r.x, r.y + r.h - 3, r.w, 3, C.wood1);
-    if (!on(s, 'sardines_taken')) b.rect(r.x + 5, r.y + r.h - 10, 16, 6, C.chrome).frame(r.x + 5, r.y + r.h - 10, 16, 6, C.stone1).rect(r.x + 8, r.y + r.h - 8, 10, 2, C.blue);
-  },
+  // The two flour packets, taken one at a time.
+  'utility.chestnut': (b, r) => b.rect(r.x + 6, r.y + 6, 10, 16, C.wood3).rect(r.x + 8, r.y + 10, 6, 5, C.cream),
+  'utility.riceflour': (b, r) => b.rect(r.x + 6, r.y + 6, 10, 16, C.paper).rect(r.x + 8, r.y + 10, 6, 5, C.water1),
+  // In the open fridge: the rice milk carton and the tin of sardines.
+  'kitchen.milk': (b, r) => b.rect(r.x + 7, r.y + 6, 8, 14, C.white).frame(r.x + 7, r.y + 6, 8, 14, C.stone2).rect(r.x + 8, r.y + 10, 6, 4, C.water1),
+  'kitchen.sardines': (b, r) => b.rect(r.x + 3, r.y + 10, 16, 6, C.chrome).frame(r.x + 3, r.y + 10, 16, 6, C.stone1).rect(r.x + 6, r.y + 12, 10, 2, C.blue),
   'utility.broom': (b, r) => b.vline(r.x + 11, r.y, r.y + r.h - 14, C.wood4).rect(r.x + 4, r.y + r.h - 14, 15, 14, C.yellow),
   // The garage.
   'garage.pole': (b, r, s) => {
@@ -591,6 +594,8 @@ const PROPS: Record<string, Prop> = {
   },
   'garage.breaker': (b, r, s) => {
     b.rect(r.x + 1, r.y + 1, r.w - 2, r.h - 2, C.white).frame(r.x + 1, r.y + 1, r.w - 2, r.h - 2, C.stone2);
+    // The fuse of the "Cellier" line, once screwed in.
+    if (on(s, 'fuse_in')) b.rect(r.x + 12, r.y + 22, 4, 5, C.white).rect(r.x + 13, r.y + 23, 2, 3, C.red);
     for (let i = 0; i < 4; i++) {
       const down = i === 2 && !on(s, 'power_on');
       b.rect(r.x + 4 + i * 4, r.y + 8, 3, 12, C.stone3).rect(r.x + 4 + i * 4, r.y + (down ? 15 : 9), 3, 4, down ? C.red : C.ink);
@@ -606,6 +611,9 @@ const PROPS: Record<string, Prop> = {
     if (!on(s, 'bar_taken')) b.line(r.x + 4, r.y + 28, r.x + r.w - 4, r.y + 24, C.ironHi);
   },
   'cellar.barrel': (b, r) => b.ellipse(r.x + 15, r.y + 16, 13, 13, C.wood3).hline(r.x + 3, r.x + 27, r.y + 9, C.iron).hline(r.x + 3, r.x + 27, r.y + 23, C.iron),
+  // The two wall stones of the hatch mechanism; a wedged one holds the iron bar.
+  'cellar.stoneLeft': (b, r, s) => stone(b, r, on(s, 'stone_left')),
+  'cellar.stoneRight': (b, r, s) => stone(b, r, on(s, 'stone_right')),
   'cellar.hatch': (b, r) => {
     // The hatch in the ceiling, seen from below, and the steep steps up to it.
     b.rect(r.x, r.y, r.w, 10, C.wood1).frame(r.x, r.y, r.w, 10, C.wood0);
@@ -1102,16 +1110,16 @@ export const VISUAL_FLAGS: Record<PlaceId, (keyof Flags)[]> = {
   football: ['extension_taken', 'gates_open'],
   pool: ['ball_freed', 'cover_open', 'pool_drained', 'plug_fixed', 'thinner_taken', 'bay_open', 'gates_open'],
   garden: ['delivered', 'cat_fed', 'parcel_taken', 'keyring_taken'],
-  hall: ['gatekey_taken'],
+  hall: ['gatekey_taken', 'fuse_taken'],
   living: ['booklet_taken', 'queen_placed', 'bay_open'],
   music: ['sticks_taken'],
-  kitchen: ['milk_taken', 'dough_mixed', 'fridge_open'],
+  kitchen: ['milk_taken', 'sardines_taken', 'dough_mixed', 'fridge_open'],
   corridor0: [],
   wc0: ['wc_wet'],
   office: ['pliers_taken', 'drawer_open'],
-  utility: ['detergent_taken', 'machine_running', 'power_on', 'flours_taken', 'sardines_taken'],
-  garage: ['pole_taken', 'wrench_taken', 'power_on', 'bike_fixed'],
-  cellar: ['bar_taken', 'hatch_open', 'bottles_done'],
+  utility: ['detergent_taken', 'machine_running', 'power_on', 'chestnut_taken', 'riceflour_taken'],
+  garage: ['pole_taken', 'wrench_taken', 'power_on', 'bike_fixed', 'fuse_in'],
+  cellar: ['bar_taken', 'hatch_open', 'bottles_done', 'stone_left', 'stone_right'],
   attic: ['door_revealed', 'secret_open', 'lab_code', 'trunk_open'],
   laundry: [],
   landing: [],
@@ -1148,6 +1156,12 @@ export function paintRoom(s: GameState): PixelBuffer {
   }
   band(b);
   return b;
+}
+
+// A stone sticking out of the cellar wall, pushed in (with the iron bar across it) once wedged.
+function stone(b: PixelBuffer, r: Rect, wedged: boolean) {
+  b.ellipse(r.x + 11, r.y + 11, 9, 8, C.stone1).ellipse(r.x + 11, r.y + 10, 7, 6, wedged ? C.stone0 : C.stone3);
+  if (wedged) b.line(r.x + 2, r.y + 18, r.x + 20, r.y + 4, C.iron).line(r.x + 3, r.y + 18, r.x + 21, r.y + 4, C.ironHi);
 }
 
 function wetFloor(b: PixelBuffer) {

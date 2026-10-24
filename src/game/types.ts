@@ -56,7 +56,8 @@ export type ItemId =
   | 'keyring'
   | 'scrap2'
   | 'scrap3'
-  | 'hat';
+  | 'hat'
+  | 'fuse';
 
 export type CharacterId = 'dad' | 'mom' | 'julien' | 'florent' | 'theo';
 
@@ -151,6 +152,12 @@ export type Flag =
   | 'frag3_in'
   | 'finale'
   | 'tonka_in'
+  | 'chestnut_taken'
+  | 'riceflour_taken'
+  | 'fuse_taken'
+  | 'fuse_in'
+  | 'stone_left'
+  | 'stone_right'
   | 'hat_given'
   | 'tonka_given'
   | 'ending';
@@ -167,7 +174,7 @@ export type KeypadId = 'computer' | 'safe' | 'lab';
 export type PadId = 'bottles' | 'trunk';
 
 // The places that can be guarded by their occupant (telemetry `capture.room`), and those entered through a door.
-export type GuardedRoom = 'office' | 'front' | 'kitchen' | 'parents' | 'garden' | 'julien' | 'florent' | 'theo' | 'garage';
+export type GuardedRoom = 'office' | 'kitchen' | 'parents' | 'garden' | 'julien' | 'florent' | 'theo' | 'garage';
 export type DoorRoom = 'office' | 'parents' | 'julien' | 'florent' | 'theo';
 
 export interface Point {
@@ -187,16 +194,17 @@ export type TutorialStep = 0 | 1 | 2 | 3;
 
 // Running timers, as deadlines on the timer clock (ms); null when not running.
 // dad: doorbell phases, cooking, fuse box; dough: until Papa comes to cook; mom: changing after the hose; delivery:
-// until the parcel is delivered.
+// until the parcel is delivered; machine: the washing machine's cycle.
 export interface Timers {
   dad: number | null;
   dough: number | null;
   mom: number | null;
   delivery: number | null;
+  machine: number | null;
 }
 
 export interface GameState {
-  v: 3;
+  v: 4;
   place: PlaceId;
   pos: Point;
   facing: Facing;

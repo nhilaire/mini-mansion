@@ -105,7 +105,7 @@ describe('GameScreen, Act II', () => {
 
   it('no timer time passes during a capture scene either: Papa still answers the door right after it (AC-69)', async () => {
     // Papa answers the door 5 s of timer time from now; the capture scene lasts far longer than that in fast mode.
-    await mount({ ...newGame(), place: 'landing', flags: { door_unlocked: true }, chars: chars({ dad: 'answering' }), timers: { dad: 5000, dough: null, mom: null, delivery: null }, tutorial: 3 });
+    await mount({ ...newGame(), place: 'landing', flags: { door_unlocked: true }, chars: chars({ dad: 'answering' }), timers: { dad: 5000, dough: null, mom: null, delivery: null, machine: null }, tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-landing.theoDoor'));
     await fireEvent.press(screen.getByTestId('verb-use'));
     expect(screen.getByText(line(t, 'capture.theo'))).toBeTruthy();
@@ -121,7 +121,7 @@ describe('GameScreen, Act II', () => {
 
   it('no timer time passes while a line plays: the doorbell timer waits, without catching up afterwards (AC-69)', async () => {
     // Papa answers the door 5 s of timer time from now (fast mode: 30 times faster, about 170 ms while idle).
-    await mount({ ...newGame(), place: 'hall', flags: { door_unlocked: true }, chars: chars({ dad: 'answering' }), timers: { dad: 5000, dough: null, mom: null, delivery: null }, tutorial: 3 });
+    await mount({ ...newGame(), place: 'hall', flags: { door_unlocked: true }, chars: chars({ dad: 'answering' }), timers: { dad: 5000, dough: null, mom: null, delivery: null, machine: null }, tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-hall.coats'));
     await fireEvent.press(screen.getByTestId('verb-look'));
     expect(screen.getByTestId('line-banner')).toBeTruthy();
@@ -165,7 +165,7 @@ describe('GameScreen, Act II', () => {
   });
 
   it('during the power cut, outside stays lit (AC-64)', async () => {
-    await mount({ ...newGame(), place: 'front', flags: { door_unlocked: true }, chars: chars({ dad: 'fuses' }), timers: { dad: 60_000, dough: null, mom: null, delivery: null }, tutorial: 3 });
+    await mount({ ...newGame(), place: 'front', flags: { door_unlocked: true }, chars: chars({ dad: 'fuses' }), timers: { dad: 60_000, dough: null, mom: null, delivery: null, machine: null }, tutorial: 3 });
     expect(screen.getByTestId('dad-fuses')).toBeTruthy();
     expect(screen.queryByTestId('power-cut')).toBeNull();
   });

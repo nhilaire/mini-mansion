@@ -90,6 +90,12 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-73 The house stays dark during the power cut until Papa has fixed the fuses (AC-64) - proof: unit
 - [x] T-74 Papa gives his drawer key to Maman when he becomes wary: it is found in her gardening basket while she changes; no more bills in the drawer (AC-62, AC-66) - proof: unit
 - [x] T-75 New ending: the tonka bean goes into the dough in the food processor (E30); the family gathers one after the other in the lab once the recipe is complete and the tonka bean is in; no jury, no chef's hat (AC-32, AC-67, AC-68) - proof: unit, e2e
+- [x] T-76 The rice milk and the sardines in the fridge, the two flours in their cupboard, each taken on its own; the cupboard stays (AC-71, AC-52) - proof: unit
+- [x] T-77 The spare fuse in the hall cabinet drawer goes into the circuit breaker before it can be switched on; the washing machine ends 2 minutes after it starts (AC-70) - proof: unit, e2e
+- [x] T-78 Doorbell: Charlie in front of the house when Papa comes out (or walking there) is a salesman, no capture; Papa locks the front door each time he goes back in; the house key stays in the inventory (AC-51, AC-59) - proof: unit
+- [x] T-79 Cellar escape: two wall stones to press together, the iron bar wedges one (AC-24) - proof: unit
+- [x] T-80 Clearer clues: the drawer only says it is locked, a science magazine upstairs explains lemon ink, the note smells of lemon, the revealed ink says how to sort the bottles, the strange colour code, shuffled trunk buttons; the pump fills the drained pool again (AC-28, AC-30, AC-65, AC-66) - proof: unit
+- [x] T-81 Save format v4 (migration of v0.2 beta saves) and the walkthrough flow regenerated (AC-35, AC-41) - proof: unit, e2e
 
 ## Notes
 

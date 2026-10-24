@@ -45,6 +45,7 @@ describe('places drawn in code', () => {
       secret_open: { door_revealed: true },
       lab_code: { door_revealed: true },
       milk_taken: { fridge_open: true },
+      sardines_taken: { fridge_open: true },
       cat_fed: { delivered: true },
       parcel_taken: { delivered: true },
       // Maman's basket (with the drawer key) is only in the garden while she changes, once Papa is wary.
