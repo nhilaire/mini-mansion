@@ -1,7 +1,7 @@
 # Device checks: Mini Mansion v0.2.0
 
-Commit: ba8bab8
-APK: dist/mini-mansion-0.2.0-universal.apk, SHA-256 a3dc65681647be3afe49f9b60775d4882d12b8caa39945a6e0a6a59881e8976d
+Commit: a0908c4 (APK built at 2035002; a0908c4 only changes tests, the search and the PRD)
+APK: dist/mini-mansion-0.2.0-universal.apk, SHA-256 7743c204fb839a2437d625c7c68e5f8d3fc082d8f3bba7cab287df3f5f6320df
 Device: emulator sdk_gphone64_x86_64, Android 16 (API 36), 2400x1080 landscape
 Date: 2026-10-23
 
@@ -16,9 +16,9 @@ in `raw/device-*.txt` (local, git-ignored).
 | No advertising ID, few permissions (privacy) | `aapt dump badging <apk>` | PASS: no `AD_ID` / ad services permission; only INTERNET, VIBRATE, ACCESS_NETWORK_STATE, WAKE_LOCK, MODIFY_AUDIO_SETTINGS and the dynamic receiver permission |
 | Nothing sent after « Refuser » (AC-06) | `setprop debug.firebase.analytics.app`, `logcat -c`, `.maestro/smoke.yaml` (fresh install, refuse, new game), then `logcat -s FA FA-SVC` (raw/device-logcat-refused.txt) | PASS: 0 `Logging event` lines |
 | Events sent after « Accepter » (AC-08) | `verify.mjs --telemetry` (REPORT.md step 13, raw/logcat-telemetry.txt) | PASS: game_start, tutorial_complete, puzzle_solved seen |
-| Cold start < 3 s (AC-46) | `verify.mjs` (REPORT.md step 10) | PASS: median 970 ms |
+| Cold start < 3 s (AC-46) | `verify.mjs` (REPORT.md step 10) | PASS: median 1123 ms |
 | No crash during the flows (AC-47) | `verify.mjs` (REPORT.md step 12: crash buffer cleared before the run, empty after) | PASS: 0 fatal log lines |
-| No ANR during the flows (AC-47) | `dumpsys dropbox --print data_app_anr` and `logcat -b events` `am_anr` (raw/device-anr.txt); the events buffer starts at 10-23 14:59, before this verification run (2026-10-23 17:41 UTC) | PASS: 0 ANR entries for the package |
+| No ANR during the flows (AC-47) | `dumpsys dropbox --print data_app_anr` and `logcat -b events` `am_anr` (raw/device-anr.txt); the events buffer starts at 10-23 20:20, before this verification run (2026-10-24 06:54 UTC) | PASS: 0 ANR entries for the package |
 
 Not checked here (on the phone at release): APK size of the arm64 phone build (the universal emulator APK is 136 MB
 because it carries 4 ABIs; the phone build is arm64 only, target < 60 MB), the launcher name seen on the phone, the
