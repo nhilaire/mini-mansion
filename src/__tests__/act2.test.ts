@@ -302,6 +302,11 @@ describe('the desk drawer and the attic trunk (AC-66)', () => {
     expect(puzzles(right)).toEqual([29]);
     expect(right.state.inventory).toEqual(['scrap3']);
     expect(interact(s, { kind: 'pad', pad: 'trunk', code: ['red', 'yellow', 'blue', 'pink'] }).accepted).toBe(false);
+    // The trunk is open for good: the code is not asked again and the Fragment n° 3 is given only once.
+    expect(interact(right.state, { kind: 'pad', pad: 'trunk', code: ['red', 'yellow', 'blue', 'green'] }).accepted).toBe(false);
+    const again = interact(right.state, use('attic.trunk'));
+    expect(again.beats).toEqual([said('hero', 'attic.trunk.empty')]);
+    expect(again.state.inventory).toEqual(['scrap3']);
   });
 });
 
