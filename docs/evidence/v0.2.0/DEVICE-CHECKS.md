@@ -18,7 +18,7 @@ in `raw/device-*.txt` (local, git-ignored).
 | Events sent after « Accepter » (AC-08) | `verify.mjs --telemetry` (REPORT.md step 13, raw/logcat-telemetry.txt) | PASS: game_start, tutorial_complete, puzzle_solved seen |
 | Cold start < 3 s (AC-46) | `verify.mjs` (REPORT.md step 10) | PASS: median 1175 ms |
 | No crash during the flows (AC-47) | `verify.mjs` (REPORT.md step 12: crash buffer cleared before the run, empty after) | PASS: 0 fatal log lines |
-| No ANR during the flows (AC-47) | `dumpsys dropbox --print data_app_anr` and `logcat -b events` `am_anr` (raw/device-anr.txt); the events buffer starts at the emulator boot (10-24 14:23), before this verification run | PASS: 0 ANR entries for the package |
+| No ANR during the flows (AC-47) | `dumpsys dropbox --print data_app_anr` and `logcat -b events` `am_anr` (raw/device-anr.txt); the events buffer starts at 10-24 14:23, before this verification run | PASS: 0 ANR entries for the package |
 
 Not checked here (on the phone at release): APK size of the arm64 phone build (the universal emulator APK is 136 MB
 because it carries 4 ABIs; the phone build is arm64 only, target < 60 MB), the launcher name seen on the phone, the
