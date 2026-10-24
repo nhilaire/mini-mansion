@@ -99,6 +99,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-82 Phone feedback (evening): Papa seen next to Charlie for the salesman scene; the cellar hatch locks again each time Charlie comes down; the note smells strongly of lemon when found and the warmed message is read aloud; the end in the kitchen or the lab with everybody seen; lines cannot be tapped away; washing machine 60 s, doorbell answered in 15 s; wicket gates and stepping stones on the garden ways (AC-24, AC-49, AC-51, AC-57, AC-65, AC-68, AC-70) - proof: unit, e2e
 - [x] T-83 Phone feedback: lines still play to the end, but Charlie can walk on the floor while a plain line plays (AC-49) - proof: unit
 - [x] T-84 Phone feedback: lines outside scenes without control become captions; the player keeps full control (objects, inventory, changing place) while they play to the end; blocking scenes wait for them (AC-49, AC-69) - proof: unit, e2e
+- [x] T-85 Phone feedback: the stepping stones in front of the garden wicket gates are removed (AC-57) - proof: device
 
 ## Notes
 

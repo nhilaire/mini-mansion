@@ -67,7 +67,7 @@ PROVEN on 014e583; both were closed by test-only additions, verified again on dd
 | AC-54 | interaction.test.ts gags (AC-54) "the Japanese toilet sprays and wets the floor for good; the other gags only answer a line" | PASS |
 | AC-55 | puzzles.test.ts "broken: "a seal is missing"; the wrench has nothing to tighten yet (AC-55)", "the O-ring fitted but not tightened leaks; the wrench then repairs it (E08, AC-55)" | PASS |
 | AC-56 | content.test.ts "in fr/en, the intro and N01 name nobody of the family and Charlie is not a friend of the boys" | PASS |
-| AC-57 | Photographed rooms, the family gathering in the lab or the kitchen, the garden wicket gates and stepping stones, Act II scenes on the phone | PENDING RELEASE |
+| AC-57 | Photographed rooms, the family gathering in the lab or the kitchen, the garden wicket gates, Act II scenes on the phone | PENDING RELEASE |
 | AC-58 | characters.test.ts "only advance through tick inputs…"; save.test.ts "fast mode makes the timers 30 times faster without changing the saved format (AC-58)", "keeps the running timers and the timer clock"; GameScreen.test.tsx doorbell test (timers wait while paused) | PASS |
 | AC-59 | act2.test.ts lures and wariness (AC-59) "before E07 he only goes back to his desk, the doorbell works again", "back from cooking after E07, he becomes wary as well", "a wary Papa ignores the doorbell and the dough, and says so through his door", "a dough timer ending once Papa is wary plays his refusal instead of CUT12" | PASS |
 | AC-60 | act2.test.ts "60 s after Papa is wary, CUT13 plays wherever Charlie is: the parcel lands in the garden under the cat", "nobody catches Charlie in front of the house…" | PASS |

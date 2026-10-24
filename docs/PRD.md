@@ -242,7 +242,7 @@ means the front of the house (`front`).
   it in order. A scene without control (capture, outside views such as the front door, the delivery or the power cut,
   the final gathering) starts once the captions said before it are over and allows no input until its end.
 - The ways between the parts of the garden (the middle path between the football corner and the pool, the way to the
-  swing corner) are marked by an open white wicket gate under a wooden arch and stepping stones on the grass.
+  swing corner) are marked by an open white wicket gate under a wooden arch.
 - An item is removed from the inventory only when it is used up by its puzzle and is no longer needed.
 - An item that is itself the hotspot (the hair dryer on its hook, the sardines, the flours, the pole) disappears from the
   scene once taken; furniture (shelves, bench, basket...) stays and says it is empty.

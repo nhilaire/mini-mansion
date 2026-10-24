@@ -3,9 +3,9 @@
 Phone install: PASS
 User acceptance: pending
 Date: 2026-10-24
-Commit: 78a21b6
+Commit: 04d1f29
 APK: mini-mansion-0.2.0-arm64-v8a.apk (51 MB, arm64-v8a)
-SHA-256: d0269f0b0f8e0d509915b8715b798ee54ef4dcb53f4e754d35f8b35dcd749ca0
+SHA-256: e05e0c2c867d69a312a5837f6b75ec62975e1ee9da7d3ecfb421db450739692a
 Signature: release signature valid
 Phone: Android 11 (API 30, arm64-v8a)
 Launch check: alive after 10 s, no fatal error
