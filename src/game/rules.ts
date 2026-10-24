@@ -260,7 +260,7 @@ function arrival(c: Ctx, place: GuardedRoom): void {
 // guarded by its occupant.
 function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
   const from = c.s.place;
-  // Florent and Théo go back to their room once Sam has left it: heard from the landing, after the place change.
+  // Florent and Théo go back to their room once Charlie has left it: heard from the landing, after the place change.
   const after: ((k: Ctx) => void)[] = [];
   if (from === 'florent' && c.state('florent') === 'drumming' && c.is('oring_taken')) {
     c.move('florent', 'in_room');
@@ -284,7 +284,7 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
   if (isGuardedRoom(to)) {
     const who = occupant(to, c.s.chars);
     if (who) {
-      // Sam steps into the room first: the capture scene plays there.
+      // Charlie steps into the room first: the capture scene plays there.
       c.beats.push({ type: 'room', place: to, pos: { ...spawn }, facing: face });
       for (const run of after) run(c);
       capture(c, to, who);
@@ -299,7 +299,7 @@ function goTo(c: Ctx, to: PlaceId, spawn: Point, face: Facing): void {
 }
 
 // The capture scene, which cannot be skipped (PRD "Guarded places and captures"): a boy shouts for Papa, who comes
-// 2 s later; the adult says the capture line, takes Sam to the cellar, says "don't run away" and leaves 3 s later.
+// 2 s later; the adult says the capture line, takes Charlie to the cellar, says "don't run away" and leaves 3 s later.
 export const SCENE_MS = { call: 2000, beforeCellar: 1500, leave: 3000, view: 1500, reunion: 2500 } as const;
 
 function capture(c: Ctx, room: GuardedRoom, who: CharacterId): void {
@@ -336,7 +336,7 @@ function doorVerb(c: Ctx, h: HotspotDef, verb: Verb): void {
     else c.hero(room === 'florent' && c.state('florent') === 'riding' ? 'door.florent.riding' : `door.${room}.empty`);
     return;
   }
-  // listen: Sam puts an ear to the door and hears the occupant talking to themself.
+  // listen: Charlie puts an ear to the door and hears the occupant talking to themself.
   if (verb === 'listen') {
     if (!who) return;
     if (who === 'dad' && c.state('dad') === 'answering') c.say('dad', 'dad.doorComing');
@@ -869,7 +869,7 @@ function recipeComplete(c: Ctx): void {
   else c.hero('line.recipeTonka');
 }
 
-// CUT11, the end: in the lab, Papa then the whole family join Sam one after the other; then the Ending.
+// CUT11, the end: in the lab, Papa then the whole family join Charlie one after the other; then the Ending.
 function reunion(c: Ctx): void {
   c.finish();
   c.cut('cut11', (k) => {
@@ -890,7 +890,7 @@ function reunion(c: Ctx): void {
   c.beats.push({ type: 'ending' });
 }
 
-// Florent coming down to his drums and Théo to the chessboard would stand where Sam is: Sam steps aside as they arrive.
+// Florent coming down to his drums and Théo to the chessboard would stand where Charlie is: Charlie steps aside as they arrive.
 function stepAside(c: Ctx, pos: Point, facing: Facing): Ctx {
   c.s.pos = { ...pos };
   c.s.facing = facing;

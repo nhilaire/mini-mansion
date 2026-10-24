@@ -1,6 +1,6 @@
 // The story in French (reference language, "tu"). Keys come from the engine (src/game/rules.ts, dialogue.ts, world.ts).
-// Written with plain spaces; typoAll() adds the French no-break space. Sam is the hero: lines in the first person
-// avoid gendered agreements (the hero can be anyone). Nobody in the house knows Sam.
+// Written with plain spaces; typoAll() adds the French no-break space. Charlie is the hero: lines in the first person
+// avoid gendered agreements (the hero can be anyone). Nobody in the house knows Charlie.
 import { typo, typoAll } from '../i18n/typo';
 
 const lines = typoAll({
@@ -107,7 +107,7 @@ const lines = typoAll({
   'e01.key': 'Une clé ! Sous le paillasson. Le premier endroit où cherche un cambrioleur… ou un détective.',
   'front.door.look': "La porte d'entrée. Fermée à clé, évidemment.",
   'front.door.locked': "C'est fermé à clé.",
-  'cut01': 'La clé tourne sans bruit. Sam se glisse dans la maison.',
+  'cut01': 'La clé tourne sans bruit. Charlie se glisse dans la maison.',
   'front.bell.look': "La sonnette. Quand elle sonne, quelqu'un finit toujours par venir ouvrir.",
   'front.hedge.look': 'Une haie bien taillée. Impossible de passer à travers.',
   'front.mailbox.look': 'La boîte aux lettres. Un prospectus : « Concours du meilleur gâteau de la ville ».',
@@ -170,7 +170,7 @@ const lines = typoAll({
   'hall.shoes.lookEmpty': 'Une montagne de chaussures. Des crampons, des baskets, des chaussons.',
   'hall.shoes.take': "Dans la basket : une petite clé. « Portillons », dit l'étiquette.",
   'hall.shoes.empty': "Il n'y a plus rien dans les chaussures. À part l'odeur.",
-  'hall.mirror.look': "Un miroir. Sam, détective. Ça a de l'allure.",
+  'hall.mirror.look': "Un miroir. Charlie, détective. Ça a de l'allure.",
   'hall.mirror.use': 'Je fais ma tête de détective. Puis ma tête de détective surpris. Parfait.',
 
   // Living room.
@@ -490,7 +490,7 @@ const lines = typoAll({
 export const story = {
   lines,
   names: {
-    speakers: { hero: 'Sam', narrator: 'Narrateur', dad: 'Papa', mom: 'Maman', julien: 'Julien', florent: 'Florent', theo: 'Théo', driver: 'Livreur' },
+    speakers: { hero: 'Charlie', narrator: 'Narrateur', dad: 'Papa', mom: 'Maman', julien: 'Julien', florent: 'Florent', theo: 'Théo', driver: 'Livreur' },
     items: {
       key: 'Clé de la maison',
       gatekey: 'Clé du portail',

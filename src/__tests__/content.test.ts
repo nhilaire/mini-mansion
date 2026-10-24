@@ -113,7 +113,7 @@ describe('clues of the puzzles off the walkthrough (AC-30)', () => {
 });
 
 describe('the rumour comes from school (AC-56)', () => {
-  it.each(LANGUAGES)('in %s, the intro and N01 name nobody of the family and Sam is not a friend of the boys', (language) => {
+  it.each(LANGUAGES)('in %s, the intro and N01 name nobody of the family and Charlie is not a friend of the boys', (language) => {
     const t = DICTIONARIES[language];
     const texts = [...t.intro.cards, t.story.notes.n01].join(' ');
     expect(texts).toMatch(language === 'fr' ? /école/ : /school/);
@@ -156,11 +156,11 @@ describe('French typography and tone (AC-45)', () => {
     expect([fr.common.yes, fr.common.no, fr.intro.skip]).toEqual(['Oui', 'Non', 'Passer']);
     expect(fr.intro.cards[0]).toBe(`Une rumeur court à l'école${N}: dans une maison du quartier, quelqu'un aurait inventé une recette secrète aux pouvoirs extraordinaires…`);
     expect(fr.intro.cards[1]).toBe(`Certains disent qu'elle pourrait provoquer une catastrophe dans toute la ville${N}!`);
-    expect(fr.intro.cards[2]).toBe("Sam l'a entendue dans la cour de récré et a décidé de mener l'enquête.");
+    expect(fr.intro.cards[2]).toBe("Charlie l'a entendue dans la cour de récré et a décidé de mener l'enquête.");
     expect(fr.intro.cards[3]).toBe(`Ton objectif${N}: trouver où se cache cette fameuse recette, et découvrir ce qu'elle est vraiment. Elle est quelque part dans cette maison…`);
     expect(fr.intro.cards[4]).toBe(`Mais la famille n'aime pas les intrus. Observe, fais diversion pour éloigner les habitants… et si tu te fais attraper, direction la cave${N}!`);
     expect(fr.tutorial).toEqual({
-      walk: 'Touche le sol pour faire marcher Sam.',
+      walk: 'Touche le sol pour faire marcher Charlie.',
       verbs: 'Touche un objet ou une personne pour voir ce que tu peux faire.',
       inventory: "Tes objets sont ici. Touche-en un, puis touche ce sur quoi l'utiliser.",
     });
@@ -300,14 +300,14 @@ describe('French typography and tone (AC-45)', () => {
       'Scrap no. 3',
       "Papa's chef's hat",
     ]);
-    expect(en.intro.cards[2]).toBe('Sam heard it in the playground and decided to investigate.');
+    expect(en.intro.cards[2]).toBe('Charlie heard it in the playground and decided to investigate.');
     expect(en.intro.cards[3]).toBe('Your goal: find where this famous recipe is hidden, and what it really is. It is somewhere in this house…');
     expect(en.intro.cards[4]).toBe("But the family doesn't like intruders. Watch, create distractions to lure the inhabitants away… and if you get caught, off to the cellar!");
     expect([en.home.continue, en.home.settings, en.home.about, en.common.yes, en.common.no, en.intro.skip]).toEqual(['Continue', 'Settings', 'About', 'Yes', 'No', 'Skip']);
     expect(en.intro.cards[0]).toBe('A rumour is going around the school: in a house of the neighbourhood, someone has invented a secret recipe with extraordinary powers…');
     expect(en.intro.cards[1]).toBe('Some say it could cause a disaster in the whole town!');
     expect(en.tutorial).toEqual({
-      walk: 'Tap the ground to make Sam walk.',
+      walk: 'Tap the ground to make Charlie walk.',
       verbs: 'Tap an object or a person to see what you can do.',
       inventory: 'Your items are here. Tap one, then tap what to use it on.',
     });

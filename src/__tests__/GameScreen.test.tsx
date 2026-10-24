@@ -179,7 +179,7 @@ describe('GameScreen', () => {
     applyTestingLink(FAST_LINK);
   });
 
-  it('a floor tap makes Sam walk and the tutorial moves to the verbs step (AC-11, AC-16)', async () => {
+  it('a floor tap makes Charlie walk and the tutorial moves to the verbs step (AC-11, AC-16)', async () => {
     const props = await mount(newGame());
     expect(screen.getByText(fr.tutorial.walk)).toBeTruthy();
     await fireEvent.press(screen.getByTestId('scene-floor'), { nativeEvent: { locationX: 300, locationY: 230 } });
@@ -337,7 +337,7 @@ describe('GameScreen', () => {
     expect(lastSaved(props).flags.chess_solved).toBe(true);
   });
 
-  it('entering an occupied room plays the capture scene, which cannot be skipped, and puts Sam in the wine cellar (AC-23, AC-49)', async () => {
+  it('entering an occupied room plays the capture scene, which cannot be skipped, and puts Charlie in the wine cellar (AC-23, AC-49)', async () => {
     const props = await mount({ ...newGame(), place: 'landing', flags: { door_unlocked: true }, tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-landing.julienDoor'));
     await fireEvent.press(screen.getByTestId('verb-use'));
@@ -345,7 +345,7 @@ describe('GameScreen', () => {
     expect(screen.getByText(line(t, 'capture.julien'))).toBeTruthy();
     await fireEvent.press(screen.getByTestId('line-banner'));
     expect(screen.getByText(line(t, 'capture.julien'))).toBeTruthy();
-    // Papa comes and says his line, then takes Sam to the cellar and tells Sam not to run away.
+    // Papa comes and says his line, then takes Charlie to the cellar and tells Charlie not to run away.
     const seen: string[] = [];
     for (let i = 0; i < 60; i++) {
       for (const key of ['capture.dad', 'capture.keep', 'capture.cellar']) if (!seen.includes(key) && screen.queryByText(line(t, key))) seen.push(key);

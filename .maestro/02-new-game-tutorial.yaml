@@ -46,7 +46,7 @@ tags:
 - assertVisible:
     id: "tutorial-bubble"
 - takeScreenshot: 03-front-tutorial
-# The floor (lower part of the scene): Sam walks.
+# The floor (lower part of the scene): Charlie walks.
 - tapOn:
     point: "30%,72%"
 - extendedWaitUntil:

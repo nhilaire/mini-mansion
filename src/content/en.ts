@@ -99,7 +99,7 @@ export const story: Content = {
     'e01.key': 'A key! Under the doormat. The first place a burglar looks… or a detective.',
     'front.door.look': 'The front door. Locked, of course.',
     'front.door.locked': "It's locked.",
-    'cut01': 'The key turns without a sound. Sam slips into the house.',
+    'cut01': 'The key turns without a sound. Charlie slips into the house.',
     'front.bell.look': 'The doorbell. When it rings, someone always ends up opening the door.',
     'front.hedge.look': "A neatly trimmed hedge. There's no getting through it.",
     'front.mailbox.look': 'The letterbox. A flyer: "Best cake in town contest".',
@@ -160,7 +160,7 @@ export const story: Content = {
     'hall.shoes.lookEmpty': 'A mountain of shoes. Football boots, trainers, slippers.',
     'hall.shoes.take': 'Inside the trainer: a small key. "Gates", says the tag.',
     'hall.shoes.empty': "There's nothing left in the shoes. Apart from the smell.",
-    'hall.mirror.look': 'A mirror. Sam, detective. Looking sharp.',
+    'hall.mirror.look': 'A mirror. Charlie, detective. Looking sharp.',
     'hall.mirror.use': 'I pull my detective face. Then my surprised detective face. Perfect.',
 
     'living.bookshelf.look': 'A stepped bookshelf. Between two novels: "The Rubik\'s Cube in 7 easy steps".',
@@ -470,7 +470,7 @@ export const story: Content = {
     'e30.tonka': "I grate the tonka bean into Papa's dough. Mmm… The whole house smells of vanilla and almond!",
   },
   names: {
-    speakers: { hero: 'Sam', narrator: 'Narrator', dad: 'Papa', mom: 'Maman', julien: 'Julien', florent: 'Florent', theo: 'Théo', driver: 'Delivery driver' },
+    speakers: { hero: 'Charlie', narrator: 'Narrator', dad: 'Papa', mom: 'Maman', julien: 'Julien', florent: 'Florent', theo: 'Théo', driver: 'Delivery driver' },
     items: {
       key: 'House key',
       gatekey: 'Gate key',

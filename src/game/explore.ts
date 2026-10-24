@@ -33,10 +33,10 @@
 //     way" too, solving E25;
 //   - while Papa is away from his desk (doorbell, dough, fuse box), only his office opens: the window is explored as
 //     one step (see officeWindow) with what can be done in the office (the computer, the pliers, the drawer), Papa
-//     then back with Sam out of the office or caught in it. What can be done elsewhere meanwhile can be done before
+//     then back with Charlie out of the office or caught in it. What can be done elsewhere meanwhile can be done before
 //     or after (checked by a test);
 //   - the hose is explored as one step (see hoseSteps): the tap, the garden actions of the window (the cat, the
-//     parcel), Maman back with Sam out of the garden or caught there. During the window only the garden opens (and
+//     parcel), Maman back with Charlie out of the garden or caught there. During the window only the garden opens (and
 //     the parents' room closes), and nothing else depends on Maman: actions elsewhere can be done before or after;
 //   - Florent's bike and the recipe book are explored once all their parts are held: a part put in alone only says a
 //     line and waits for the others (see partSteps);
@@ -236,7 +236,7 @@ export function partSteps(members: readonly GameState[]): { state: GameState; be
 }
 
 // The hose in one step: the tap from the pool, then in the garden while Maman changes nothing, the cat fed, or the
-// cat fed and the parcel taken; then Maman comes back with Sam out of the garden (football corner) or still in it.
+// cat fed and the parcel taken; then Maman comes back with Charlie out of the garden (football corner) or still in it.
 export function hoseSteps(members: readonly GameState[]): { state: GameState; beats: Beat[] }[] {
   const pool = members.find((m) => m.place === 'pool');
   if (!pool || pool.chars.mom !== 'gardening') return [];
@@ -329,8 +329,8 @@ function backToDesk(s: GameState): Step {
   return step;
 }
 
-// Papa away from his desk: Sam goes to the office and does any of what can be done there (the computer, the pliers,
-// the drawer), then Papa comes back with Sam out of the office or still in it. Caught before reaching the office
+// Papa away from his desk: Charlie goes to the office and does any of what can be done there (the computer, the pliers,
+// the drawer), then Papa comes back with Charlie out of the office or still in it. Caught before reaching the office
 // (or with Papa not away), Papa simply comes back.
 export function officeWindow(away: GameState): Step[] {
   if (!AWAY.includes(away.chars.dad) || away.place === 'cellar') return [backToDesk(away)];

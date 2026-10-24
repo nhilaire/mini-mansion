@@ -1,4 +1,4 @@
-// The Skia scene: the place, the inhabitants, Sam and the inventory band, in logical pixels scaled with
+// The Skia scene: the place, the inhabitants, Charlie and the inventory band, in logical pixels scaled with
 // nearest-neighbour sampling (crisp pixel art). Visual only: proven by Maestro screenshots.
 import { Canvas, FilterMode, Group, Image, MipmapMode, Rect, SkImage } from '@shopify/react-native-skia';
 import { memo } from 'react';
@@ -33,7 +33,7 @@ interface Props {
   unread: boolean;
   // Animation clock in ms (blinks, talking mouths, activities).
   clock: number;
-  // Inhabitants standing around Sam for a scene (the adult of a capture, the family at the end).
+  // Inhabitants standing around Charlie for a scene (the adult of a capture, the family at the end).
   guests?: readonly CharacterId[];
   // Extra sprites of an outside view (the delivery van, the jury...).
   extras?: readonly Extra[];
@@ -80,7 +80,7 @@ function SceneView({ state, hero, transform, width, height, speaker, selected, p
   }));
   const frame = heroFrame(heroSprites(), hero.facing, hero.frame, speaker === 'hero' && Math.floor(clock / 140) % 2 === 0);
   const heroBuf = frame.flip ? flippedOf(frame.image) : frame.image;
-  // Guests stand on both sides of Sam, the first one on the side with more room.
+  // Guests stand on both sides of Charlie, the first one on the side with more room.
   const side = hero.pos.x > 160 ? -1 : 1;
   guests.forEach((g, i) => {
     const step = Math.floor(i / 2) + 1;

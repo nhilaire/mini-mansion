@@ -47,7 +47,7 @@ describe('character states (AC-22)', () => {
     expect(state.place).toBe('landing');
   });
 
-  it('Florent and Théo are heard going back once Sam is out of their room, not while Sam is still inside', () => {
+  it('Florent and Théo are heard going back once Charlie is out of their room, not while Charlie is still inside', () => {
     const drumming = base('florent', { chars: chars({ florent: 'drumming' }), flags: { door_unlocked: true, oring_taken: true } });
     const out = interact(drumming, go('florent.toLanding')).beats;
     const room = out.findIndex((b) => b.type === 'room' && b.place === 'landing');
@@ -120,13 +120,13 @@ describe('the doorbell sequence (AC-51)', () => {
     expect(desk.state.timers.dad).toBeNull();
   });
 
-  it('Sam still in front of the house when Papa opens is caught', () => {
+  it('Charlie still in front of the house when Papa opens is caught', () => {
     const o = interact(rung().state, tick(TIMER_MS.answer));
     expect(o.state.place).toBe('cellar');
     expect(o.events).toEqual([{ type: 'capture', room: 'front', count: 1 }]);
   });
 
-  it('Sam still in the office when Papa is back is caught', () => {
+  it('Charlie still in the office when Papa is back is caught', () => {
     const s = interact({ ...rung().state, place: 'corridor0' }, tick(TIMER_MS.answer)).state;
     const inOffice = interact(s, enter('office')).state;
     expect(inOffice.place).toBe('office');
@@ -183,7 +183,7 @@ describe('the dough (AC-52)', () => {
     expect(back.state.timers.dad).toBeNull();
   });
 
-  it('Sam still in the kitchen when Papa arrives is caught', () => {
+  it('Charlie still in the kitchen when Papa arrives is caught', () => {
     const o = interact(mixed().state, tick(TIMER_MS.dough));
     expect(o.state.place).toBe('cellar');
     expect(o.events).toEqual([{ type: 'capture', room: 'kitchen', count: 1 }]);
@@ -223,7 +223,7 @@ describe('guarded places and captures (AC-23)', () => {
     expect(o.state.captures).toBe(1);
     expect(o.events).toEqual([{ type: 'capture', room, count: 1 }]);
     expect(o.beats).toContainEqual(said(OCCUPANT[room], `capture.${OCCUPANT[room]}`));
-    // The scene plays inside the room: Sam steps in first.
+    // The scene plays inside the room: Charlie steps in first.
     const stepIn = o.beats.findIndex((b) => b.type === 'room' && b.place === room);
     const first = o.beats.findIndex((b) => b.type === 'say');
     expect(stepIn).toBeGreaterThanOrEqual(0);
@@ -272,7 +272,7 @@ describe('guarded places and captures (AC-23)', () => {
 describe('the capture scene (AC-23)', () => {
   const lines = (beats: readonly Beat[]) => beats.flatMap((b) => (b.type === 'say' ? [b] : []));
 
-  it('caught by a boy: he shouts for Papa, Papa comes 2 s later, takes Sam to the cellar and leaves 3 s later; all unskippable', () => {
+  it('caught by a boy: he shouts for Papa, Papa comes 2 s later, takes Charlie to the cellar and leaves 3 s later; all unskippable', () => {
     const o = interact(base('landing'), enter('theo'));
     expect(lines(o.beats).map((l) => [l.speaker, l.key])).toEqual([
       ['theo', 'capture.theo'],
@@ -281,7 +281,7 @@ describe('the capture scene (AC-23)', () => {
       ['narrator', 'capture.cellar'],
     ]);
     const kinds = o.beats.map((b) => (b.type === 'say' ? b.key : b.type === 'wait' ? `wait ${b.ms}` : b.type === 'captor' ? `captor ${b.character}` : b.type === 'cinematic' ? `cinematic ${b.on}` : b.type === 'room' ? `room ${b.place}` : b.type));
-    // The door, Sam steps into the room, then the capture sting.
+    // The door, Charlie steps into the room, then the capture sting.
     expect(kinds).toEqual([
       'sfx',
       'room theo',
@@ -337,7 +337,7 @@ describe('the capture scene (AC-23)', () => {
 });
 
 describe('first and later captures (AC-24)', () => {
-  it('the first capture asks who Sam is, even when the hatch was already unblocked; later ones say "Encore toi ?!"', () => {
+  it('the first capture asks who Charlie is, even when the hatch was already unblocked; later ones say "Encore toi ?!"', () => {
     const visited: GameState = { ...base('landing'), flags: { door_unlocked: true, hatch_open: true, bar_taken: true }, solved: [15] };
     const first = interact(visited, enter('julien'));
     expect(first.beats).toContainEqual(said('dad', 'capture.dad'));
@@ -371,7 +371,7 @@ describe('the cellar hatch (AC-24)', () => {
     expect(interact(down, go('cellar.toGarage')).accepted).toBe(false);
   });
 
-  it('a later capture says "Encore toi ?!" and Sam can walk straight up', () => {
+  it('a later capture says "Encore toi ?!" and Charlie can walk straight up', () => {
     const open = playAll(caught(), [take('cellar.rack'), { kind: 'item', item: 'bar', target: 'cellar.hatch' }]).state;
     const again = interact({ ...open, place: 'landing' }, enter('florent'));
     expect(again.beats).toContainEqual(said('dad', 'line.captureAgain'));

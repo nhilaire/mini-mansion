@@ -49,7 +49,7 @@ describe('the whole solution (AC-21, AC-32)', () => {
 });
 
 describe('E01: the key under the doormat', () => {
-  it('the door is locked without the key; the key opens it once and Sam slips in', () => {
+  it('the door is locked without the key; the key opens it once and Charlie slips in', () => {
     expectRefusal(at('front'), use('front.door'), 'front.door.locked');
     const { state, outcomes } = playAll(at('front'), [{ kind: 'verb', verb: 'take', target: 'front.doormat' }, item('key', 'front.door')]);
     expect(outcomes[1].events).toEqual([{ type: 'puzzle', puzzle: 1 }]);
@@ -323,7 +323,7 @@ describe('E11-E13: the attic, the lab door, the lab', () => {
     expect(o.state.inventory).toEqual([]);
     expect(o.state.cuts).toEqual(['cut11']);
     expect(o.beats[o.beats.length - 1]).toEqual({ type: 'ending' });
-    // The whole family joins Sam in the lab, each one before their line.
+    // The whole family joins Charlie in the lab, each one before their line.
     const casts = o.beats.filter((b) => b.type === 'cast');
     expect(casts[casts.length - 1]).toEqual({ type: 'cast', characters: ['dad', 'mom', 'theo', 'julien', 'florent'] });
     for (const [who, key] of [['dad', 'line.final2'], ['mom', 'line.final5'], ['theo', 'line.final6'], ['julien', 'line.final7'], ['florent', 'line.final8']] as const) {

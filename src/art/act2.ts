@@ -63,7 +63,7 @@ export function viewExtras(view: ViewId): Extra[] {
   return cache[view] ?? [];
 }
 
-// The place shown by an outside view: the dark view is the place where Sam is.
+// The place shown by an outside view: the dark view is the place where Charlie is.
 export function viewPlace(view: ViewId): 'front' | 'kitchen' | 'garden' | null {
   switch (view) {
     case 'door':

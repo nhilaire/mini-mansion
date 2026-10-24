@@ -1,4 +1,4 @@
-// The adventure: Skia scene + touch overlays. Taps make Sam walk, hotspots open the verb menu, inventory items are
+// The adventure: Skia scene + touch overlays. Taps make Charlie walk, hotspots open the verb menu, inventory items are
 // used on hotspots, characters or other items. Engine outcomes are played as beats (lines, dialogues, keypads, the
 // chess board, sequence pads, documents, captures, outside views, unskippable scenes). Play time feeds the engine's
 // timers through tick inputs, sent only while nothing is being shown or walked. Rules live in src/game.
@@ -115,11 +115,11 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   // Scenes that cannot be skipped (captures, the front door and kitchen views): lines ignore taps meanwhile.
   const cinematicRef = useRef(false);
   const [cinematic, setCinematic] = useState(false);
-  // The adult shown next to Sam during a capture scene.
+  // The adult shown next to Charlie during a capture scene.
   const [captor, setCaptor] = useState<CharacterId | null>(null);
-  // The family gathered around Sam for the final scene.
+  // The family gathered around Charlie for the final scene.
   const [cast, setCast] = useState<CharacterId[]>([]);
-  // The place on screen: it changes on the place-change beat, so that a capture scene plays where Sam was caught
+  // The place on screen: it changes on the place-change beat, so that a capture scene plays where Charlie was caught
   // even though the saved state is already in the cellar.
   const [shown, setShown] = useState<PlaceId>(initialState.place);
 
@@ -218,7 +218,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           break;
         }
         case 'step':
-          // Sam steps aside; the scene goes on once there.
+          // Charlie steps aside; the scene goes on once there.
           walkToRef.current?.(b.pos, b.facing, runNext);
           return;
         case 'ending':

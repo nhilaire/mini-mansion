@@ -79,7 +79,7 @@ describe('lures and wariness (AC-59)', () => {
 describe('the delivery (AC-60)', () => {
   const pending = (place: PlaceId) => wary(place, { timers: { dad: null, dough: null, mom: null, delivery: TIMER_MS.delivery } });
 
-  it('60 s after Papa is wary, CUT13 plays wherever Sam is: the parcel lands in the garden under the cat', () => {
+  it('60 s after Papa is wary, CUT13 plays wherever Charlie is: the parcel lands in the garden under the cat', () => {
     expect(interact(pending('hall'), tick(TIMER_MS.delivery - 1)).state.flags.delivered).toBeUndefined();
     const o = interact(pending('hall'), tick(TIMER_MS.delivery));
     const views = o.beats.flatMap((b) => (b.type === 'view' ? [b.view] : []));
@@ -95,7 +95,7 @@ describe('the delivery (AC-60)', () => {
     expect(findHotspot(garden, 'garden.parcel')).toBeDefined();
   });
 
-  it('nobody catches Sam in front of the house: the driver only delivers', () => {
+  it('nobody catches Charlie in front of the house: the driver only delivers', () => {
     const o = interact(pending('front'), tick(TIMER_MS.delivery));
     expect(o.state.place).toBe('front');
     expect(o.events).toEqual([]);
@@ -118,7 +118,7 @@ describe('the hose (AC-61)', () => {
     expect(intoHerRoom.events).toEqual([{ type: 'capture', room: 'parents', count: 1 }]);
   });
 
-  it('she comes back 90 s later and catches Sam still in the garden', () => {
+  it('she comes back 90 s later and catches Charlie still in the garden', () => {
     const s = interact(gardening(), use('pool.tap')).state;
     const inGarden = { ...s, place: 'garden' as const };
     expect(interact(inGarden, tick(TIMER_MS.change - 1)).state.chars.mom).toBe('changing');
@@ -334,7 +334,7 @@ describe('the tonka bean and the end (AC-67, AC-68)', () => {
     expect(o.beats.some((b) => b.type === 'ending')).toBe(false);
   });
 
-  it('without it, the recipe asks for the secret touch; the family gathers once Sam is back in the lab with it', () => {
+  it('without it, the recipe asks for the secret touch; the family gathers once Charlie is back in the lab with it', () => {
     const done = playAll(lab([]), pieces);
     expect(done.outcomes[2].beats).toContainEqual(said('hero', 'line.recipeTonka'));
     expect(done.state.finished).toBe(false);
@@ -367,7 +367,7 @@ describe('the timer order (AC-69)', () => {
   });
 });
 
-describe('Sam steps aside when an inhabitant arrives where Sam stands', () => {
+describe('Charlie steps aside when an inhabitant arrives where Charlie stands', () => {
   it.each([
     ['florent', 'music', 'sticks', 'music.drums', 'line.florentDrums'],
     ['theo', 'living', 'queen', 'living.chess', 'line.theoQueen'],

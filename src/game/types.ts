@@ -60,7 +60,7 @@ export type ItemId =
 
 export type CharacterId = 'dad' | 'mom' | 'julien' | 'florent' | 'theo';
 
-// Who says a line: the hero (Sam), the narrator (cutscene descriptions) or an inhabitant.
+// Who says a line: the hero (Charlie), the narrator (cutscene descriptions) or an inhabitant.
 // The delivery driver only speaks in the delivery scene.
 export type Speaker = 'hero' | 'narrator' | 'driver' | CharacterId;
 
@@ -259,9 +259,9 @@ export type Beat =
   | { type: 'chess' }
   | { type: 'documents' }
   | { type: 'note'; note: NoteId }
-  // A place change; pos/facing are given when it is not the saved place (Sam steps into a room before a capture).
+  // A place change; pos/facing are given when it is not the saved place (Charlie steps into a room before a capture).
   | { type: 'room'; place: PlaceId; pos?: Point; facing?: Facing }
-  // Sam steps aside (an inhabitant arrives where Sam stands).
+  // Charlie steps aside (an inhabitant arrives where Charlie stands).
   | { type: 'step'; pos: Point; facing: Facing }
   | { type: 'capture' }
   // A view of another place without control (PRD outside views).
@@ -270,9 +270,9 @@ export type Beat =
   | { type: 'cinematic'; on: boolean }
   // A pause in a scene (ms of real time).
   | { type: 'wait'; ms: number }
-  // An inhabitant shown next to Sam for a scene (the adult taking Sam to the cellar), or nobody.
+  // An inhabitant shown next to Charlie for a scene (the adult taking Charlie to the cellar), or nobody.
   | { type: 'captor'; character: CharacterId | null }
-  // The inhabitants gathered around Sam for the final scene, in the order they arrived.
+  // The inhabitants gathered around Charlie for the final scene, in the order they arrived.
   | { type: 'cast'; characters: CharacterId[] }
   | { type: 'sfx'; sfx: SfxName }
   | { type: 'ending' };

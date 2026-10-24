@@ -1,4 +1,4 @@
-// The cast: one spec per person (the hero Sam and the five inhabitants) and the sprite sets the renderer uses.
+// The cast: one spec per person (the hero Charlie and the five inhabitants) and the sprite sets the renderer uses.
 // Each inhabitant has a distinct colour and silhouette (PRD "Look, sound and feel").
 import { CharacterId, Facing } from '../game/types';
 import { C } from './palette';

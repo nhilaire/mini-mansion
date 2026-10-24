@@ -1,6 +1,6 @@
 // The walkthrough from a new game to the ending: used by the engine tests and to generate the Maestro walkthrough
 // flow. E18 (side gates) is taken on the way; the office is freed the first time by the dough (E19), whose single
-// timer suits an automated run better than the three doorbell timers (E16, covered by the unit tests). Sam waits next
+// timer suits an automated run better than the three doorbell timers (E16, covered by the unit tests). Charlie waits next
 // to each window (the corridor for the office) so that the automated run fits the timed windows.
 import { SOLUTION_MOVES } from './chess';
 import { Input, ItemId, KeypadId, PadId } from './types';
