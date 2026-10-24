@@ -1,6 +1,6 @@
 # Device checks: Mini Mansion v0.2.0
 
-Commit: 0faa1e4 (APK built and verified on this commit; the AC-66 test added afterwards changes tests only)
+Commit: 1b38889 (verified with the APK built on 0faa1e4; 0faa1e4..1b38889 only changes a test and the evidence)
 APK: dist/mini-mansion-0.2.0-universal.apk, SHA-256 af4a65bdbe5b782077d3c372914f4abfafb15d79c5db07698b586085ac76f15a
 Device: emulator sdk_gphone64_x86_64, Android 16 (API 36), 2400x1080 landscape
 Date: 2026-10-24
@@ -16,7 +16,7 @@ in `raw/device-*.txt` (local, git-ignored).
 | No advertising ID, few permissions (privacy) | `aapt dump badging <apk>` | PASS: no `AD_ID` / ad services permission; only INTERNET, VIBRATE, ACCESS_NETWORK_STATE, WAKE_LOCK, MODIFY_AUDIO_SETTINGS and the dynamic receiver permission |
 | Nothing sent after « Refuser » (AC-06) | `setprop debug.firebase.analytics.app`, `logcat -c`, `.maestro/smoke.yaml` (fresh install, refuse, new game), then `logcat -s FA FA-SVC` (raw/device-logcat-refused.txt) | PASS: 0 `Logging event` lines (run on the a0908c4 APK; the consent and telemetry code did not change since) |
 | Events sent after « Accepter » (AC-08) | `verify.mjs --telemetry` (REPORT.md step 13, raw/logcat-telemetry.txt) | PASS: game_start, tutorial_complete, puzzle_solved seen |
-| Cold start < 3 s (AC-46) | `verify.mjs` (REPORT.md step 10) | PASS: median 1509 ms |
+| Cold start < 3 s (AC-46) | `verify.mjs` (REPORT.md step 10) | PASS: median 1123 ms |
 | No crash during the flows (AC-47) | `verify.mjs` (REPORT.md step 12: crash buffer cleared before the run, empty after) | PASS: 0 fatal log lines |
 | No ANR during the flows (AC-47) | `dumpsys dropbox --print data_app_anr` and `logcat -b events` `am_anr` (raw/device-anr.txt); the events buffer starts at the emulator boot (10-24 10:02), before this verification run | PASS: 0 ANR entries for the package |
 
