@@ -49,7 +49,6 @@ export type ItemId =
   | 'riceflour'
   // Act II.
   | 'patches'
-  | 'hairdryer'
   | 'sardines'
   | 'tonka'
   | 'pump'
@@ -57,7 +56,15 @@ export type ItemId =
   | 'scrap2'
   | 'scrap3'
   | 'hat'
-  | 'fuse';
+  | 'fuse'
+  // Théo's electromagnet experiment (E27).
+  | 'wire'
+  | 'nail'
+  | 'battery'
+  | 'plug'
+  | 'coil'
+  | 'magnet'
+  | 'magnetPlug';
 
 export type CharacterId = 'dad' | 'mom' | 'julien' | 'florent' | 'theo';
 
@@ -135,6 +142,11 @@ export type Flag =
   | 'delivered'
   | 'sardines_taken'
   | 'hairdryer_taken'
+  | 'wire_taken'
+  | 'nail_taken'
+  | 'battery_taken'
+  | 'plug_taken'
+  | 'magnet_ready'
   | 'patches_taken'
   | 'cat_fed'
   | 'parcel_taken'

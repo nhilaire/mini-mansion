@@ -21,7 +21,9 @@ Last updated: 2026-10-24
 > of the house and a front door that Papa locks again, the house key kept; the same evening: Papa seen coming out to
 > the salesman, the hatch locking again behind Charlie, the lemon smell and the warmed message said aloud, the whole
 > family seen at the end, in the kitchen or in the lab, lines that cannot be tapped away, the washing machine in 1 min,
-> the doorbell answered in 15 s, the garden ways marked by wicket gates), which amend this PRD: timed doorbell sequence, kitchen/garden/front captures, side gates, merged music corner and dining
+> the doorbell answered in 15 s, the garden ways marked by wicket gates; 2026-10-25, after a test by another player:
+> the hair dryer stays plugged on its hook, and the power cut comes from Théo's electromagnet experiment, explained by a
+> second science magazine in Julien's room and assembled from four found objects), which amend this PRD: timed doorbell sequence, kitchen/garden/front captures, side gates, merged music corner and dining
 > room, breaker, cellar hatch, lab door code, optional kitchen recipe, art from the author's room photos. Every rule
 > kept is restated here: this PRD is the only source of truth.
 
@@ -192,10 +194,10 @@ means the front of the house (`front`).
 | laundry | Buanderie secrète (Papa's lab, his recipe notebook with three torn pages) | door -> attic |
 | landing | Couloir de l'étage (doors in this order from the stairs) | stairs -> hall; door 1 -> wc1; door 2 -> julien; door 3 -> bathroom; door 4 -> theo; door 5 -> florent; door 6 -> parents |
 | wc1 | WC de l'étage (Théo's science magazine, open at « l'encre invisible au citron ») | door -> landing |
-| julien | Chambre de Julien (trophies, medals) | door -> landing |
-| bathroom | Salle de bains du couloir (hair dryer) | door -> landing |
+| julien | Chambre de Julien (trophies, medals, a science magazine Théo left there, open at « l'électroaimant ») | door -> landing |
+| bathroom | Salle de bains du couloir (hair dryer on its hook, plugged in) | door -> landing |
 | theo | Chambre de Théo (Rubik's Cubes, chess posters) | door -> landing |
-| florent | Chambre de Florent (Nerf, video games, Nerf modding kit, an overloaded power strip) | door -> landing |
+| florent | Chambre de Florent (Nerf, video games, Nerf modding kit, an overloaded power strip with Papa's post-it) | door -> landing |
 | parents | Chambre des parents (bed, painting hiding the safe, sinks, mirror, shower) | door -> landing |
 
 - The secret laundry adjoins the parents' bedroom but has no door to it: the attic is its only access.
@@ -244,7 +246,9 @@ means the front of the house (`front`).
 - The ways between the parts of the garden (the middle path between the football corner and the pool, the way to the
   swing corner) are marked by an open white wicket gate under a wooden arch.
 - An item is removed from the inventory only when it is used up by its puzzle and is no longer needed.
-- An item that is itself the hotspot (the hair dryer on its hook, the sardines, the flours, the pole) disappears from the
+- The hair dryer stays on its hook in the bathroom, plugged in, and is never taken: used alone it answers
+  `line.dryNothing` (« Je n'ai rien à sécher. »); the Mot de Papa used on it is E20.
+- An item that is itself the hotspot (the sardines, the flours, the pole) disappears from the
   scene once taken; furniture (shelves, bench, basket...) stays and says it is empty.
 - When more items are held than the band shows, its last slot is a page button: a framed arrow with one dot per page.
 
@@ -374,14 +378,15 @@ Dependencies (checked by AC-31; the drawer of E28 only gives N14 once Papa is wa
 after CUT07 (E05); E07 after E06 and (E16 or E19); E08 after E03 and E17; E09 after E08; E10 after E09; E14 after
 (E16 or E19, or later E27: the power cut stays possible until the Pince is taken) and E02; E11 after E14; E12 after E10, E11 and E07; E20 after E10; E21 after E20; E22 after
 E17; CUT13 (the delivery) after E07 (60 s after Papa is wary); E23 after CUT13, with the garden free (Maman still folding, or E22); E24 after E23; E25 after E22 and Papa wary (E07);
-E26 after E24 and the Nerf kit taken (E08's Joint torique); E27 after E26; E28 after E25 and E27; E29 after E28; E13
+E26 after E24 and the Nerf kit taken (E08's Joint torique); E27 after E26 and the Électroaimant à brancher assembled; E28 after E25 and E27; E29 after E28; E13
 after E12, E21 and E29; E30 after E19 and E24; the end (CUT11) once E13 and E30 are done, where the last of them was made. E16 and E18 are
 optional.
 
 Items: Clé de la maison, Fusible, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du
 Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau,
 Fragment n° 1, Fragment n° 2, Fragment n° 3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz,
-Sèche-cheveux, Boîte de sardines, Fève tonka, Pompe à vélo, Clé du tiroir (names in the Player
+Boîte de sardines, Fève tonka, Pompe à vélo, Clé du tiroir, Fil de cuivre, Gros clou, Pile, Vieille fiche, Bobine,
+Électroaimant, Électroaimant à brancher (names in the Player
 copy).
 
 | # | Puzzle | Condition | Effect |
@@ -403,14 +408,14 @@ copy).
 | E14 | Drain the pool: open the cover (switch), the Pince (office shelves, Papa's toolbox) on the pump, use the pump, take the Dissolvant from the pool floor | cover switch before E02: `line.coverBall`; pump before the Pince: `line.pumpPlug`; pump with cover closed: `line.pumpCover` | - Pince; the pool empties; + Dissolvant when taken (E14 solved when taken); using the pump again on the drained pool fills it up again, and again drains it (a gag: the Dissolvant can only be taken from the drained pool) |
 | E11 | Use the Dissolvant on the paint stain (attic) | - | - Dissolvant; CUT09: a door with a lock and a keypad appears |
 | E12 | Open the revealed door: the Clé ancienne in the lock and the code 2510 on its keypad, in any order | door used without the code known: `line.doorLocked`; wrong code: `line.codeWrong` | - Clé ancienne; CUT10 when both are done: the door opens; exit attic -> laundry |
-| E20 | Heat the Mot de Papa with the Sèche-cheveux (taken in the corridor bathroom): invisible ink written with lemon juice appears; the idea comes from Théo's science magazine in the upstairs WC (« L'encre invisible au citron : chauffe le papier et le message apparaît ! ») and the note itself smells of lemon (`item.note.look`: « Ce papier sent drôlement le citron… ») | - | notebook N13 (« Ma cachette de la cave s'ouvre si l'on range mes bouteilles de la plus vieille à la plus jeune. »); the note keeps its revealed text (look `item.note.lookInk`) |
+| E20 | Heat the Mot de Papa with the hair dryer, hooked and plugged in the corridor bathroom (use the note on it): invisible ink written with lemon juice appears; the idea comes from Théo's science magazine in the upstairs WC (« L'encre invisible au citron : chauffe le papier et le message apparaît ! ») and the note itself smells of lemon (`item.note.look`: « Ce papier sent drôlement le citron… ») | - | notebook N13 (« Ma cachette de la cave s'ouvre si l'on range mes bouteilles de la plus vieille à la plus jeune. »); the note keeps its revealed text (look `item.note.lookInk`) |
 | E21 | The bottle rack (cellar): tap Papa's four bottles from the oldest to the youngest vintage (1987, 1994, 2003, 2011) on the sequence pad | N13 not in the notebook: `line.bottlesUnknown`; wrong order: `line.bottlesWrong`, the bottles go back, unlimited tries | a hidden compartment opens: + Fragment n° 2 |
 | E22 | Open the garden tap (pool): the hose runs wild in the garden (CUT14) | Maman not gardening: `line.hoseLawn` (the water only waters the lawn) | Maman soaked: mom -> changing for 90 s (the garden is free, her room guarded) |
 | E23 | Use the Boîte de sardines (kitchen fridge) on the neighbours' cat lying on the parcel (garden, after CUT13) | the cat or the parcel used without the sardines: `line.catHiss` | - Boîte de sardines; the cat eats and runs off over the hedge |
 | E24 | Take the parcel (garden) | the cat still on it: `line.catHiss` | + Fève tonka, + Pompe à vélo (`line.parcelOpen`) |
 | E25 | Take Papa's drawer key in Maman's gardening basket, which she leaves in the garden while she changes after the hose (after Papa is wary) | - | + Clé du tiroir |
 | E26 | Repair Florent's bike (garage): the Rustines and the Pompe à vélo, in any order | one of the two only: `line.bikeHalf` | - Rustines, - Pompe à vélo; when Charlie then leaves the garage: CUT15, Florent rides away (florent -> riding) |
-| E27 | Plug the Sèche-cheveux into Florent's overloaded power strip (florent, Florent riding) | Florent not riding: `line.stripNotNow`; Papa not at his desk: `line.fusesNobody`; nothing left to get in the office: `line.fusesNoNeed` | the power cut (CUT18): dad -> fuses (garage) for 60 s; the Sèche-cheveux is kept |
+| E27 | Théo's electromagnet experiment, explained by his science magazine left in Julien's room (« Expérience n° 7 : l'électroaimant ! Enroule du fil de cuivre autour d'un gros clou et relie-le à une pile… ⚠ Ne JAMAIS le brancher sur une prise : court-circuit garanti, tous les plombs de la maison sautent ! »): the Fil de cuivre (garage, on the shelf above the bench) on the Gros clou (garden shed) gives the Bobine; the Pile (TV remote, living room) on the Bobine gives the Électroaimant (Charlie tests it: it attracts a spoon, `line.magnetWorks`); the Vieille fiche (attic boxes) on the Électroaimant gives the Électroaimant à brancher; plug it into Florent's overloaded power strip, which carries Papa's yellow post-it « Florent ! Plus RIEN sur cette multiprise, ça fait sauter les plombs ! » (florent, Florent riding) | a combination out of this order: the generic wrong lines; Florent not riding: `line.stripNotNow`; Papa not at his desk: `line.fusesNobody`; nothing left to get in the office: `line.fusesNoNeed` | - Fil de cuivre, Gros clou, Pile, Vieille fiche as they are combined; the power cut (CUT18): dad -> fuses (garage) for 60 s; the Électroaimant à brancher is kept |
 | E28 | Open Papa's desk drawer (office) with the Clé du tiroir: his sketchbook, « Rouge, jaune, bleu, vert… C'est vraiment étrange, ce code couleur. » (`e28.open`) | drawer looked at: `office.drawer.look` (« Le tiroir du bureau de Papa. Fermé à clé. »); used without the key: `line.drawerLocked` (« C'est fermé à clé. »), nothing about the key | - Clé du tiroir; Papa's sketchbook: notebook N14 (the trunk colours) |
 | E29 | Open the attic trunk: the colour padlock on the sequence pad (red, yellow, blue, green), its six colour buttons shown in a mixed order (blue, orange, green, red, purple, yellow) | N14 not in the notebook: `line.trunkUnknown`; wrong colours: `line.codeWrong`, unlimited tries | + Fragment n° 3 |
 | E13 | In the laundry, put the three fragments on Papa's recipe notebook, in any order | fewer than three yet: `line.recipeMore` (the fragment is kept in the notebook) | - Fragments; the recipe is complete: with the tonka bean already in the dough, CUT11 and the Ending; otherwise `line.recipeTonka` (the secret touch is missing), and CUT11 plays in the kitchen when the tonka bean goes into the dough (E30) |
@@ -421,7 +426,7 @@ copy).
   Exceptions: the lures listed in "Lures and wariness" (doorbell, hose, power cut) can be used again under their
   rules, and `puzzle_solved` is emitted on their first success only.
 - The Photo du gâteau and the Mot de Papa are look-only items: they stay in the inventory until the end. The
-  Sèche-cheveux is never used up.
+  Électroaimant à brancher is never used up.
 - Items can be taken as soon as Charlie can stand next to them; items found before their puzzle stay in the inventory.
 - Always winnable: from every reachable state, the ending is reachable (exhaustive search of the engine's state
   graph, timers included, in a unit test), and no item needed later can be removed early.
@@ -511,15 +516,17 @@ checked by a unit test:
 - E11: stain look; garage paint look (the same white as the attic wall). E12: N10, N12; door look (lock + keypad).
 - E13: N12; recipe notebook look (three torn pages). E15: hatch look from below (no handle, a mechanism); stones look (two stones sticking out, too far apart to press both
   at once); `line.stoneAlone`; wine rack look (an iron bar).
-- E20: Mot de Papa look (« Ce papier sent drôlement le citron… »); Théo's science magazine in the upstairs WC (lemon
-  ink, heat the paper); hair dryer look (bathroom); N12.
+- E20: Mot de Papa look (« Ce papier sent fortement le citron… »); Théo's science magazine in the upstairs WC (lemon
+  ink, heat the paper); hair dryer look (bathroom: plugged in, ready to dry something); N12.
 - E21: N13 (in order from the oldest to the youngest); bottle rack look (four dusty bottles, their vintages on the
   labels; they seem to turn on a mechanism); N12 (a piece in the cellar).
 - E22: garden tap look (the hose runs to the garden); Maman humming heard from the football corner; `line.hoseLawn`.
 - E23: cat look (it hisses, it looks hungry); fridge look (a tin of sardines next to the rice milk); N16.
 - E24: parcel look (addressed to Papa, a bakery supplier's label). E25: `line.dadKey` (Papa gives the key to Maman); basket look.
 - E26: bike look (flat tyre); Nerf kit look (puncture patches next to the O-ring); N15 (the pump is for Florent).
-- E27: power strip look (« console, ampli, guirlande… un appareil de plus et tout saute ! »); `dad.doorWary`.
+- E27: Théo's second science magazine in Julien's room (the electromagnet and its warning); power strip look (« console,
+  ampli, guirlande… » and Papa's yellow post-it stuck on it: « Florent ! Plus RIEN sur cette multiprise, ça fait sauter
+  les plombs ! »); `line.magnetWorks`; `dad.doorWary`.
 - E28: `line.dadKey` (Papa gave his drawer key to Maman); drawer look (only says it is locked); drawer key look. E29: trunk look (a padlock with
   colour wheels); N14; N12 (a piece in the attic trunk).
 - E30: fragment n° 2 look (« une fève tonka râpée dans la pâte du robot »); `line.recipeTonka`; N15 and the parcel look (the
@@ -725,6 +732,10 @@ Puzzles, characters, captures, timers
 - AC-71 [unit] Given the open fridge, then the rice milk and the tin of sardines are two hotspots taken one at a time,
   each gone from the fridge once taken; given the flours cupboard, then the chestnut flour and the rice flour are taken
   one at a time and the cupboard stays.
+- AC-72 [unit] Given the Fil de cuivre, the Gros clou, the Pile and the Vieille fiche, then wire on nail gives the
+  Bobine, the Pile on the Bobine gives the Électroaimant (`line.magnetWorks`), the Vieille fiche on it gives the
+  Électroaimant à brancher (each pair in either order), any other combination answers the generic wrong lines; the
+  magazine in Julien's room explains the experiment and warns that plugging it in trips every fuse of the house.
 - AC-29 [unit] Given the notebook, then each entry N01-N16 is added once on its trigger (N11 at the end of CUT08,
   N16 at the end of CUT13),
   is marked unread until the notebook is opened, and no entry appears before its trigger.
@@ -754,12 +765,13 @@ Puzzles, characters, captures, timers
   Rustines and the Pompe à vélo used on the bike in any order, then E26 is solved (one alone: `line.bikeHalf`), and
   when Charlie leaves the garage CUT15 plays and Florent rides away with the bike (no longer in the garage): his room is
   free until CUT11.
-- AC-64 [unit] Given Florent riding and Papa at his desk, when the Sèche-cheveux is used on the power strip, then
+- AC-64 [unit] Given Florent riding and Papa at his desk, when the Électroaimant à brancher is used on the power strip, then
   CUT18 plays and Papa is at the garage fuse box for 60 s (garage guarded, office free), then back at his desk (Charlie
   caught if in the office); the first cut plays `line.dadFuses`, later ones `line.fusesAgain`; it can be caused again
   until E28 is solved (N14 found) and the Pince is taken, then `line.fusesNoNeed`; while Florent is not riding the strip
-  answers `line.stripNotNow`; the Sèche-cheveux is never used up and no other object changes state.
-- AC-65 [unit] Given the Sèche-cheveux used on the Mot de Papa, then N13 is added once (E20); given the bottle rack,
+  answers `line.stripNotNow`; the Électroaimant à brancher is never used up and no other object changes state.
+- AC-65 [unit] Given the Mot de Papa used on the hair dryer in the bathroom, then N13 is added once (E20); the hair
+  dryer used alone answers `line.dryNothing` and it cannot be taken; given the bottle rack,
   then it refuses before N13 (`line.bottlesUnknown`), accepts only 1987, 1994, 2003, 2011 in that order, resets on a
   wrong order (`line.bottlesWrong`, unlimited tries) and gives the Fragment n° 2 once (E21).
 - AC-66 [unit] Given the desk drawer, then it refuses without the Clé du tiroir (`line.drawerLocked`) and with it adds
@@ -906,7 +918,7 @@ Final app name: fr "Mini Mansion", en "Mini Mansion". Language-specific assets: 
 | about.story | Enfant, je passais des heures à fouiller chaque pièce du manoir de Maniac Mansion, chez une famille complètement folle. Cette fois, j'ai voulu que le manoir soit une vraie maison : la mienne, transformée en pixel art, avec ses habitants loufoques et un secret bien gardé. | As a child, I spent hours searching every room of the Maniac Mansion manor, home to a completely crazy family. This time, I wanted the mansion to be a real house: mine, turned into pixel art, with its zany inhabitants and a well-kept secret. |
 | about.authorTitle | Un mot de l'auteur | A word from the author |
 | about.dataTitle | Tes données | Your data |
-| item names | Clé de la maison, Fusible, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau, Fragment n° 1, Fragment n° 2, Fragment n° 3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz, Sèche-cheveux, Boîte de sardines, Fève tonka, Pompe à vélo, Clé du tiroir | House key, Fuse, Gate key, Pole, Extension, Extended pole, Drumsticks, White queen, Rubik's Cube booklet, O-ring, Puncture patches, Adjustable wrench, Pliers, Detergent, Paint thinner, Old key, Cake photo, Scrap no. 1, Scrap no. 2, Scrap no. 3, Papa's note, Iron bar, Rice milk, Chestnut flour, Rice flour, Hair dryer, Tin of sardines, Tonka bean, Bike pump, Drawer key |
+| item names | Clé de la maison, Fusible, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau, Fragment n° 1, Fragment n° 2, Fragment n° 3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz, Boîte de sardines, Fève tonka, Pompe à vélo, Clé du tiroir, Fil de cuivre, Gros clou, Pile, Vieille fiche, Bobine, Électroaimant, Électroaimant à brancher | House key, Fuse, Gate key, Pole, Extension, Extended pole, Drumsticks, White queen, Rubik's Cube booklet, O-ring, Puncture patches, Adjustable wrench, Pliers, Detergent, Paint thinner, Old key, Cake photo, Scrap no. 1, Scrap no. 2, Scrap no. 3, Papa's note, Iron bar, Rice milk, Chestnut flour, Rice flour, Tin of sardines, Tonka bean, Bike pump, Drawer key, Copper wire, Big nail, Battery, Old plug, Coil, Electromagnet, Electromagnet with a plug |
 
 ## Out of scope
 

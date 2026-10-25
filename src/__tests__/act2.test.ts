@@ -171,7 +171,8 @@ describe('the cat, the parcel and the shed (AC-62)', () => {
     expect(puzzles(o)).toEqual([25]);
     expect(o.state.inventory).toEqual(['keyring']);
     expect(findHotspot(o.state, 'garden.basket')).toBeUndefined();
-    expect(findHotspot(garden(), 'garden.shed')?.verbs).toEqual(['look']);
+    // The shed now holds the big nail of Théo's electromagnet (T-87).
+    expect(findHotspot(garden(), 'garden.shed')?.verbs).toEqual(['look', 'take']);
   });
 
   it('the sardines are in the fridge, next to the rice milk', () => {
@@ -208,22 +209,22 @@ describe('Florent\'s bike (AC-63)', () => {
 });
 
 describe('the power cut (AC-64)', () => {
-  const room = (extra: Partial<GameState> = {}) => wary('florent', { chars: chars({ florent: 'riding' }), inventory: ['hairdryer'], ...extra });
+  const room = (extra: Partial<GameState> = {}) => wary('florent', { chars: chars({ florent: 'riding' }), inventory: ['magnetPlug'], ...extra });
 
   it('only once Florent rides away: his console runs on the power strip', () => {
     for (const florent of ['in_room', 'drumming'] as const) {
-      const o = interact(room({ chars: chars({ florent }) }), give('hairdryer', 'florent.strip'));
+      const o = interact(room({ chars: chars({ florent }) }), give('magnetPlug', 'florent.strip'));
       expect(o.beats).toContainEqual(said('hero', 'line.stripNotNow'));
       expect(o.state.chars.dad).toBe('at_desk');
     }
   });
 
   it('the fuses blow (CUT18): Papa is at the garage fuse box for 60 s, the office is free, then he comes back', () => {
-    const o = interact(room(), give('hairdryer', 'florent.strip'));
+    const o = interact(room(), give('magnetPlug', 'florent.strip'));
     expect(o.beats).toContainEqual({ type: 'view', view: 'dark' });
     expect(o.beats).toContainEqual(said('dad', 'line.dadFuses'));
     expect(puzzles(o)).toEqual([27]);
-    expect(o.state.inventory).toEqual(['hairdryer']);
+    expect(o.state.inventory).toEqual(['magnetPlug']);
     expect(o.state.chars.dad).toBe('fuses');
     expect(occupant('garage', o.state.chars)).toBe('dad');
     expect(occupant('office', o.state.chars)).toBeNull();
@@ -238,29 +239,29 @@ describe('the power cut (AC-64)', () => {
   });
 
   it('can be caused again while the office holds something needed, then is useless; never while Papa is away', () => {
-    const first = interact(room(), give('hairdryer', 'florent.strip')).state;
-    expect(interact(first, give('hairdryer', 'florent.strip')).beats).toContainEqual(said('hero', 'line.fusesNobody'));
+    const first = interact(room(), give('magnetPlug', 'florent.strip')).state;
+    expect(interact(first, give('magnetPlug', 'florent.strip')).beats).toContainEqual(said('hero', 'line.fusesNobody'));
     const back = interact(first, tick(TIMER_MS.fuses)).state;
-    const again = interact(back, give('hairdryer', 'florent.strip'));
+    const again = interact(back, give('magnetPlug', 'florent.strip'));
     expect(again.beats).toContainEqual(said('dad', 'line.fusesAgain'));
     expect(again.events).toEqual([]);
     const drawerOnly = room({ flags: flags('computer_read', 'dad_wary', 'drawer_open') });
-    expect(interact(drawerOnly, give('hairdryer', 'florent.strip')).state.chars.dad).toBe('fuses');
+    expect(interact(drawerOnly, give('magnetPlug', 'florent.strip')).state.chars.dad).toBe('fuses');
     const nothingLeft = room({ flags: flags('computer_read', 'dad_wary', 'drawer_open', 'pliers_taken') });
-    const no = interact(nothingLeft, give('hairdryer', 'florent.strip'));
+    const no = interact(nothingLeft, give('magnetPlug', 'florent.strip'));
     expect(no.beats).toEqual([said('hero', 'line.fusesNoNeed')]);
     expect(no.state.chars.dad).toBe('at_desk');
   });
 });
 
 describe('invisible ink and the cellar bottles (AC-65)', () => {
-  it('the hair dryer on Papa\'s note reveals the invisible ink once (E20)', () => {
-    const o = interact(at('hall', { inventory: ['hairdryer', 'note'] }), { kind: 'item', item: 'hairdryer', target: 'item:note' });
+  it('the hair dryer on its hook warms Papa\'s note and reveals the invisible ink once (E20)', () => {
+    const o = interact(at('bathroom', { inventory: ['note'] }), give('note', 'bathroom.hairdryer'));
     expect(puzzles(o)).toEqual([20]);
     expect(o.state.notes).toContain('n13');
-    expect(o.state.inventory).toEqual(['hairdryer', 'note']);
+    expect(o.state.inventory).toEqual(['note']);
     expect(interact(o.state, { kind: 'lookItem', item: 'note' }).beats).toEqual([said('hero', 'item.note.lookInk')]);
-    const again = interact(o.state, { kind: 'item', item: 'note', target: 'item:hairdryer' });
+    const again = interact(o.state, give('note', 'bathroom.hairdryer'));
     expect(again.events).toEqual([]);
     expect(again.beats.some((b) => b.type === 'note')).toBe(false);
   });
@@ -421,13 +422,12 @@ describe('the outside views of Act II cannot be skipped (AC-49)', () => {
   it('Florent riding away and the power cut', () => {
     const fixed = at('garage', { flags: flags('bike_fixed') });
     wrapped(interact(fixed, go('garage.toCorridor')).beats, 'ride');
-    wrapped(interact(wary('florent', { chars: chars({ florent: 'riding' }), inventory: ['hairdryer'] }), give('hairdryer', 'florent.strip')).beats, 'dark');
+    wrapped(interact(wary('florent', { chars: chars({ florent: 'riding' }), inventory: ['magnetPlug'] }), give('magnetPlug', 'florent.strip')).beats, 'dark');
   });
 });
 
 describe('items taken from the wall or a shelf leave nothing to tap', () => {
   it.each([
-    ['bathroom', 'bathroom.hairdryer', 'hairdryer'],
     ['utility', 'utility.chestnut', 'chestnut'],
     ['utility', 'utility.riceflour', 'riceflour'],
     ['garage', 'garage.pole', 'pole'],
@@ -493,7 +493,7 @@ describe('the 2026-10-24 amendment', () => {
   });
 
   it('warming the note reads the revealed message aloud', () => {
-    const o = interact(at('hall', { inventory: ['hairdryer', 'note'] }), give('hairdryer', 'item:note'));
+    const o = interact(at('bathroom', { inventory: ['note'] }), give('note', 'bathroom.hairdryer'));
     expect(keys(o.beats)).toEqual(['e20.ink', 'e20.read']);
     expect(fr('e20.read')).toMatch(/de la plus vieille à la plus jeune/);
   });
@@ -548,5 +548,62 @@ describe('phone feedback of 2026-10-24 (evening)', () => {
       for (let i = 1; i < xs.length; i++) expect(xs[i] - xs[i - 1]).toBeGreaterThanOrEqual(26);
       for (const s of spots) expect(s.x >= 14 && s.x <= 306).toBe(true);
     }
+  });
+});
+
+// T-87: the hair dryer stays on its hook; Théo's electromagnet makes the power cut (AC-64, AC-65, AC-72).
+describe("Théo's electromagnet and the hair dryer on its hook", () => {
+  const look = (target: string): Input => ({ kind: 'verb', verb: 'look', target });
+  const fr = (key: string) => line(frStrings, key);
+
+  it('the hair dryer cannot be taken; used alone it has nothing to dry', () => {
+    const bath = at('bathroom');
+    expect(findHotspot(bath, 'bathroom.hairdryer')?.verbs).toEqual(['look', 'use']);
+    expect(interact(bath, use('bathroom.hairdryer')).beats).toEqual([said('hero', 'line.dryNothing')]);
+    expect(fr('line.dryNothing')).toBe("Je n'ai rien à sécher.");
+    expect(fr('bathroom.hairdryer.look')).toMatch(/branché/);
+  });
+
+  it('the four parts are found in the garage, the garden shed, the TV remote and the attic boxes', () => {
+    const takes: [PlaceId, string, ItemId][] = [
+      ['garage', 'garage.wire', 'wire'],
+      ['garden', 'garden.shed', 'nail'],
+      ['living', 'living.remote', 'battery'],
+      ['attic', 'attic.boxes', 'plug'],
+    ];
+    for (const [place, target, item] of takes) {
+      const o = interact(at(place), take(target));
+      expect(o.state.inventory).toEqual([item]);
+      expect(keys(interact(o.state, take(target)).beats).every((k) => k.endsWith('.empty'))).toBe(true);
+    }
+    expect(findHotspot(interact(at('garage'), take('garage.wire')).state, 'garage.wire')).toBeUndefined();
+  });
+
+  it('wire on nail, then the battery, then the old plug: the electromagnet to plug in (AC-72)', () => {
+    const s = at('hall', { inventory: ['wire', 'nail', 'battery', 'plug'] });
+    expect(interact(s, give('battery', 'item:nail')).state.inventory).toEqual(s.inventory);
+    expect(interact(s, give('plug', 'item:wire')).state.inventory).toEqual(s.inventory);
+    const coil = interact(s, give('nail', 'item:wire'));
+    expect(coil.state.inventory).toEqual(['battery', 'plug', 'coil']);
+    expect(keys(coil.beats)).toEqual(['combine.coil']);
+    const magnet = interact(coil.state, give('coil', 'item:battery'));
+    expect(magnet.state.inventory).toEqual(['plug', 'magnet']);
+    expect(keys(magnet.beats)).toEqual(['line.magnetWorks']);
+    const ready = interact(magnet.state, give('magnet', 'item:plug'));
+    expect(ready.state.inventory).toEqual(['magnetPlug']);
+    expect(ready.state.flags.magnet_ready).toBe(true);
+    expect(keys(ready.beats)).toEqual(['combine.magnetPlug']);
+  });
+
+  it("the magazine in Julien's room explains the experiment and warns that plugging it in blows every fuse", () => {
+    const room = at('julien', { chars: chars({ julien: 'football' }) });
+    expect(keys(interact(room, look('julien.magazine')).beats)).toEqual(['julien.magazine.look']);
+    expect(fr('julien.magazine.look')).toMatch(/fil de cuivre.*gros clou.*pile/);
+    expect(fr('julien.magazine.look')).toMatch(/JAMAIS le brancher sur une prise.*plombs/);
+  });
+
+  it("Papa's post-it on Florent's power strip says one more device blows the fuses", () => {
+    expect(fr('florent.strip.look')).toMatch(/post-it de Papa/);
+    expect(fr('florent.strip.look')).toMatch(/ça fait sauter les plombs/);
   });
 });

@@ -239,7 +239,6 @@ describe('French typography and tone (AC-45)', () => {
       'Farine de châtaigne',
       'Farine de riz',
       'Rustines',
-      'Sèche-cheveux',
       'Boîte de sardines',
       'Fève tonka',
       'Pompe à vélo',
@@ -248,6 +247,13 @@ describe('French typography and tone (AC-45)', () => {
       'Fragment n° 3',
       'Toque de Papa',
       'Fusible',
+      'Fil de cuivre',
+      'Gros clou',
+      'Pile',
+      'Vieille fiche',
+      'Bobine',
+      'Électroaimant',
+      'Électroaimant à brancher',
     ]);
   });
 
@@ -292,7 +298,6 @@ describe('French typography and tone (AC-45)', () => {
       'Chestnut flour',
       'Rice flour',
       'Puncture patches',
-      'Hair dryer',
       'Tin of sardines',
       'Tonka bean',
       'Bike pump',
@@ -301,6 +306,13 @@ describe('French typography and tone (AC-45)', () => {
       'Scrap no. 3',
       "Papa's chef's hat",
       'Fuse',
+      'Copper wire',
+      'Big nail',
+      'Battery',
+      'Old plug',
+      'Coil',
+      'Electromagnet',
+      'Electromagnet with a plug',
     ]);
     expect(en.intro.cards[2]).toBe('Charlie heard it in the playground and decided to investigate.');
     expect(en.intro.cards[3]).toBe('Your goal: find where this famous recipe is hidden, and what it really is. It is somewhere in this house…');

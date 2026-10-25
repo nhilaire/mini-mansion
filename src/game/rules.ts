@@ -438,7 +438,11 @@ const TAKES: Readonly<Record<string, readonly [Flag, ItemId | readonly ItemId[],
   'utility.chestnut': ['chestnut_taken', 'chestnut', 'utility.chestnut.take'],
   'utility.riceflour': ['riceflour_taken', 'riceflour', 'utility.riceflour.take'],
   'hall.console': ['fuse_taken', 'fuse', 'hall.console.take'],
-  'bathroom.hairdryer': ['hairdryer_taken', 'hairdryer', 'bathroom.hairdryer.take'],
+  // The four parts of Théo's electromagnet (E27).
+  'garage.wire': ['wire_taken', 'wire', 'garage.wire.take'],
+  'garden.shed': ['nail_taken', 'nail', 'garden.shed.take'],
+  'living.remote': ['battery_taken', 'battery', 'living.remote.take'],
+  'attic.boxes': ['plug_taken', 'plug', 'attic.boxes.take'],
   // E25: the drawer key in Maman's gardening basket, left in the garden while she changes.
   'garden.basket': ['keyring_taken', 'keyring', 'garden.basket.take', 25],
 };
@@ -707,6 +711,10 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
     case 'florent.strip:use':
       c.hero('florent.strip.use');
       return;
+    // The hair dryer stays plugged in on its hook: nothing to dry without Papa's note.
+    case 'bathroom.hairdryer:use':
+      c.hero('line.dryNothing');
+      return;
     // E15: the cellar hatch, locked from below; the two wall stones, pressed together, unlock it.
     case 'cellar.hatch:use':
       c.hero('line.hatchStuck');
@@ -772,7 +780,8 @@ export const USE_RULES: readonly string[] = [
   'sardines>garden.cat',
   'patches>garage.bike',
   'pump>garage.bike',
-  'hairdryer>florent.strip',
+  'magnetPlug>florent.strip',
+  'note>bathroom.hairdryer',
   'keyring>office.drawer',
   'scrap2>laundry.notebook',
   'scrap3>laundry.notebook',
@@ -886,8 +895,13 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
       if (c.is('patches_in') && c.is('pump_in')) c.set('bike_fixed').sfx('bikebell').hero('e26.fixed').solve(26);
       else c.hero('line.bikeHalf');
       return;
-    // E27: the hair dryer on Florent's power strip blows the fuses; Papa goes down to the garage.
-    case 'hairdryer>florent.strip':
+    // E20: the hair dryer on its hook warms Papa's note: invisible ink written with lemon juice appears.
+    case 'note>bathroom.hairdryer':
+      if (c.is('ink_revealed')) c.hero('item.note.lookInk');
+      else c.set('ink_revealed').hero('e20.ink').hero('e20.read').note('n13').solve(20);
+      return;
+    // E27: Théo's electromagnet plugged into Florent's power strip blows the fuses; Papa goes down to the garage.
+    case 'magnetPlug>florent.strip':
       if (c.state('florent') !== 'riding') c.hero('line.stripNotNow');
       else if (c.is('drawer_open') && c.is('pliers_taken')) c.hero('line.fusesNoNeed');
       else if (c.state('dad') !== 'at_desk' && c.state('dad') !== 'answering') c.hero('line.fusesNobody');
@@ -971,7 +985,7 @@ function openLab(c: Ctx): void {
 }
 
 // The item-on-item rules (checked by a test, used to prune the exhaustive search).
-export const COMBINE_RULES: readonly string[] = ['extension+pole', 'hairdryer+note'];
+export const COMBINE_RULES: readonly string[] = ['extension+pole', 'nail+wire', 'battery+coil', 'magnet+plug'];
 
 function combine(c: Ctx, a: ItemId, b: ItemId): void {
   const pair = [a, b].sort().join('+');
@@ -979,10 +993,17 @@ function combine(c: Ctx, a: ItemId, b: ItemId): void {
     c.remove('pole').remove('extension').give('longpole').hero('combine.pole');
     return;
   }
-  // E20: the hair dryer warms Papa's note: invisible ink written with lemon juice appears.
-  if (pair === 'hairdryer+note') {
-    if (c.is('ink_revealed')) c.hero('item.note.lookInk');
-    else c.set('ink_revealed').hero('e20.ink').hero('e20.read').note('n13').solve(20);
+  // Théo's electromagnet (E27): the wire around the nail, then the battery, then the old plug.
+  if (pair === 'nail+wire') {
+    c.remove('wire').remove('nail').give('coil').hero('combine.coil');
+    return;
+  }
+  if (pair === 'battery+coil') {
+    c.remove('battery').remove('coil').give('magnet').sfx('gag').hero('line.magnetWorks');
+    return;
+  }
+  if (pair === 'magnet+plug') {
+    c.remove('magnet').remove('plug').give('magnetPlug').set('magnet_ready').hero('combine.magnetPlug');
     return;
   }
   c.wrong();

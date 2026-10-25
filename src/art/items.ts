@@ -200,7 +200,6 @@ const ICONS: Record<ItemId, string[]> = {
   scrap: [E, '...pppppppp.....', '...pkkkkkpppp...', '...pppppppppp...', '...pkkkkkkkpp...', '...pppppppppp...', '...pkkkkpppp....', '...ppppppppp....', '...pkkkkkkp.....', '...pppppppp.....', '....pp.ppp......', E, E, E, E, E],
   note: [E, E, '...mmmmmmmmmm...', '...mkkkkkkkkm...', '...mmmmmmmmmm...', '...mkkkkkkmmm...', '...mmmmmmmmmm...', '...mkkkkkkkkm...', '...mmmmmmmmmm...', '...mkkkkmmmmm...', '...mmmmmmmmGG...', '...mmmmmmmmG....', E, E, E, E],
   patches: [E, '..rrrr..........', '.rRRRRr.........', '.rRRRRr...rrrr..', '.rRRRRr..rRRRRr.', '..rrrr...rRRRRr.', '.........rRRRRr.', '..........rrrr..', E, '...iiiiiiiiii...', '...iIIIIIIIIi...', '...iIlllllIIiii.', '...iIIIIIIIIi...', '...iiiiiiiiii...', E, E],
-  hairdryer: [E, '..PPPPPPPPP.....', '.PPPPPPPPPPPP...', 'kPPPPPPPPPPPPP..', 'kPPPPPPPPPPPPP..', '.PPPPPPPPPPPP...', '..PPPPPPPPP.....', '.......PPP......', '.......PPP......', '.......PPP......', '.......PPP......', '.......PPPk.....', '.......PPP.k....', '...........kk...', E, E],
   sardines: [E, E, E, '.IIIIIIIIIIIIII.', 'IhhhhhhhhhhhhhhI', 'IllllllllllllllI', 'IlwwlllllllllllI', 'IlwwllllnnnnnllI', 'IllllllllllllllI', 'IhhhhhhhhhhhhhhI', '.IIIIIIIIIIIIII.', E, E, E, E, E],
   tonka: [E, E, E, '.....tttttt.....', '...ttTTtttttt...', '..tTTttttTttt...', '.ttTttttttTttt..', '.tttttTttttttt..', '.tttTtttttTttt..', '..ttttttTtttt...', '...ttttttttt....', '.....tttttt.....', E, E, E, E],
   pump: [E, '.....kkkkkk.....', '.......kk.......', '.......II.......', '......IIII......', '......ShhS......', '......ShhS......', '......ShhS..rr..', '......ShhSrrrr..', '......ShhS.rr...', '......ShhS.r.r..', '......ShhS......', '......SSSS......', '....kkkkkkkk....', E, E],
@@ -209,6 +208,14 @@ const ICONS: Record<ItemId, string[]> = {
   scrap3: [E, '...pppppppp.....', '...pkkkkkpppp...', '...pppppppppp...', '...pkkkkkkkpp...', '...pppppppppp...', '...pkkkkpppp....', '...ppppppppp....', '...pkkkkkkp.....', '...pppppppp.....', '....pp.ppp......', '.........kkk....', '...........k....', '.........kkk....', '...........k....', '.........kkk....'],
   hat: [E, '....ww.ww.ww....', '...wwwwwwwwww...', '..wwwwwwwwwwww..', '..wwwwwcwwwwww..', '..wwwwwwwwwcww..', '...wwwwwwwwww...', '....wwwwwwww....', '....wcccccccw...', '....wwwwwwww....', '....wrrrrrrw....', '....wwwwwwww....', E, E, E, E],
   fuse: [E, E, '......kkkk......', '......IIII......', '.....wwwwww.....', '.....wrrrrw.....', '.....wwwwww.....', '.....wrrrrw.....', '.....wwwwww.....', '......IIII......', '......kkkk......', E, E, E, E, E],
+  // Théo's electromagnet and its parts (E27).
+  wire: [E, E, '....nnnnnnn.....', '...nBBBBBBBn....', '..nBnnnnnnnBn...', '..nBn.....nBn...', '..nBn..k..nBn...', '..nBn.....nBn...', '..nBnnnnnnnBn...', '...nBBBBBBBn....', '....nnnnnnn.nn..', '.............nn.', E, E, E, E],
+  nail: [E, E, '.....IIIIII.....', '.....hhhhhh.....', '.......hh.......', '.......hh.......', '.......hh.......', '.......hh.......', '.......hh.......', '.......hh.......', '.......hh.......', '.......hh.......', '........h.......', E, E, E],
+  battery: [E, E, E, E, '.............kk.', '..kkkkkkkkkkkkk.', '..kmmmmmmmlllkkk', '..kmmmmmmmlllkkk', '..kmmmmmmmlllkkk', '..kkkkkkkkkkkkk.', '.............kk.', E, E, E, E, E],
+  plug: [E, E, '.....I...I......', '.....I...I......', '....wwwwwww.....', '....wwwwwww.....', '....wwwwwww.....', '.....wwwww......', '.......k........', '.......k........', '........k.......', '.........kk.....', '...........k....', E, E, E],
+  coil: [E, E, '.....IIIIII.....', '.....hhhhhh.....', '.....nnhhnn.....', '.....nnnnnn.....', '.....nnhhnn.....', '.....nnnnnn.....', '.....nnhhnn.....', '.....nnnnnn.....', '.......hh.......', '.......hh.......', '........h.......', E, E, E],
+  magnet: [E, E, '..IIIIII........', '..hhhhhh........', '..nnnnnn........', '..nnnnnn.kkkkkk.', '..nnnnnn.kmmmlk.', '..nnnnnn.kmmmlk.', '..nnnnnnnkkkkkk.', '....hh..........', '....hh..........', '...lIIl.........', E, E, E, E],
+  magnetPlug: [E, E, '..IIIIII........', '..hhhhhh........', '..nnnnnn....I.I.', '..nnnnnn...wwwww', '..nnnnnn...wwwww', '..nnnnnn....www.', '..nnnnnnkkkk.k..', '....hh.......k..', '....hh..........', E, E, E, E, E],
   bar: [
     E,
     '.............ii.',

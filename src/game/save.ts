@@ -51,7 +51,7 @@ export function deserialize(json: string): GameState {
     isNum(raw.pos.y) &&
     typeof raw.facing === 'string' &&
     FACINGS.includes(raw.facing) &&
-    uniqueOf(raw.inventory, ITEMS) &&
+    uniqueOf(Array.isArray(raw.inventory) ? raw.inventory.filter((i) => i !== 'hairdryer') : raw.inventory, ITEMS) &&
     isObj(raw.flags) &&
     Object.entries(raw.flags).every(([k, v]) => (FLAGS as readonly string[]).includes(k) && v === true) &&
     isObj(chars) &&
@@ -82,7 +82,8 @@ export function deserialize(json: string): GameState {
   if (!ok) throw new SaveError('save has an invalid shape');
   const c = chars as unknown as CharacterStates;
   const flags = { ...(raw.flags as GameState['flags']) };
-  const inventory = [...(raw.inventory as GameState['inventory'])];
+  // The hair dryer stays on its hook since 2026-10-25: an older save holding it puts it back.
+  const inventory = (raw.inventory as string[]).filter((i) => i !== 'hairdryer') as GameState['inventory'];
   if (old) {
     if (flags.door_unlocked && !inventory.includes('key')) inventory.unshift('key');
     if (flags.flours_taken) Object.assign(flags, { chestnut_taken: true, riceflour_taken: true });

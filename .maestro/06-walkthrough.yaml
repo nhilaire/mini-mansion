@@ -565,26 +565,6 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "exit-landing.toBathroom"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "hs-bathroom.hairdryer"
-- tapOn:
-    id: "verb-take"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "exit-bathroom.toLanding"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
     id: "exit-landing.toHall"
 - extendedWaitUntil:
     visible:
@@ -971,30 +951,42 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "inv-hairdryer"
+    id: "exit-parents.toLanding"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-landing.toBathroom"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-note"
 - runFlow:
     when:
       notVisible:
-        id: "selected-hairdryer"
+        id: "selected-note"
     commands:
       - extendedWaitUntil:
           visible:
             id: "scene-idle"
           timeout: 15000
       - tapOn:
-          id: "inv-hairdryer"
+          id: "inv-note"
 - extendedWaitUntil:
     visible:
-      id: "selected-hairdryer"
+      id: "selected-note"
     timeout: 5000
 - tapOn:
-    id: "inv-note"
+    id: "hs-bathroom.hairdryer"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "exit-parents.toLanding"
+    id: "exit-bathroom.toLanding"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
@@ -1077,6 +1069,14 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
+    id: "hs-garden.shed"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
     id: "exit-garden.toFootball"
 - extendedWaitUntil:
     visible:
@@ -1107,6 +1107,14 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
+    id: "hs-living.remote"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
     id: "exit-living.toMusic"
 - extendedWaitUntil:
     visible:
@@ -1118,8 +1126,6 @@ tags:
     visible:
       id: "scene-idle"
     timeout: 15000
-- tapOn:
-    id: "inv-more"
 - tapOn:
     id: "inv-tonka"
 - runFlow:
@@ -1173,6 +1179,107 @@ tags:
     visible:
       id: "scene-idle"
     timeout: 15000
+- tapOn:
+    id: "hs-garage.wire"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-garage.toAttic"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "hs-attic.boxes"
+- tapOn:
+    id: "verb-take"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "exit-attic.toGarage"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-more"
+- tapOn:
+    id: "inv-wire"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-wire"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-wire"
+- extendedWaitUntil:
+    visible:
+      id: "selected-wire"
+    timeout: 5000
+- tapOn:
+    id: "inv-nail"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-battery"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-battery"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-battery"
+- extendedWaitUntil:
+    visible:
+      id: "selected-battery"
+    timeout: 5000
+- tapOn:
+    id: "inv-coil"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-plug"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-plug"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-plug"
+- extendedWaitUntil:
+    visible:
+      id: "selected-plug"
+    timeout: 5000
+- tapOn:
+    id: "inv-magnet"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-more"
 - tapOn:
     id: "inv-patches"
 - runFlow:
@@ -1246,21 +1353,21 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "inv-hairdryer"
+    id: "inv-magnetPlug"
 - runFlow:
     when:
       notVisible:
-        id: "selected-hairdryer"
+        id: "selected-magnetPlug"
     commands:
       - extendedWaitUntil:
           visible:
             id: "scene-idle"
           timeout: 15000
       - tapOn:
-          id: "inv-hairdryer"
+          id: "inv-magnetPlug"
 - extendedWaitUntil:
     visible:
-      id: "selected-hairdryer"
+      id: "selected-magnetPlug"
     timeout: 5000
 - tapOn:
     id: "hs-florent.strip"

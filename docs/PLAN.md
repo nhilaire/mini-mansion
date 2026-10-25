@@ -101,6 +101,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-84 Phone feedback: lines outside scenes without control become captions; the player keeps full control (objects, inventory, changing place) while they play to the end; blocking scenes wait for them (AC-49, AC-69) - proof: unit, e2e
 - [x] T-85 Phone feedback: the stepping stones in front of the garden wicket gates are removed (AC-57) - proof: device
 - [x] T-86 Phone feedback: the bike leaves the garage with Florent; a tap on the frame of a line goes to the next one, not in its first second (AC-49, AC-63) - proof: unit
+- [x] T-87 Test by another player: the hair dryer stays plugged on its hook ("Je n'ai rien à sécher." alone, Papa's note warmed on it); the power cut comes from Théo's electromagnet (wire + nail + battery + old plug), explained by his magazine in Julien's room, with Papa's post-it on Florent's power strip (AC-64, AC-65, AC-72) - proof: unit
 
 ## Notes
 

@@ -103,3 +103,10 @@ describe('save format v4 (AC-35, AC-58)', () => {
     expect(() => deserialize(json as string)).toThrow(SaveError);
   });
 });
+
+describe('the hair dryer back on its hook (2026-10-25)', () => {
+  it('a save holding the hair dryer loads without it', () => {
+    const old = { ...JSON.parse(serialize(newGame())), inventory: ['key', 'hairdryer', 'note'] };
+    expect(deserialize(JSON.stringify(old)).inventory).toEqual(['key', 'note']);
+  });
+});

@@ -59,7 +59,6 @@ export const ITEMS: readonly ItemId[] = [
   'chestnut',
   'riceflour',
   'patches',
-  'hairdryer',
   'sardines',
   'tonka',
   'pump',
@@ -68,6 +67,13 @@ export const ITEMS: readonly ItemId[] = [
   'scrap3',
   'hat',
   'fuse',
+  'wire',
+  'nail',
+  'battery',
+  'plug',
+  'coil',
+  'magnet',
+  'magnetPlug',
 ];
 
 export const CHARACTERS: readonly CharacterId[] = ['dad', 'mom', 'julien', 'florent', 'theo'];
@@ -124,6 +130,11 @@ export const FLAGS: readonly Flag[] = [
   'delivered',
   'sardines_taken',
   'hairdryer_taken',
+  'wire_taken',
+  'nail_taken',
+  'battery_taken',
+  'plug_taken',
+  'magnet_ready',
   'patches_taken',
   'cat_fed',
   'parcel_taken',
@@ -241,7 +252,7 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('garden.gnome', 'garden', r(126, 78, 22, 22), p(137, 108), ['look']),
   hs('garden.hose', 'garden', r(150, 76, 22, 24), p(161, 108), ['look', 'use']),
   hs('garden.swing', 'garden', r(170, 30, 50, 70), p(195, 108), ['look', 'use']),
-  hs('garden.shed', 'garden', r(236, 30, 40, 70), p(256, 108), ['look']),
+  hs('garden.shed', 'garden', r(236, 30, 40, 70), p(256, 108), ['look', 'take']),
   // Maman's gardening basket, left behind while she changes, with Papa's drawer key once he gave it to her (E25).
   hs('garden.basket', 'garden', r(8, 78, 26, 22), p(21, 108), ['look', 'take'], (s) => s.chars.mom === 'changing' && has(s, 'dad_wary') && !has(s, 'keyring_taken')),
   // The delivered parcel among the flowers, with the neighbours' cat lying on it (CUT13 until E23 / E24).
@@ -260,6 +271,7 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('living.lamp', 'living', r(186, 30, 24, 30), p(198, 108), ['look']),
   hs('living.chess', 'living', r(214, 78, 36, 22), p(232, 110), ['look', 'use']),
   hs('living.tv', 'living', r(254, 44, 28, 30), p(268, 108), ['look', 'use']),
+  hs('living.remote', 'living', r(256, 78, 24, 22), p(268, 110), ['look', 'take']),
   // The dining part on the left (next to the kitchen), the music part on the right.
   hs('music.sideboard', 'music', r(36, 28, 28, 40), p(50, 108), ['look']),
   hs('music.table', 'music', r(66, 76, 76, 24), p(104, 110), ['look']),
@@ -300,6 +312,7 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('utility.broom', 'utility', r(274, 40, 22, 60), p(285, 108), ['look']),
   hs('garage.pole', 'garage', r(60, 24, 22, 76), p(71, 108), ['look', 'take'], (s) => !has(s, 'pole_taken')),
   hs('garage.crate', 'garage', r(90, 70, 40, 30), p(110, 108), ['look']),
+  hs('garage.wire', 'garage', r(98, 36, 24, 24), p(110, 108), ['look', 'take'], (s) => !has(s, 'wire_taken')),
   hs('garage.bike', 'garage', r(136, 60, 38, 40), p(155, 108), ['look', 'use'], (s) => s.chars.florent !== 'riding'),
   hs('garage.paint', 'garage', r(186, 24, 40, 30), p(206, 108), ['look']),
   hs('garage.bench', 'garage', r(180, 62, 58, 38), p(209, 108), ['look', 'take']),
@@ -315,7 +328,7 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('cellar.cobweb', 'cellar', r(250, 20, 30, 24), p(265, 108), ['look']),
   // The attic is cluttered with junk.
   hs('attic.horse', 'attic', r(8, 70, 28, 30), p(22, 110), ['look', 'use']),
-  hs('attic.boxes', 'attic', r(40, 60, 60, 40), p(70, 108), ['look']),
+  hs('attic.boxes', 'attic', r(40, 60, 60, 40), p(70, 108), ['look', 'take']),
   hs('attic.chairs', 'attic', r(104, 56, 30, 44), p(119, 108), ['look']),
   hs('attic.suitcase', 'attic', r(136, 80, 36, 22), p(154, 110), ['look']),
   hs('attic.window', 'attic', r(150, 20, 30, 30), p(165, 108), ['look']),
@@ -345,13 +358,16 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('julien.radio', 'julien', r(110, 74, 26, 22), p(123, 110), ['look', 'use']),
   hs('julien.trophy', 'julien', r(150, 44, 26, 40), p(163, 108), ['look', 'take']),
   hs('julien.medals', 'julien', r(200, 30, 50, 30), p(225, 108), ['look']),
+  // Théo's second science magazine, left on the floor: the electromagnet (E27).
+  hs('julien.magazine', 'julien', r(184, 76, 24, 24), p(196, 110), ['look']),
   hs('julien.bed', 'julien', r(240, 70, 70, 30), p(270, 110), ['look']),
   hs('bathroom.sink', 'bathroom', r(50, 56, 40, 44), p(70, 108), ['look', 'use']),
   hs('bathroom.cabinet', 'bathroom', r(96, 26, 30, 30), p(111, 108), ['look']),
   hs('bathroom.scale', 'bathroom', r(100, 78, 26, 22), p(113, 110), ['look', 'use']),
   hs('bathroom.bath', 'bathroom', r(140, 64, 90, 36), p(185, 110), ['look']),
   hs('bathroom.duck', 'bathroom', r(240, 72, 22, 22), p(251, 110), ['look', 'use']),
-  hs('bathroom.hairdryer', 'bathroom', r(266, 40, 24, 28), p(278, 108), ['look', 'take'], (s) => !has(s, 'hairdryer_taken')),
+  // The hair dryer stays on its hook, plugged in: Papa's note is warmed there (E20).
+  hs('bathroom.hairdryer', 'bathroom', r(266, 40, 24, 28), p(278, 108), ['look', 'use']),
   hs('theo.poster', 'theo', r(60, 24, 40, 40), p(80, 108), ['look']),
   hs('theo.cube', 'theo', r(160, 70, 24, 22), p(172, 110), ['look', 'use']),
   hs('theo.desk', 'theo', r(196, 66, 50, 34), p(221, 110), ['look', 'use']),

@@ -84,7 +84,7 @@ const USED: [Flag, (s: GameState) => boolean][] = [
   ['sardines_taken', (s) => has(s, 'sardines') || s.flags.cat_fed === true],
   ['keyring_taken', (s) => has(s, 'keyring') || s.flags.drawer_open === true],
   ['patches_taken', (s) => has(s, 'patches') || s.flags.patches_in === true],
-  ['hairdryer_taken', (s) => has(s, 'hairdryer')],
+  ['magnet_ready', (s) => has(s, 'magnetPlug')],
   ['parcel_taken', (s) => (has(s, 'tonka') || s.flags.tonka_in === true) && (has(s, 'pump') || s.flags.pump_in === true)],
   ['bottles_done', (s) => has(s, 'scrap2') || s.flags.frag2_in === true],
   ['trunk_open', (s) => has(s, 'scrap3') || s.flags.frag3_in === true],

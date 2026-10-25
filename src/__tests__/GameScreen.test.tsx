@@ -141,8 +141,8 @@ describe('GameScreen, Act II', () => {
   });
 
   it('the power cut darkens the scene while Papa goes down to the fuse box (AC-64)', async () => {
-    await mount({ ...newGame(), place: 'florent', chars: chars({ florent: 'riding' }), inventory: ['hairdryer'], flags: { door_unlocked: true, computer_read: true, dad_wary: true }, tutorial: 3 });
-    await fireEvent.press(screen.getByTestId('inv-hairdryer'));
+    await mount({ ...newGame(), place: 'florent', chars: chars({ florent: 'riding' }), inventory: ['magnetPlug'], flags: { door_unlocked: true, computer_read: true, dad_wary: true }, tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('inv-magnetPlug'));
     await fireEvent.press(screen.getByTestId('hs-florent.strip'));
     expect(screen.getByTestId('view-dark')).toBeTruthy();
     expect(screen.getByText(line(t, 'line.dadFuses'))).toBeTruthy();

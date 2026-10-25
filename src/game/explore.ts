@@ -23,9 +23,9 @@
 //     is explored together with starting the machine (see machineSteps), and left out of the story part;
 //   - once Charlie has the house key and has been in (E01), the front door that Papa locks again only matters at the
 //     door, which the key opens: the lock is left out of the story part;
-//   - the hair dryer (corridor bathroom) and the sardines (utility room) lie in places nobody guards and are never
-//     needed before they are used: holding them changes nothing else, so they are left out of the story part and
-//     taken "on the way" when used (see lazyItem);
+//   - Théo's electromagnet (its wire, nail, battery and old plug, put together) and the sardines (utility room) are
+//     only needed where they are used (Florent's power strip, the cat): holding them changes nothing else, so they are
+//     left out of the story part and taken (the electromagnet: assembled) "on the way" when used (see lazyItem);
 //   - the parcel's delivery (CUT13) only adds the cat, the parcel and a notebook entry, and catches nobody: whatever a
 //     player does while it is on its way can be done once it has arrived, so it is fired as soon as Papa is wary;
 //   - the first power cut and the later ones only differ by Papa's line (fuses_cut is left out of the story part),
@@ -87,13 +87,21 @@ export const REDUCED_FLAGS: readonly Flag[] = [
   'stone_left',
   'stone_right',
   'hairdryer_taken',
+  'wire_taken',
+  'nail_taken',
+  'battery_taken',
+  'plug_taken',
+  'magnet_ready',
   'keyring_taken',
   'patches_taken',
   'fuses_cut',
 ];
-export const REDUCED_ITEMS: readonly ItemId[] = ['gatekey', 'ricemilk', 'chestnut', 'riceflour', 'bar', 'fuse'];
+export const REDUCED_ITEMS: readonly ItemId[] = ['gatekey', 'ricemilk', 'chestnut', 'riceflour', 'bar', 'fuse', 'wire', 'nail', 'battery', 'plug', 'coil', 'magnet'];
+// The parts of the electromagnet, with the flag their take sets, and what each combination uses up.
+const MAGNET_PARTS: readonly ItemId[] = ['wire', 'nail', 'battery', 'plug', 'coil', 'magnet'];
+const MAGNET_FLAGS: readonly Flag[] = ['wire_taken', 'nail_taken', 'battery_taken', 'plug_taken'];
 // Items taken on the way when used (see above), with the flag their take sets.
-export const LAZY_ITEMS: Readonly<Partial<Record<ItemId, Flag>>> = { hairdryer: 'hairdryer_taken', sardines: 'sardines_taken', keyring: 'keyring_taken' };
+export const LAZY_ITEMS: Readonly<Partial<Record<ItemId, Flag>>> = { magnetPlug: 'magnet_ready', sardines: 'sardines_taken', keyring: 'keyring_taken' };
 // The pieces put together in one step: the bike (E26), the recipe book (E13).
 export const PART_GROUPS: readonly { target: string; items: readonly ItemId[] }[] = [
   { target: 'garage.bike', items: ['patches', 'pump'] },
@@ -106,7 +114,7 @@ export const REDUCED_PUZZLES: readonly number[] = [15, 18];
 // Inputs of the reduced side systems, not explored one by one.
 export const GATE_TARGETS: readonly string[] = ['front.gateLeft', 'front.gateRight', 'football.gate', 'pool.gate'];
 export const BELL = 'front.bell';
-export const SIDE_TAKES: readonly string[] = ['hall.shoes', 'kitchen.fridge', 'utility.flours', 'cellar.rack', 'cellar.hatch', 'cellar.stoneLeft', 'cellar.stoneRight', 'garage.breaker', 'hall.console', 'kitchen.milk', 'kitchen.sardines', 'utility.chestnut', 'utility.riceflour', 'bathroom.hairdryer', 'garden.basket', TAP];
+export const SIDE_TAKES: readonly string[] = ['hall.shoes', 'kitchen.fridge', 'utility.flours', 'cellar.rack', 'cellar.hatch', 'cellar.stoneLeft', 'cellar.stoneRight', 'garage.breaker', 'hall.console', 'kitchen.milk', 'kitchen.sardines', 'utility.chestnut', 'utility.riceflour', 'bathroom.hairdryer', 'garage.wire', 'garden.shed', 'living.remote', 'attic.boxes', 'garden.basket', TAP];
 const PAD_IDS = Object.keys(PADS) as PadId[];
 
 // Story keys are computed once per state object (states are never mutated once returned by the engine).
@@ -180,7 +188,7 @@ export function isSideInput(input: Input): boolean {
     return (
       REDUCED_ITEMS.includes(input.item) ||
       isPart(input.item, input.target) ||
-      (input.item === 'hairdryer' && input.target === 'florent.strip') ||
+      (input.item === 'magnetPlug' && input.target === 'florent.strip') ||
       (input.target.startsWith('item:') && REDUCED_ITEMS.includes(input.target.slice(5) as ItemId))
     );
   return false;
@@ -188,7 +196,7 @@ export function isSideInput(input: Input): boolean {
 
 // The non-move inputs the search tries. Pruned (each pruning is proven by a test on every sample state): item pairs
 // without a rule only answer a wrong line, looking at an item, listening at a door and the gags only say lines; the
-// pole and its extension, the hair dryer and Papa's note are the only item-on-item rules; the side systems are
+// pole and its extension and the electromagnet's parts are the only item-on-item rules; the side systems are
 // explored by sideSteps; a wrong pad sequence only says a line.
 // Looking only says a line, except at the painting, which reveals the safe.
 export const STORY_LOOKS: readonly string[] = ['parents.painting'];
@@ -211,7 +219,6 @@ export function actionInputs(s: GameState): Input[] {
     }
   }
   if (s.inventory.includes('pole') && s.inventory.includes('extension')) out.push({ kind: 'item', item: 'pole', target: 'item:extension' });
-  if (s.inventory.includes('note') && lazyAvailable(s, 'hairdryer')) out.push({ kind: 'item', item: 'hairdryer', target: 'item:note' });
   for (const keypad of KEYPADS) out.push({ kind: 'keypad', keypad, code: CODES[keypad] }, { kind: 'keypad', keypad, code: '0000' });
   for (const pad of PAD_IDS) out.push({ kind: 'pad', pad, code: [...PADS[pad].code] });
   out.push({ kind: 'chess', moves: [...SOLUTION_MOVES] });
@@ -231,7 +238,11 @@ export function lazyAvailable(s: GameState, item: ItemId): boolean {
 export function lazyItem(s: GameState, input: Input): GameState {
   if (input.kind !== 'item' || !isLazy(input.item) || s.inventory.includes(input.item)) return s;
   const solved = input.item === 'keyring' ? [...s.solved, ...[22, 25].filter((n) => !s.solved.includes(n))] : s.solved;
-  return { ...s, inventory: [...s.inventory, input.item], flags: { ...s.flags, [LAZY_ITEMS[input.item]!]: true }, solved };
+  // The electromagnet: its parts taken and put together on the way.
+  const magnet = input.item === 'magnetPlug';
+  const inventory = magnet ? s.inventory.filter((i) => !MAGNET_PARTS.includes(i)) : s.inventory;
+  const parts = magnet ? Object.fromEntries(MAGNET_FLAGS.map((f) => [f, true])) : {};
+  return { ...s, inventory: [...inventory, input.item], flags: { ...s.flags, ...parts, [LAZY_ITEMS[input.item]!]: true }, solved };
 }
 
 // The pieces of a group put in together, once all are held (the bike, the recipe book).
@@ -395,11 +406,11 @@ export function doughSteps(members: readonly GameState[]): Step[] {
   });
 }
 
-// The power cut in one step: the hair dryer on Florent's power strip, then Papa's absence at the fuse box.
+// The power cut in one step: Théo's electromagnet on Florent's power strip, then Papa's absence at the fuse box.
 export function fuseSteps(members: readonly GameState[]): Step[] {
-  const room = members.find((m) => m.place === 'florent' && lazyAvailable(m, 'hairdryer'));
+  const room = members.find((m) => m.place === 'florent' && lazyAvailable(m, 'magnetPlug'));
   if (!room) return [];
-  const input: Input = { kind: 'item', item: 'hairdryer', target: 'florent.strip' };
+  const input: Input = { kind: 'item', item: 'magnetPlug', target: 'florent.strip' };
   const cut = interact(lazyItem(room, input), input);
   if (cut.state.chars.dad !== 'fuses') return [];
   return officeWindow(cut.state).map((w) => ({ state: w.state, beats: [...cut.beats, ...w.beats] }));

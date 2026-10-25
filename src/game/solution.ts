@@ -73,9 +73,6 @@ export const SOLUTION: readonly Input[] = [
   use('landing.florentDoor'),
   take('florent.kit'), // the O-ring and the puncture patches
   go('florent.toLanding'),
-  go('landing.toBathroom'),
-  take('bathroom.hairdryer'),
-  go('bathroom.toLanding'),
   go('landing.toHall'),
   go('hall.toLiving'),
   use('living.chess'),
@@ -113,8 +110,10 @@ export const SOLUTION: readonly Input[] = [
   look('parents.painting'),
   use('parents.safe'),
   code('safe', '1987'), // E10
-  combine('hairdryer', 'note'), // E20
   go('parents.toLanding'),
+  go('landing.toBathroom'),
+  give('note', 'bathroom.hairdryer'), // E20
+  go('bathroom.toLanding'),
   go('landing.toHall'),
   go('hall.toFront'),
   go('front.toPool'),
@@ -124,11 +123,13 @@ export const SOLUTION: readonly Input[] = [
   give('sardines', 'garden.cat'), // E23
   take('garden.parcel'), // E24
   take('garden.basket'), // E25: Papa's drawer key
+  take('garden.shed'), // the big nail
   go('garden.toFootball'),
   go('football.toPool'),
   go('pool.toFront'),
   go('front.toHall'),
   go('hall.toLiving'),
+  take('living.remote'), // the battery
   go('living.toMusic'),
   go('music.toKitchen'),
   give('tonka', 'kitchen.robot'), // E30: the secret touch in Papa's dough
@@ -137,13 +138,20 @@ export const SOLUTION: readonly Input[] = [
   go('living.toHall'),
   go('hall.toCorridor'),
   go('corridor0.toGarage'),
+  take('garage.wire'),
+  go('garage.toAttic'),
+  take('attic.boxes'), // the old plug
+  go('attic.toGarage'),
+  combine('wire', 'nail'),
+  combine('battery', 'coil'),
+  combine('plug', 'magnet'), // Théo's electromagnet, ready to plug
   give('patches', 'garage.bike'),
   give('pump', 'garage.bike'), // E26
   go('garage.toCorridor'), // CUT15: Florent rides away
   go('corridor0.toHall'),
   go('hall.stairs'),
   use('landing.florentDoor'),
-  give('hairdryer', 'florent.strip'), // E27: Papa goes down to the fuse box for 60 s
+  give('magnetPlug', 'florent.strip'), // E27: Papa goes down to the fuse box for 60 s
   go('florent.toLanding'),
   go('landing.toHall'),
   go('hall.toCorridor'),

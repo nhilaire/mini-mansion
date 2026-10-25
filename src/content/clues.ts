@@ -28,7 +28,7 @@ export const CLUES: Record<number, readonly string[]> = {
   24: ['garden.parcel.look', 'line.catHiss'],
   25: ['line.dadKey', 'garden.basket.look'],
   26: ['garage.bike.look', 'florent.kit.look'],
-  27: ['florent.strip.look', 'dad.doorWary'],
+  27: ['florent.strip.look', 'julien.magazine.look', 'line.magnetWorks', 'dad.doorWary'],
   28: ['office.drawer.lookWary', 'item.keyring.look', 'line.drawerLocked'],
   29: ['attic.trunk.look', 'line.trunkUnknown'],
   30: ['item.scrap2.look', 'line.recipeTonka', 'item.tonka.look'],

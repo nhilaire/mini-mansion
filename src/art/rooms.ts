@@ -739,9 +739,10 @@ const PROPS: Record<string, Prop> = {
     for (let x = r.x + 2; x < r.x + r.w - 6; x += 8) b.rect(x, r.y + 18, 6, 6, [C.lime, C.redTile, C.royal, C.tileYellow, C.turquoise][(x / 8) % 5 | 0]);
     b.ellipse(r.x + 20, r.y - 4, 5, 4, C.pink);
   },
-  'bathroom.hairdryer': (b, r, s) => {
-    b.rect(r.x + 9, r.y + 2, 6, 3, C.stone2);
-    if (!on(s, 'hairdryer_taken')) b.rect(r.x + 4, r.y + 6, 16, 9, C.pink).ellipse(r.x + 6, r.y + 10, 4, 5, C.pink).rect(r.x + 14, r.y + 14, 5, 12, C.pink).set(r.x + 3, r.y + 10, C.ink);
+  // The hair dryer on its hook, plugged in (its cord runs down to the socket).
+  'bathroom.hairdryer': (b, r) => {
+    b.rect(r.x + 9, r.y + 2, 6, 3, C.stone2).vline(r.x + 16, r.y + 26, r.y + r.h - 2, C.ink).rect(r.x + 14, r.y + r.h - 3, 6, 3, C.white);
+    b.rect(r.x + 4, r.y + 6, 16, 9, C.pink).ellipse(r.x + 6, r.y + 10, 4, 5, C.pink).rect(r.x + 14, r.y + 14, 5, 12, C.pink).set(r.x + 3, r.y + 10, C.ink);
   },
   'bathroom.duck': (b, r) => b.ellipse(r.x + 11, r.y + 14, 7, 5, C.yellow).ellipse(r.x + 15, r.y + 8, 4, 4, C.yellow).set(r.x + 19, r.y + 8, C.orange).hline(r.x + 13, r.x + 17, r.y + 7, C.ink),
   // Théo's room (photo): bright turquoise walls, white cube bookcase, oak desk, pine bed with a pink blanket.
@@ -787,6 +788,21 @@ const PROPS: Record<string, Prop> = {
   'florent.strip': (b, r) => {
     b.rect(r.x + 2, r.y + r.h - 6, r.w - 4, 5, C.white).frame(r.x + 2, r.y + r.h - 6, r.w - 4, 5, C.stone2).set(r.x + 4, r.y + r.h - 4, C.red);
     for (let i = 0; i < 4; i++) b.line(r.x + 7 + i * 4, r.y + r.h - 6, r.x + 4 + i * 6, r.y + 2, [C.ink, C.stone1, C.green3, C.ink][i]);
+    // Papa's yellow post-it on the strip.
+    b.rect(r.x + r.w - 9, r.y + r.h - 12, 7, 6, C.yellow).hline(r.x + r.w - 8, r.x + r.w - 4, r.y + r.h - 10, C.ink).hline(r.x + r.w - 8, r.x + r.w - 5, r.y + r.h - 8, C.ink);
+  },
+  // Théo's science magazine on the floor of Julien's room.
+  'julien.magazine': (b, r) => {
+    b.rect(r.x + 2, r.y + 12, 20, 12, C.paper).frame(r.x + 2, r.y + 12, 20, 12, C.stone2).rect(r.x + 4, r.y + 14, 7, 8, C.blue).rect(r.x + 13, r.y + 14, 7, 2, C.red).hline(r.x + 13, r.x + 19, r.y + 18, C.ink).hline(r.x + 13, r.x + 18, r.y + 20, C.ink);
+  },
+  // A reel of copper wire on a hook.
+  'garage.wire': (b, r) => {
+    b.rect(r.x + 10, r.y + 1, 4, 3, C.stone1).ellipse(r.x + 12, r.y + 13, 9, 9, C.orange).ellipse(r.x + 12, r.y + 13, 5, 5, C.wood2).ellipse(r.x + 12, r.y + 13, 2, 2, C.stone1);
+  },
+  // The TV remote control on the TV cabinet; its battery cover open once the battery is taken.
+  'living.remote': (b, r, s) => {
+    b.rect(r.x + 4, r.y + 12, 16, 6, C.ink).set(r.x + 7, r.y + 14, C.red).set(r.x + 10, r.y + 14, C.stone3).set(r.x + 13, r.y + 14, C.stone3);
+    if (on(s, 'battery_taken')) b.rect(r.x + 15, r.y + 13, 4, 4, C.stone2);
   },
   'florent.console': (b, r) => b.rect(r.x, r.y, r.w, r.h - 10, C.ink).rect(r.x + 2, r.y + 2, r.w - 4, r.h - 14, C.purple).rect(r.x + 8, r.y + r.h - 8, 12, 6, C.stone1).rect(r.x + 30, r.y + r.h - 8, 10, 6, C.stone2),
   // The parents' room (photo): pale walls with a mauve band behind the bed, the rainbow-striped duvet with mustard
@@ -1131,21 +1147,21 @@ export const VISUAL_FLAGS: Record<PlaceId, (keyof Flags)[]> = {
   pool: ['ball_freed', 'cover_open', 'pool_drained', 'plug_fixed', 'thinner_taken', 'bay_open', 'gates_open'],
   garden: ['delivered', 'cat_fed', 'parcel_taken', 'keyring_taken'],
   hall: ['gatekey_taken', 'fuse_taken'],
-  living: ['booklet_taken', 'queen_placed', 'bay_open'],
+  living: ['booklet_taken', 'queen_placed', 'bay_open', 'battery_taken'],
   music: ['sticks_taken'],
   kitchen: ['milk_taken', 'sardines_taken', 'dough_mixed', 'fridge_open'],
   corridor0: [],
   wc0: ['wc_wet'],
   office: ['pliers_taken', 'drawer_open'],
   utility: ['detergent_taken', 'machine_running', 'power_on', 'chestnut_taken', 'riceflour_taken'],
-  garage: ['pole_taken', 'wrench_taken', 'power_on', 'bike_fixed', 'fuse_in'],
+  garage: ['pole_taken', 'wrench_taken', 'power_on', 'bike_fixed', 'fuse_in', 'wire_taken'],
   cellar: ['bar_taken', 'hatch_open', 'bottles_done', 'stone_left', 'stone_right'],
   attic: ['door_revealed', 'secret_open', 'lab_code', 'trunk_open'],
   laundry: [],
   landing: [],
   wc1: [],
   julien: ['queen_taken'],
-  bathroom: ['hairdryer_taken'],
+  bathroom: [],
   theo: ['cube_solved'],
   florent: ['oring_taken'],
   parents: ['safe_found', 'safe_open', 'mirror_code', 'shower_repaired', 'oring_fitted'],
