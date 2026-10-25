@@ -300,7 +300,7 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('utility.broom', 'utility', r(274, 40, 22, 60), p(285, 108), ['look']),
   hs('garage.pole', 'garage', r(60, 24, 22, 76), p(71, 108), ['look', 'take'], (s) => !has(s, 'pole_taken')),
   hs('garage.crate', 'garage', r(90, 70, 40, 30), p(110, 108), ['look']),
-  hs('garage.bike', 'garage', r(136, 60, 38, 40), p(155, 108), ['look', 'use']),
+  hs('garage.bike', 'garage', r(136, 60, 38, 40), p(155, 108), ['look', 'use'], (s) => s.chars.florent !== 'riding'),
   hs('garage.paint', 'garage', r(186, 24, 40, 30), p(206, 108), ['look']),
   hs('garage.bench', 'garage', r(180, 62, 58, 38), p(209, 108), ['look', 'take']),
   hs('garage.breaker', 'garage', r(240, 30, 24, 30), p(252, 108), ['look', 'use']),

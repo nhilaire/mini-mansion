@@ -229,14 +229,37 @@ describe('GameScreen', () => {
     expect(screen.queryByTestId('inv-pole')).toBeNull();
   });
 
-  it('a spoken line stays for its whole delay: a tap does not skip it (AC-49)', async () => {
+  it('a tap on the frame of a line goes to the next one, but not in its first second (AC-49)', async () => {
     resetFastModeForTests();
     await mount({ ...newGame(), tutorial: 3 });
     await fireEvent.press(screen.getByTestId('hs-front.hedge'));
     await fireEvent.press(screen.getByTestId('verb-look'));
     const text = line(t, 'front.hedge.look');
     expect(screen.getByText(text)).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('line-banner'));
+    await act(async () => {
+      jest.advanceTimersByTime(900);
+    });
+    await fireEvent.press(screen.getByTestId('line-frame'));
+    await act(async () => {
+      jest.advanceTimersByTime(50);
+    });
+    expect(screen.getByText(text)).toBeTruthy();
+    await act(async () => {
+      jest.advanceTimersByTime(150);
+    });
+    await fireEvent.press(screen.getByTestId('line-frame'));
+    await act(async () => {
+      jest.advanceTimersByTime(50);
+    });
+    expect(screen.queryByText(text)).toBeNull();
+  });
+
+  it('without a tap, a spoken line stays for its whole delay (AC-49)', async () => {
+    resetFastModeForTests();
+    await mount({ ...newGame(), tutorial: 3 });
+    await fireEvent.press(screen.getByTestId('hs-front.hedge'));
+    await fireEvent.press(screen.getByTestId('verb-look'));
+    const text = line(t, 'front.hedge.look');
     expect(screen.getByText(text)).toBeTruthy();
     const duration = Math.max(2500, 60 * text.length);
     await act(async () => {

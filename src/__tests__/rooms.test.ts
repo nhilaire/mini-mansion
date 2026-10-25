@@ -37,6 +37,11 @@ describe('places drawn in code', () => {
     const pool: GameState = { ...newGame(), place: 'pool' };
     expect(roomKey(pool)).toBe(roomKey({ ...pool, flags: { key_taken: true } }));
     expect(roomKey(pool)).not.toBe(roomKey({ ...pool, flags: { ball_freed: true } }));
+    // Florent's bike leaves the garage with him.
+    const garage: GameState = { ...newGame(), place: 'garage', flags: { bike_fixed: true } };
+    const ridden = { ...garage, chars: { ...garage.chars, florent: 'riding' as const } };
+    expect(roomKey(ridden)).not.toBe(roomKey(garage));
+    expect(paintRoom(ridden).data.some((v, i) => v !== paintRoom(garage).data[i])).toBe(true);
     // Flags only visible once another one is set (the bottle is under the cover...).
     const needs: Partial<Record<keyof GameState['flags'], GameState['flags']>> = {
       thinner_taken: { cover_open: true },

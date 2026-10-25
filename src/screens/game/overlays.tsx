@@ -51,18 +51,18 @@ export function ActionMenu({ title, verbs, anchor, screenW, screenH, onVerb, onC
   );
 }
 
-// A spoken line: it cannot be tapped away, so that nothing is missed; it stays for its reading time (AC-49). Taps go
-// through it to the scene, where Charlie may walk while it plays.
-export function LineBanner({ speaker, text }: { speaker: Speaker; text: string }) {
+// A spoken line: it stays for its reading time; a tap on its frame goes to the next line, but not in its first second,
+// so that nothing is missed (AC-49). Taps beside the frame go through to the scene.
+export function LineBanner({ speaker, text, onPress }: { speaker: Speaker; text: string; onPress: () => void }) {
   const { t } = useI18n();
   // The narrator has no name tag.
   const name = speaker === 'narrator' ? null : speakerName(t, speaker);
   return (
-    <View testID="line-banner" accessibilityRole="text" pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <View style={[styles.panel, styles.banner]}>
+    <View testID="line-banner" pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+      <Pressable testID="line-frame" accessibilityRole="button" accessibilityHint={t.game.tapToContinue} onPress={onPress} style={[styles.panel, styles.banner]}>
         {name ? <Text style={[styles.speaker, { color: speakerColors[speaker] }]}>{name}</Text> : null}
         <Text style={[styles.lineText, { color: speakerColors[speaker] }, speaker === 'narrator' && styles.italic]}>{text}</Text>
-      </View>
+      </Pressable>
     </View>
   );
 }

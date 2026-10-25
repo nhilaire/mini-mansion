@@ -50,7 +50,7 @@ import {
 } from './game/overlays';
 
 type Presentation =
-  | { kind: 'line'; speaker: Speaker; text: string; until: number }
+  | { kind: 'line'; speaker: Speaker; text: string; start: number; until: number }
   | { kind: 'keypad'; keypad: KeypadId }
   | { kind: 'pad'; pad: PadId }
   | { kind: 'chess' }
@@ -64,6 +64,7 @@ type Presentation =
 interface Caption {
   speaker: Speaker;
   text: string;
+  full: number;
   left: number;
 }
 
@@ -89,6 +90,8 @@ interface Props {
 const TICK_MS = 33;
 const CAPTURE_MS = 900;
 const TOAST_MS = 1800;
+// A tap on the line's frame goes to the next line, but not in the first second it is shown (AC-49).
+const LINE_TAP_GUARD_MS = 1000;
 
 // The hero is not part of a view of another place.
 const OFFSCREEN: HeroPose = { pos: { x: -100, y: -100 }, facing: 'down', frame: -1 };
@@ -179,11 +182,12 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
         case 'say': {
           const text = line(t, b.key);
           if (cinematicRef.current) {
-            show({ kind: 'line', speaker: b.speaker, text, until: now + lineDurationMs(text) });
+            show({ kind: 'line', speaker: b.speaker, text, start: now, until: now + lineDurationMs(text) });
             return;
           }
           // Outside a scene without control: a caption, and the player keeps playing.
-          captionsRef.current.push({ speaker: b.speaker, text, left: lineDurationMs(text) });
+          const full = lineDurationMs(text);
+          captionsRef.current.push({ speaker: b.speaker, text, full, left: full });
           if (captionsRef.current.length === 1) setCaption(captionsRef.current[0]);
           break;
         }
@@ -454,6 +458,17 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   const bubble = !blocked ? tutorialBubble(game) : null;
   // The line on show: the one of a scene without control, else the current caption.
   const shownLine = present?.kind === 'line' ? present : caption;
+  // A tap on the frame of the line: the next line, once the line has been shown for a second.
+  const onLineTap = () => {
+    const pr = presentRef.current;
+    if (pr?.kind === 'line') {
+      if (Date.now() - pr.start >= LINE_TAP_GUARD_MS) runNext();
+      return;
+    }
+    const cap = captionsRef.current[0];
+    // The game loop moves to the next caption on its next tick.
+    if (cap && cap.full - cap.left >= LINE_TAP_GUARD_MS) cap.left = 0;
+  };
   const speaker = shownLine ? shownLine.speaker : null;
   const idle = !blocked && !walking && !menu;
   const menuRect = toScreenRect(transform, MENU_BUTTON);
@@ -596,7 +611,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           onClose={() => setMenu(null)}
         />
       )}
-      {shownLine && <LineBanner speaker={shownLine.speaker} text={shownLine.text} />}
+      {shownLine && <LineBanner speaker={shownLine.speaker} text={shownLine.text} onPress={onLineTap} />}
       {present?.kind === 'keypad' && (
         <Keypad
           title={t.keypad[present.keypad]}

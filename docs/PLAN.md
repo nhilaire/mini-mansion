@@ -100,6 +100,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-83 Phone feedback: lines still play to the end, but Charlie can walk on the floor while a plain line plays (AC-49) - proof: unit
 - [x] T-84 Phone feedback: lines outside scenes without control become captions; the player keeps full control (objects, inventory, changing place) while they play to the end; blocking scenes wait for them (AC-49, AC-69) - proof: unit, e2e
 - [x] T-85 Phone feedback: the stepping stones in front of the garden wicket gates are removed (AC-57) - proof: device
+- [x] T-86 Phone feedback: the bike leaves the garage with Florent; a tap on the frame of a line goes to the next one, not in its first second (AC-49, AC-63) - proof: unit
 
 ## Notes
 

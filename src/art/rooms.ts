@@ -1151,9 +1151,11 @@ export const VISUAL_FLAGS: Record<PlaceId, (keyof Flags)[]> = {
   parents: ['safe_found', 'safe_open', 'mirror_code', 'shower_repaired', 'oring_fitted'],
 };
 
-// Julien's ball lies on the grass of the football corner while he plays: part of the drawing too.
+// Julien's ball lies on the grass of the football corner while he plays, and Florent's bike leaves the garage with him:
+// part of the drawing too.
 function stateKey(s: GameState): string {
   if (s.place === 'garden') return `${s.chars.mom}${s.flags.dad_wary ? '-wary' : ''}`;
+  if (s.place === 'garage') return s.chars.florent === 'riding' ? 'riding' : '';
   return s.place === 'football' ? s.chars.julien : '';
 }
 

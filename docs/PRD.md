@@ -236,8 +236,8 @@ means the front of the house (`front`).
   item = look at it.
 - Wrong combinations answer one of 6 generic lines in rotation (`wrong.0-5`), never consume anything and change
   no state.
-- Spoken lines: shown in the banner in the speaker's colour for max(2.5 s, 60 ms x length); a tap never skips them, so
-  that no clue is missed (only the intro cards can be skipped). A line said outside a scene without control is a caption:
+- Spoken lines: shown in the banner in the speaker's colour for max(2.5 s, 60 ms x length); a tap on the frame of the
+  line goes to the next line, but not in the first second the line is shown, so that no clue is missed by accident. A line said outside a scene without control is a caption:
   the player keeps full control meanwhile (walking, objects, inventory, changing place), and lines said meanwhile follow
   it in order. A scene without control (capture, outside views such as the front door, the delivery or the power cut,
   the final gathering) starts once the captions said before it are over and allows no input until its end.
@@ -752,7 +752,8 @@ Puzzles, characters, captures, timers
   (E25).
 - AC-63 [unit] Given the Nerf kit taken, then the inventory holds the Joint torique and the Rustines; given the
   Rustines and the Pompe à vélo used on the bike in any order, then E26 is solved (one alone: `line.bikeHalf`), and
-  when Charlie leaves the garage CUT15 plays and Florent rides away: his room is free until CUT11.
+  when Charlie leaves the garage CUT15 plays and Florent rides away with the bike (no longer in the garage): his room is
+  free until CUT11.
 - AC-64 [unit] Given Florent riding and Papa at his desk, when the Sèche-cheveux is used on the power strip, then
   CUT18 plays and Papa is at the garage fuse box for 60 s (garage guarded, office free), then back at his desk (Charlie
   caught if in the office); the first cut plays `line.dadFuses`, later ones `line.fusesAgain`; it can be caused again
@@ -807,7 +808,8 @@ Persistence, pause, ending, settings, about
   or the per-language content files, fr and en have the same keys, French uses tu when addressing the player (UI, narration, tutorial; characters
   may say vous to an unknown visitor, as `line.dadAtDoor`), the UI strings match the "Player
   copy" table, and French typography uses a no-break space before `: ; ! ?` and inside « ».
-- AC-49 [unit] Given a spoken line, then it stays max(2.5 s, 60 ms x length) and a tap does not skip it; outside a
+- AC-49 [unit] Given a spoken line, then it stays max(2.5 s, 60 ms x length), a tap on its frame goes to the next line
+  but not in its first second; outside a
   scene without control it is a caption and the player keeps control (walk, objects, inventory, another place), the
   lines said meanwhile following in order; scene input is ignored while a scene without control plays; the capture scene and the outside views
   (front door, kitchen, delivery, garden, Florent's ride, power cut) cannot be skipped by a tap (their lines

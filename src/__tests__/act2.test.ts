@@ -532,6 +532,14 @@ describe('phone feedback of 2026-10-24 (evening)', () => {
     expect(o.state.place).toBe('front');
   });
 
+  it('the bike leaves the garage with Florent', () => {
+    const fixed = at('garage', { flags: flags('bike_fixed') });
+    expect(findHotspot(fixed, 'garage.bike')).toBeDefined();
+    const gone = interact(fixed, go('garage.toCorridor')).state;
+    expect(gone.chars.florent).toBe('riding');
+    expect(findHotspot({ ...gone, place: 'garage' }, 'garage.bike')).toBeUndefined();
+  });
+
   it('nobody hides anybody in a scene with guests, wherever Charlie stands', () => {
     for (let x = 14; x <= 306; x += 4) {
       const spots = guestSpots({ x, y: 124 }, 5);
