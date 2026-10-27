@@ -3,6 +3,8 @@
 // hose or delivery timer and Papa cooking had no end; formats 2 and 3 have no washing machine timer, gave the house
 // key away at E01, took both flours at once and had no fuse in the breaker.
 import { CHARACTERS, FLAGS, ITEMS, PLACES } from './world';
+import { isBoard } from './circuit';
+import { PUZZLE_COUNT } from './ctx';
 import { TIMER_MS } from './rules';
 import { CharacterStates, CutId, GameState, NoteId } from './types';
 
@@ -62,7 +64,8 @@ export function deserialize(json: string): GameState {
     (raw.unread as unknown[]).every((n) => (raw.notes as unknown[]).includes(n)) &&
     uniqueOf(raw.cuts, CUT_IDS) &&
     Array.isArray(raw.solved) &&
-    raw.solved.every((n) => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= 30) &&
+    raw.solved.every((n) => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= PUZZLE_COUNT) &&
+    (raw.circuit === undefined || isBoard(raw.circuit)) &&
     new Set(raw.solved).size === raw.solved.length &&
     isNat(raw.captures) &&
     (raw.tutorial === 0 || raw.tutorial === 1 || raw.tutorial === 2 || raw.tutorial === 3) &&
@@ -119,5 +122,6 @@ export function deserialize(json: string): GameState {
     },
     finished: raw.finished as boolean,
     wrongIdx: raw.wrongIdx as number,
+    ...(raw.circuit === undefined ? {} : { circuit: [...(raw.circuit as number[])] }),
   };
 }

@@ -551,6 +551,59 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
+    id: "hs-florent.console"
+- tapOn:
+    id: "verb-use"
+- extendedWaitUntil:
+    visible:
+      id: "circuit"
+    timeout: 15000
+- takeScreenshot: circuit-fullscreen
+- tapOn:
+    id: "circuit-cell-1"
+- tapOn:
+    id: "circuit-cell-2"
+- tapOn:
+    id: "circuit-cell-3"
+- tapOn:
+    id: "circuit-cell-3"
+- tapOn:
+    id: "circuit-cell-8"
+- tapOn:
+    id: "circuit-cell-9"
+- tapOn:
+    id: "circuit-cell-9"
+- tapOn:
+    id: "circuit-cell-9"
+- tapOn:
+    id: "circuit-cell-13"
+- tapOn:
+    id: "circuit-cell-15"
+- tapOn:
+    id: "circuit-cell-16"
+- tapOn:
+    id: "circuit-cell-16"
+- tapOn:
+    id: "circuit-cell-16"
+- tapOn:
+    id: "circuit-cell-18"
+- tapOn:
+    id: "circuit-cell-18"
+- tapOn:
+    id: "circuit-cell-18"
+- tapOn:
+    id: "circuit-cell-24"
+- tapOn:
+    id: "circuit-cell-25"
+- extendedWaitUntil:
+    notVisible:
+      id: "circuit"
+    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
     id: "hs-florent.kit"
 - tapOn:
     id: "verb-take"

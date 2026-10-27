@@ -3,6 +3,7 @@
 // The inventory band pages like the game screen does (page reset on every place change), so items beyond the
 // first page are reached with the "more" slot. Waiting for a timer waits for the marker of what it changes (Papa's
 // or Maman's state, the delivered parcel), or until no timer runs any more (fast mode: timers run faster).
+import { START_BOARD, taps } from '../game/circuit';
 import { interact, newGame } from '../game/rules';
 import { SOLUTION } from '../game/solution';
 import { GameState, Input, ItemId } from '../game/types';
@@ -59,6 +60,8 @@ function stepFor(input: Input, state: GameState, after: GameState, band: Band): 
     case 'verb': {
       const head = [tap(`hs-${input.target}`), tap(`verb-${input.verb}`)];
       if (input.verb === 'use' && input.target === 'living.chess') return [...head, waitFor('chess')];
+      // Florent's console fills the whole screen (AC-74): a screenshot proves it.
+      if (input.verb === 'use' && input.target === 'florent.console') return [...head, waitFor('circuit'), '- takeScreenshot: circuit-fullscreen'];
       if (input.verb === 'use' && (input.target === 'office.computer' || input.target === 'parents.safe' || input.target === 'attic.door')) return [...head, waitFor('keypad')];
       if (input.verb === 'use' && (input.target === 'cellar.bottles' || input.target === 'attic.trunk')) return [...head, waitFor('pad')];
       return [...head, idle()];
@@ -81,6 +84,9 @@ function stepFor(input: Input, state: GameState, after: GameState, band: Band): 
       return input.moves.flatMap((m) => [tap(`chess-sq-${m.slice(0, 2)}`), tap(`chess-sq-${m.slice(2, 4)}`), waitGone('chess-waiting')]).concat(idle());
     case 'pad':
       return [...input.code.map((b) => tap(`pad-${b}`)), idle()];
+    case 'circuit':
+      // A tap per quarter turn, tile by tile; the game closes by itself once the bulb lights.
+      return [...taps(state.circuit ?? START_BOARD, input.board).map((i) => tap(`circuit-cell-${i}`)), waitGone('circuit'), idle()];
     case 'wait':
       return [waitFor(waitMarker(state, after), 90000), waitFor('scene-idle', 60000)];
     case 'lookItem':

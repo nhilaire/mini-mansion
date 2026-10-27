@@ -45,7 +45,7 @@ describe('telemetry events (AC-06, AC-07)', () => {
     }
     expect(tracked[0]).toEqual({ name: 'capture', params: { room: 'julien', count: 1 } });
     const puzzles = tracked.filter((e) => e.name === 'puzzle_solved');
-    expect(puzzles).toHaveLength(29);
+    expect(puzzles).toHaveLength(30);
     expect(puzzles[0]).toEqual({ name: 'puzzle_solved', params: { puzzle: 1, duration_s: 125 } });
     expect(tracked.filter((e) => e.name === 'game_complete')).toEqual([{ name: 'game_complete', params: { duration_s: 125, captures: 0 } }]);
     for (const e of tracked) {

@@ -804,7 +804,11 @@ const PROPS: Record<string, Prop> = {
     b.rect(r.x + 4, r.y + 12, 16, 6, C.ink).set(r.x + 7, r.y + 14, C.red).set(r.x + 10, r.y + 14, C.stone3).set(r.x + 13, r.y + 14, C.stone3);
     if (on(s, 'battery_taken')) b.rect(r.x + 15, r.y + 13, 4, 4, C.stone2);
   },
-  'florent.console': (b, r) => b.rect(r.x, r.y, r.w, r.h - 10, C.ink).rect(r.x + 2, r.y + 2, r.w - 4, r.h - 14, C.purple).rect(r.x + 8, r.y + r.h - 8, 12, 6, C.stone1).rect(r.x + 30, r.y + r.h - 8, 10, 6, C.stone2),
+  // Florent's console, with his challenge post-it stuck on the screen's corner (E31).
+  'florent.console': (b, r) => {
+    b.rect(r.x, r.y, r.w, r.h - 10, C.ink).rect(r.x + 2, r.y + 2, r.w - 4, r.h - 14, C.purple).rect(r.x + 8, r.y + r.h - 8, 12, 6, C.stone1).rect(r.x + 30, r.y + r.h - 8, 10, 6, C.stone2);
+    b.rect(r.x + r.w - 12, r.y + 1, 10, 9, C.yellow).hline(r.x + r.w - 11, r.x + r.w - 4, r.y + 4, C.ink).hline(r.x + r.w - 11, r.x + r.w - 6, r.y + 6, C.ink);
+  },
   // The parents' room (photo): pale walls with a mauve band behind the bed, the rainbow-striped duvet with mustard
   // pillows, two white cylinder lamps, the white wardrobe, a tall black-framed mirror, and the ensuite shower with
   // its red wall and red/orange checker tiles.

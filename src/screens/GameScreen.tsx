@@ -11,6 +11,7 @@ import { findPath } from '../game/geometry';
 import { addPlayTime, advanceTutorial, TutorialSignal, tutorialBubble, tutorialDone } from '../game/progress';
 import { viewExtras, viewPlace } from '../art/act2';
 import { interact, nextDeadline, PADS, readNotes } from '../game/rules';
+import { START_BOARD } from '../game/circuit';
 import { Beat, CharacterId, Facing, GameState, Input, ItemId, KeypadId, PadId, PlaceId, Point, Speaker, Verb, ViewId } from '../game/types';
 import { poseAt } from '../game/walker';
 import {
@@ -38,6 +39,7 @@ import {
   ActionMenu,
   CaptureFade,
   ChessBoard,
+  CircuitGame,
   DocumentsOverlay,
   Keypad,
   LineBanner,
@@ -54,6 +56,7 @@ type Presentation =
   | { kind: 'keypad'; keypad: KeypadId }
   | { kind: 'pad'; pad: PadId }
   | { kind: 'chess' }
+  | { kind: 'circuit' }
   | { kind: 'documents' }
   | { kind: 'capture'; until: number }
   | { kind: 'wait'; until: number }
@@ -196,6 +199,9 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           return;
         case 'pad':
           show({ kind: 'pad', pad: b.pad });
+          return;
+        case 'circuit':
+          show({ kind: 'circuit' });
           return;
         case 'chess':
           show({ kind: 'chess' });
@@ -644,6 +650,19 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
             apply({ kind: 'chess', moves });
           }}
           onClose={runNext}
+        />
+      )}
+      {present?.kind === 'circuit' && (
+        <CircuitGame
+          initial={game.circuit ?? START_BOARD}
+          onSolved={(board) => {
+            show(null);
+            apply({ kind: 'circuit', board });
+          }}
+          onClose={(board) => {
+            apply({ kind: 'circuit', board });
+            runNext();
+          }}
         />
       )}
       {present?.kind === 'documents' && <DocumentsOverlay onClose={runNext} />}

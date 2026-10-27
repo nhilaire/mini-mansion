@@ -227,7 +227,7 @@ export interface GameState {
   notes: NoteId[];
   unread: NoteId[];
   cuts: CutId[];
-  // Puzzles solved (E01-E30 as 1-30), in order.
+  // Puzzles solved (E01-E31 as 1-31), in order.
   solved: number[];
   captures: number;
   tutorial: TutorialStep;
@@ -238,6 +238,8 @@ export interface GameState {
   finished: boolean;
   // Rotation index of the generic "wrong combination" lines.
   wrongIdx: number;
+  // The quarter turns of the tiles of Florent's console game (E31), once Charlie has played it.
+  circuit?: number[];
 }
 
 export type SfxName =
@@ -277,6 +279,8 @@ export type Beat =
   | { type: 'keypad'; keypad: KeypadId }
   | { type: 'pad'; pad: PadId }
   | { type: 'chess' }
+  // Florent's console: the broken circuit game, full screen (E31).
+  | { type: 'circuit' }
   | { type: 'documents' }
   | { type: 'note'; note: NoteId }
   // A place change; pos/facing are given when it is not the saved place (Charlie steps into a room before a capture).
@@ -314,6 +318,8 @@ export type Input =
   | { kind: 'pad'; pad: PadId; code: string[] }
   // The moves played on Théo's chess problem, as "e2e4" squares (white moves only).
   | { kind: 'chess'; moves: string[] }
+  // The board of Florent's console game as the player leaves it (closed or solved): quarter turns per tile.
+  | { kind: 'circuit'; board: number[] }
   // Play time passing: advances the timer clock and resolves the timers that end.
   | { kind: 'tick'; ms: number }
   // Waiting until the next timer ends (tests and the solver).

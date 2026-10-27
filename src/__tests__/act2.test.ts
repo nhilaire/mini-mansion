@@ -183,7 +183,7 @@ describe('the cat, the parcel and the shed (AC-62)', () => {
 
 describe('Florent\'s bike (AC-63)', () => {
   it('the Nerf kit holds the O-ring and the puncture patches', () => {
-    const o = interact(at('florent', { chars: chars({ florent: 'drumming' }) }), take('florent.kit'));
+    const o = interact(at('florent', { chars: chars({ florent: 'drumming' }), solved: [31] }), take('florent.kit'));
     expect(o.state.inventory).toEqual(['oring', 'patches']);
   });
 

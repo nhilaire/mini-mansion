@@ -5,6 +5,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { AppState } from 'react-native';
 
 import { hotspotName, itemName, line } from '../content/index';
+import { SOLUTION_BOARD, START_BOARD, taps, TILES } from '../game/circuit';
 import { interact, newGame, playAll } from '../game/rules';
 import { SOLUTION } from '../game/solution';
 import { CharacterStates, GameState, Input } from '../game/types';
@@ -534,5 +535,47 @@ describe('GameScreen', () => {
     await dismissLines();
     expect(props.onEnding).toHaveBeenCalledTimes(1);
     expect((props.onEnding.mock.calls[0][0] as GameState).finished).toBe(true);
+  });
+});
+
+// T-88 (AC-73, AC-74): Florent's console opens the broken circuit game over the whole screen.
+describe("Florent's console", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.clearAllMocks();
+    resetFastModeForTests();
+    applyTestingLink(FAST_LINK);
+  });
+  const room = (): GameState => ({ ...newGame(), place: 'florent', chars: chars({ florent: 'drumming' }), flags: { door_unlocked: true }, tutorial: 3 });
+  const open = async () => {
+    await fireEvent.press(screen.getByTestId('hs-florent.console'));
+    await fireEvent.press(screen.getByTestId('verb-use'));
+    await act(async () => {
+      jest.advanceTimersByTime(3000);
+    });
+  };
+
+  it('fills the screen, hides the inventory, and keeps the board when closed', async () => {
+    const props = await mount(room());
+    await open();
+    expect(screen.getByTestId('circuit')).toBeTruthy();
+    expect(screen.getByText(fr.circuit.title)).toBeTruthy();
+    const free = TILES.findIndex((t) => !t.fixed && t.kind !== 'O');
+    await fireEvent.press(screen.getByTestId(`circuit-cell-${free}`));
+    await fireEvent.press(screen.getByTestId('circuit-close'));
+    expect(screen.queryByTestId('circuit')).toBeNull();
+    expect(lastSaved(props).circuit?.[free]).toBe((START_BOARD[free] + 1) % 4);
+  });
+
+  it('lighting the bulb shows the win, then closes the game and opens the Nerf kit (E31)', async () => {
+    const props = await mount(room());
+    await open();
+    for (const i of taps(START_BOARD, SOLUTION_BOARD)) await fireEvent.press(screen.getByTestId(`circuit-cell-${i}`));
+    expect(screen.getByTestId('circuit-solved')).toBeTruthy();
+    await act(async () => {
+      jest.advanceTimersByTime(1600);
+    });
+    expect(screen.queryByTestId('circuit')).toBeNull();
+    expect(lastSaved(props).solved).toContain(31);
   });
 });

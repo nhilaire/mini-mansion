@@ -66,6 +66,18 @@ export const fr = {
     square: (name: string, square: string) => `${name} en ${square}`,
     empty: (square: string) => `Case ${square}`,
   },
+  // Florent's console: the broken circuit game (E31).
+  circuit: {
+    title: typo('Circuit Brisé — Niveau 99'),
+    hint: typo('Touche une pièce pour la tourner. Amène le courant de la pile jusqu\'à l\'ampoule !'),
+    solved: typo('NIVEAU 99 TERMINÉ !'),
+    reset: 'Recommencer',
+    close: 'Quitter',
+    battery: 'Pile',
+    bulb: 'Ampoule',
+    // Accessibility label of a tile: "Pièce 3, 2, allumée".
+    cell: (x: number, y: number, on: boolean, fixed: boolean) => `Pièce ${x + 1}, ${y + 1}${on ? ', allumée' : ''}${fixed ? ', fixe' : ''}`,
+  },
   documents: { title: "Les documents secrets de Papa", close: 'Fermer' },
   pause: { title: 'Pause', resume: 'Reprendre', settings: 'Paramètres', home: 'Menu principal' },
   ending: {

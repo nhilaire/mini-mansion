@@ -4,7 +4,7 @@ Status: approved
 Project slug: mini-mansion
 Final app name: Mini Mansion
 Android package: io.github.nhilaire.minimansion
-Version target: 0.2.0
+Version target: 0.3.0
 Last updated: 2026-10-24
 
 > Written in English. Player-facing text is quoted in the "Player copy" section, in every language of the game
@@ -23,7 +23,8 @@ Last updated: 2026-10-24
 > family seen at the end, in the kitchen or in the lab, lines that cannot be tapped away, the washing machine in 1 min,
 > the doorbell answered in 15 s, the garden ways marked by wicket gates; 2026-10-25, after a test by another player:
 > the hair dryer stays plugged on its hook, and the power cut comes from Théo's electromagnet experiment, explained by a
-> second science magazine in Julien's room and assembled from four found objects), which amend this PRD: timed doorbell sequence, kitchen/garden/front captures, side gates, merged music corner and dining
+> second science magazine in Julien's room and assembled from four found objects; 2026-10-26, v0.3.0: Florent's console
+> runs a full-screen "broken circuit" game, and beating its level 99 opens his Nerf kit), which amend this PRD: timed doorbell sequence, kitchen/garden/front captures, side gates, merged music corner and dining
 > room, breaker, cellar hatch, lab door code, optional kitchen recipe, art from the author's room photos. Every rule
 > kept is restated here: this PRD is the only source of truth.
 
@@ -197,7 +198,7 @@ means the front of the house (`front`).
 | julien | Chambre de Julien (trophies, medals, a science magazine Théo left there, open at « l'électroaimant ») | door -> landing |
 | bathroom | Salle de bains du couloir (hair dryer on its hook, plugged in) | door -> landing |
 | theo | Chambre de Théo (Rubik's Cubes, chess posters) | door -> landing |
-| florent | Chambre de Florent (Nerf, video games, Nerf modding kit, an overloaded power strip with Papa's post-it) | door -> landing |
+| florent | Chambre de Florent (Nerf, the game console with Florent's challenge post-it, Nerf modding kit, an overloaded power strip with Papa's post-it) | door -> landing |
 | parents | Chambre des parents (bed, painting hiding the safe, sinks, mirror, shower) | door -> landing |
 
 - The secret laundry adjoins the parents' bedroom but has no door to it: the attic is its only access.
@@ -333,7 +334,8 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
   While Florent is not riding (in his room, or drumming with his room free), the power strip answers
   `line.stripNotNow`: his console runs on it and he would come straight up to check it.
 - Florent, 1st exit: the drums (E03). 2nd exit: his repaired bike (E26), which needs the Rustines, found in his Nerf
-  kit together with the Joint torique (so only during or after his 1st exit), and the bike pump of the parcel.
+  kit together with the Joint torique (so only during or after his 1st exit, once his console challenge is beaten,
+  E31), and the bike pump of the parcel.
 - Maman leaves her room once (E17). In the garden, the hose (E22) sends her to change for 90 s; it can be used again
   once she is back (`line.momSoakedAgain`), until the parcel and Papa's drawer key have been taken
   (then `line.hoseOff`: the tap stays closed).
@@ -367,7 +369,8 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
 
 ### Puzzle chain
 
-Puzzle ids keep the draft's numbering (E01-E15), then the lures and the gates (E16-E19), then Act II (E20-E30).
+Puzzle ids keep the draft's numbering (E01-E15), then the lures and the gates (E16-E19), then Act II (E20-E30), then
+Florent's console (E31).
 Needed to finish: E01-E15, E17 and E19-E30 (the dough is needed for the tonka bean, E30; it frees the office the
 first time unless the doorbell, E16, did it before);
 E15 is needed since the bottle rack is in the cellar, whose hatch only opens from below with the iron bar; E22 (the
@@ -379,7 +382,8 @@ after CUT07 (E05); E07 after E06 and (E16 or E19); E08 after E03 and E17; E09 af
 (E16 or E19, or later E27: the power cut stays possible until the Pince is taken) and E02; E11 after E14; E12 after E10, E11 and E07; E20 after E10; E21 after E20; E22 after
 E17; CUT13 (the delivery) after E07 (60 s after Papa is wary); E23 after CUT13, with the garden free (Maman still folding, or E22); E24 after E23; E25 after E22 and Papa wary (E07);
 E26 after E24 and the Nerf kit taken (E08's Joint torique); E27 after E26 and the Électroaimant à brancher assembled; E28 after E25 and E27; E29 after E28; E13
-after E12, E21 and E29; E30 after E19 and E24; the end (CUT11) once E13 and E30 are done, where the last of them was made. E16 and E18 are
+after E12, E21 and E29; E30 after E19 and E24; E31 after E03 (Florent's room free); the Nerf kit (E08's Joint torique, E26's Rustines) after
+E31; the end (CUT11) once E13 and E30 are done, where the last of them was made. E16 and E18 are
 optional.
 
 Items: Clé de la maison, Fusible, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du
@@ -420,6 +424,7 @@ copy).
 | E29 | Open the attic trunk: the colour padlock on the sequence pad (red, yellow, blue, green), its six colour buttons shown in a mixed order (blue, orange, green, red, purple, yellow) | N14 not in the notebook: `line.trunkUnknown`; wrong colours: `line.codeWrong`, unlimited tries | + Fragment n° 3 |
 | E13 | In the laundry, put the three fragments on Papa's recipe notebook, in any order | fewer than three yet: `line.recipeMore` (the fragment is kept in the notebook) | - Fragments; the recipe is complete: with the tonka bean already in the dough, CUT11 and the Ending; otherwise `line.recipeTonka` (the secret touch is missing), and CUT11 plays in the kitchen when the tonka bean goes into the dough (E30) |
 | E30 | Grate the Fève tonka into Papa's dough in the food processor (kitchen) | no dough yet: `line.tonkaNoDough` | - Fève tonka; flag `tonka_in` (`e30.tonka`) |
+| E31 | Beat level 99 of Florent's console (florent, his room free): the broken circuit game (see Florent's console) | room not free: not reachable; kit before E31: `line.kitLocked` | the Nerf kit can be taken (`line.kitOpen`) |
 | E15 | Unlock the cellar hatch from below: wedge one of the two wall stones with the Barre de fer, then press the other one | hatch used: `line.hatchStuck`; one stone pressed alone: `line.stoneAlone`; the bar on the hatch: `line.hatchStuck` | - Barre de fer (wedged in the stone, `line.stoneWedged`); pressing the other stone: the hatch unlocks (`e15.open`), open both ways for good |
 
 - Effects happen exactly once; a solved puzzle stays solved; trying again gives the "already done" look line.
@@ -430,6 +435,26 @@ copy).
 - Items can be taken as soon as Charlie can stand next to them; items found before their puzzle stay in the inventory.
 - Always winnable: from every reachable state, the ending is reachable (exhaustive search of the engine's state
   graph, timers included, in a unit test), and no item needed later can be removed early.
+
+### Florent's console: the broken circuit (E31)
+
+- Florent's game console (florent) is paused on « Niveau 99 » of « Circuit Brisé ». Florent's post-it on it:
+  « Celui qui bat le niveau 99 a le droit de piocher dans mon kit Nerf. — Florent ». It can be used only while his room
+  is free (Florent drumming or riding); the Nerf kit refuses to be taken until E31 is solved (`line.kitLocked`:
+  « Florent a mis un cadenas à code sur son kit… Son post-it dit qu'il faut d'abord battre son niveau 99. »).
+- Using the console opens the circuit game **full screen** (it covers the whole phone screen, landscape, scene,
+  inventory and buttons hidden), in a retro console frame.
+- The board: 7 columns x 5 rows of tiles (straight, corner, T, and a few burnt cells with no pipe). A battery on the left edge feeds one tile, a bulb on
+  the right edge is fed by one tile. Tapping a tile turns it a quarter turn clockwise. Some tiles are fixed (a rivet
+  drawn on them) and do not turn. The current lights in yellow every tile connected to the battery; when the bulb is
+  connected it lights, `sfx` win, `console.solved` (« NIVEAU 99 TERMINÉ ! »), the game closes after 1.5 s and E31 is
+  solved (the kit can now be taken, `line.kitOpen`).
+- One hand-made level, "not too easy, not too hard": a single path of tiles can link the battery to the bulb; at the
+  start it is not connected; at least 12 and at most 30 quarter turns are needed (computed by a unit test); decoy T
+  and corner tiles lead off the path.
+- No timer, no move limit, unlimited tries: `console.reset` puts the starting board back, `console.close` leaves
+  the game and keeps the board as it is (the next use goes on from there; the board is part of the save).
+- Once E31 is solved, using the console says `console.done` (« Niveau 99 battu. Florent ne va pas en revenir. »).
 
 ### Chess problem (E06)
 
@@ -531,6 +556,8 @@ checked by a unit test:
   colour wheels); N14; N12 (a piece in the attic trunk).
 - E30: fragment n° 2 look (« une fève tonka râpée dans la pâte du robot »); `line.recipeTonka`; N15 and the parcel look (the
   tonka bean is the secret ingredient).
+- E31: console look (paused on « Niveau 99 », Florent's challenge post-it); Nerf kit look (a code lock: beat level 99
+  first).
 
 ### Tutorial (first scene)
 
@@ -732,6 +759,13 @@ Puzzles, characters, captures, timers
 - AC-71 [unit] Given the open fridge, then the rice milk and the tin of sardines are two hotspots taken one at a time,
   each gone from the fridge once taken; given the flours cupboard, then the chestnut flour and the rice flour are taken
   one at a time and the cupboard stays.
+- AC-73 [unit] Given Florent's console, then it can be used only while his room is free; its board is 7x5, not
+  connected at the start, solvable with between 12 and 30 quarter turns, with a single path of tiles linking the
+  battery to the bulb; a tap turns a non-fixed tile a quarter turn clockwise and fixed tiles never turn; the lit tiles
+  are exactly those connected to the battery; connecting the bulb solves E31 once; the board survives a close and a
+  save; the Nerf kit answers `line.kitLocked` before E31 and gives the Joint torique and the Rustines after it.
+- AC-74 [e2e] Given the full walkthrough on the release build, when Charlie uses Florent's console, then the circuit
+  game fills the whole screen (screenshot), and solving it lets the walkthrough take the Nerf kit.
 - AC-72 [unit] Given the Fil de cuivre, the Gros clou, the Pile and the Vieille fiche, then wire on nail gives the
   Bobine, the Pile on the Bobine gives the Électroaimant (`line.magnetWorks`), the Vieille fiche on it gives the
   Électroaimant à brancher (each pair in either order), any other combination answers the generic wrong lines; the

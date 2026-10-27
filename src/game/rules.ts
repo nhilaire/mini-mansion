@@ -2,6 +2,7 @@
 // E01-E30, character states, lures and wariness, timers, guarded places and captures). interact() is pure: it returns a new state, the
 // beats to play and the telemetry facts.
 import { isSolution } from './chess';
+import { connected, isBoard } from './circuit';
 import { cloneState, Ctx } from './ctx';
 import {
   CELLAR_SPAWN,
@@ -100,6 +101,13 @@ export function interact(state: GameState, input: Input): Outcome {
       c.set('chess_solved').hero('e06.solved').note('n08').solve(6);
       return done(c);
     }
+    // E31: the board of Florent's console game; the bulb lit solves it and opens his Nerf kit.
+    case 'circuit': {
+      if (state.place !== 'florent' || c.isSolved(31) || !isBoard(input.board)) return rejected(state);
+      c.s.circuit = [...input.board];
+      if (connected(input.board)) c.sfx('solved').hero('line.kitOpen').solve(31);
+      return done(c);
+    }
     case 'tick':
       if (!(input.ms >= 0)) return rejected(state);
       advanceClock(c, c.s.clock + input.ms);
@@ -128,6 +136,8 @@ function plausible(s: GameState, input: Input): boolean {
       return s.place === PADS[input.pad].place;
     case 'chess':
       return s.place === 'living';
+    case 'circuit':
+      return s.place === 'florent';
     default:
       return true;
   }
@@ -410,7 +420,6 @@ export const GAGS: Readonly<Record<string, SfxName>> = {
   'theo.desk': 'gag',
   'theo.cube': 'gag',
   'florent.nerf': 'gag',
-  'florent.console': 'gag',
   'parents.sink': 'water',
 };
 
@@ -457,6 +466,11 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       return;
     }
     c.hero(!open ? 'kitchen.fridge.lookClosed' : c.is('milk_taken') && c.is('sardines_taken') ? 'kitchen.fridge.lookEmpty' : 'kitchen.fridge.look');
+    return;
+  }
+  // E31: Florent's Nerf kit is locked until his console's level 99 is beaten.
+  if (id === 'florent.kit' && !c.isSolved(31)) {
+    c.hero(verb === 'take' ? 'line.kitLocked' : 'florent.kit.lookLocked');
     return;
   }
   const take = TAKES[id];
@@ -710,6 +724,11 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       return;
     case 'florent.strip:use':
       c.hero('florent.strip.use');
+      return;
+    // E31: Florent's console, level 99 of the broken circuit game; his Nerf kit is locked until it is beaten.
+    case 'florent.console:use':
+      if (c.isSolved(31)) c.hero('console.done');
+      else c.beats.push({ type: 'circuit' });
       return;
     // The hair dryer stays plugged in on its hook: nothing to dry without Papa's note.
     case 'bathroom.hairdryer:use':

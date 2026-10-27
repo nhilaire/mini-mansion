@@ -55,6 +55,7 @@
 //   transitions.
 // So every reachable concrete state belongs to exactly one explored node and every input from it is tried.
 import { SOLUTION_MOVES } from './chess';
+import { SOLUTION_BOARD } from './circuit';
 import { CODES, GAGS, interact, newGame, PADS, playAll, USE_RULES } from './rules';
 import { Beat, Flag, GameState, Input, ItemId, KeypadId, NoteId, PadId } from './types';
 import { exitsIn, hotspotsIn } from './world';
@@ -177,7 +178,7 @@ export function allInputs(s: GameState): Input[] {
   for (const item of s.inventory) out.push({ kind: 'lookItem', item });
   for (const keypad of KEYPADS) out.push({ kind: 'keypad', keypad, code: CODES[keypad] }, { kind: 'keypad', keypad, code: '0000' });
   for (const pad of PAD_IDS) out.push({ kind: 'pad', pad, code: [...PADS[pad].code] }, { kind: 'pad', pad, code: [...PADS[pad].code].reverse() });
-  out.push({ kind: 'chess', moves: [...SOLUTION_MOVES] }, { kind: 'wait' }, { kind: 'tick', ms: 1000 });
+  out.push({ kind: 'chess', moves: [...SOLUTION_MOVES] }, { kind: 'circuit', board: [...SOLUTION_BOARD] }, { kind: 'wait' }, { kind: 'tick', ms: 1000 });
   return out;
 }
 
@@ -221,7 +222,7 @@ export function actionInputs(s: GameState): Input[] {
   if (s.inventory.includes('pole') && s.inventory.includes('extension')) out.push({ kind: 'item', item: 'pole', target: 'item:extension' });
   for (const keypad of KEYPADS) out.push({ kind: 'keypad', keypad, code: CODES[keypad] }, { kind: 'keypad', keypad, code: '0000' });
   for (const pad of PAD_IDS) out.push({ kind: 'pad', pad, code: [...PADS[pad].code] });
-  out.push({ kind: 'chess', moves: [...SOLUTION_MOVES] });
+  out.push({ kind: 'chess', moves: [...SOLUTION_MOVES] }, { kind: 'circuit', board: [...SOLUTION_BOARD] });
   return out;
 }
 

@@ -62,6 +62,16 @@ export const en: Strings = {
     square: (name: string, square: string) => `${name} on ${square}`,
     empty: (square: string) => `Square ${square}`,
   },
+  circuit: {
+    title: 'Broken Circuit — Level 99',
+    hint: 'Tap a piece to turn it. Bring the current from the battery to the bulb!',
+    solved: 'LEVEL 99 COMPLETE!',
+    reset: 'Start again',
+    close: 'Quit',
+    battery: 'Battery',
+    bulb: 'Bulb',
+    cell: (x: number, y: number, on: boolean, fixed: boolean) => `Piece ${x + 1}, ${y + 1}${on ? ', lit' : ''}${fixed ? ', fixed' : ''}`,
+  },
   documents: { title: "Papa's secret documents", close: 'Close' },
   pause: { title: 'Pause', resume: 'Resume', settings: 'Settings', home: 'Main menu' },
   ending: {

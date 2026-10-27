@@ -1,7 +1,7 @@
 // Mutable working copy of the state while one interaction is resolved; collects beats and events.
 import { Beat, CharacterId, CutId, Flag, GameEvent, GameState, ItemId, NoteId, SfxName, Speaker } from './types';
 
-export const PUZZLE_COUNT = 30;
+export const PUZZLE_COUNT = 31;
 export const WRONG_LINES = 6;
 // E18 (side gates) is optional; one of E16 (doorbell) and E19 (dough) frees the office the first time.
 export const OPTIONAL_PUZZLES: readonly number[] = [18];

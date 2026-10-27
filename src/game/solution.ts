@@ -3,6 +3,7 @@
 // timer suits an automated run better than the three doorbell timers (E16, covered by the unit tests). Charlie waits next
 // to each window (the corridor for the office) so that the automated run fits the timed windows.
 import { SOLUTION_MOVES } from './chess';
+import { SOLUTION_BOARD } from './circuit';
 import { Input, ItemId, KeypadId, PadId } from './types';
 
 const go = (exit: string): Input => ({ kind: 'exit', exit });
@@ -71,6 +72,8 @@ export const SOLUTION: readonly Input[] = [
   give('booklet', 'theo.cube'), // E05
   go('theo.toLanding'), // CUT07
   use('landing.florentDoor'),
+  use('florent.console'),
+  { kind: 'circuit', board: [...SOLUTION_BOARD] }, // E31: level 99 beaten, the Nerf kit opens
   take('florent.kit'), // the O-ring and the puncture patches
   go('florent.toLanding'),
   go('landing.toHall'),

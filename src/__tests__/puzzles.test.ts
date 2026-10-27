@@ -33,7 +33,7 @@ describe('the whole solution (AC-21, AC-32)', () => {
 
   it('solves every puzzle exactly once except the doorbell (the dough frees the office)', () => {
     const puzzles = events.filter((e) => e.type === 'puzzle').map((e) => (e as { puzzle: number }).puzzle);
-    expect([...puzzles].sort((a, b) => a - b)).toEqual(Array.from({ length: 30 }, (_, i) => i + 1).filter((n) => n !== 16));
+    expect([...puzzles].sort((a, b) => a - b)).toEqual(Array.from({ length: 31 }, (_, i) => i + 1).filter((n) => n !== 16));
   });
 
   it('E30 ends the game: game_complete once, with the captures, then the ending beat', () => {

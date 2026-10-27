@@ -39,7 +39,7 @@ describe('character states (AC-22)', () => {
   });
 
   it('Florent goes back to his room once the O-ring is taken and the hero leaves his room', () => {
-    const drumming = base('florent', { chars: chars({ florent: 'drumming' }) });
+    const drumming = base('florent', { chars: chars({ florent: 'drumming' }), solved: [31] });
     expect(interact(drumming, go('florent.toLanding')).state.chars.florent).toBe('drumming');
     const { state } = playAll(drumming, [{ kind: 'verb', verb: 'take', target: 'florent.kit' }, go('florent.toLanding')]);
     expect(state.chars.florent).toBe('in_room');

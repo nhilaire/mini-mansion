@@ -90,7 +90,7 @@ describe('save format v4 (AC-35, AC-58)', () => {
     ['an unknown note', JSON.stringify({ ...valid, notes: ['n99'] })],
     ['an unread note not learnt', JSON.stringify({ ...valid, notes: [], unread: ['n01'] })],
     ['an unknown cutscene', JSON.stringify({ ...valid, cuts: ['cut99'] })],
-    ['an out-of-range puzzle', JSON.stringify({ ...valid, solved: [31] })],
+    ['an out-of-range puzzle', JSON.stringify({ ...valid, solved: [32] })],
     ['a bad timer', JSON.stringify({ ...valid, timers: { ...valid.timers, dad: -5 } })],
     ['a missing hose timer', JSON.stringify({ ...valid, timers: { dad: null, dough: null, delivery: null, machine: null } })],
     ['a v2 save with v3 states', JSON.stringify({ ...valid, v: 2, timers: { dad: null, dough: null }, chars: { ...valid.chars, florent: 'riding', theo: 'sleeping' } })],

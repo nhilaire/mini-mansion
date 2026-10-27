@@ -1,11 +1,12 @@
 // Overlays of the game screen: action menu, spoken line banner, dialogue choices, digit keypad, chess board, clue
-// notebook, documents, capture fade, tutorial bubble, "use with" hint, note toast and the pause menu. Plain React
+// notebook, Florent's console game, documents, capture fade, tutorial bubble, "use with" hint, note toast and the pause menu. Plain React
 // Native views (readable by Maestro and screen readers); every text comes from the dictionaries.
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { noteText, speakerName } from '../../content/index';
 import { applyMove, Board, ChessSession, coords, legalFrom, newSession, playWhite, square } from '../../game/chess';
+import { Board as Board2, BATTERY_ROW, BULB_ROW, COLS, connected, E, ends, lit, N, ROWS, S, START_BOARD, TILES, turn, W } from '../../game/circuit';
 import { NoteId, Rect, Speaker, Verb } from '../../game/types';
 import { useI18n } from '../../i18n/I18nProvider';
 import { isFastMode } from '../../testing/fastMode';
@@ -270,6 +271,93 @@ export function ChessBoard({ onSolved, onClose }: { onSolved: (moves: string[]) 
   );
 }
 
+// Florent's console: the broken circuit game of level 99, full screen in a retro console frame (E31). A tap turns a
+// tile a quarter turn; the tiles the current reaches light up; once the bulb lights, the win stays on show 1.5 s and
+// the game hands its board back (the engine solves E31). Closing hands the board back as it is, so the next use goes
+// on from there.
+export const CIRCUIT_WIN_MS = 1500;
+
+export function CircuitGame({ initial, onSolved, onClose }: { initial: Board2; onSolved: (board: number[]) => void; onClose: (board: number[]) => void }) {
+  const { t } = useI18n();
+  const { width, height } = useWindowDimensions();
+  const [board, setBoard] = useState<number[]>(() => [...initial]);
+  const [won, setWon] = useState(false);
+  const on = lit(board);
+  // The board takes the height of the screen, the side panel the rest of the width.
+  const size = Math.floor(Math.max(36, Math.min((height - 48) / ROWS, (width - 260) / COLS)));
+  const tapTile = (i: number) => {
+    if (won) return;
+    const next = [...turn(board, i)];
+    setBoard(next);
+    if (connected(next)) {
+      setWon(true);
+      setTimeout(() => onSolved(next), isFastMode() ? 100 : CIRCUIT_WIN_MS);
+    }
+  };
+  const pipe = (m: number, glow: boolean) => {
+    const c = glow ? styles.pipeOn : styles.pipeOff;
+    const half = size / 2;
+    const w = Math.max(6, Math.round(size * 0.22));
+    const arm = { position: 'absolute' as const, backgroundColor: c.backgroundColor };
+    return (
+      <>
+        {m & N ? <View style={[arm, { left: half - w / 2, top: 0, width: w, height: half + w / 2 }]} /> : null}
+        {m & S ? <View style={[arm, { left: half - w / 2, top: half - w / 2, width: w, height: half + w / 2 }]} /> : null}
+        {m & W ? <View style={[arm, { top: half - w / 2, left: 0, height: w, width: half + w / 2 }]} /> : null}
+        {m & E ? <View style={[arm, { top: half - w / 2, left: half - w / 2, height: w, width: half + w / 2 }]} /> : null}
+      </>
+    );
+  };
+  return (
+    <View testID="circuit" style={[StyleSheet.absoluteFill, styles.consoleBezel]}>
+      <View style={styles.consoleRow}>
+        <View style={[styles.consoleSide, { height: size }, { marginTop: BATTERY_ROW * size }]}>
+          <View accessibilityLabel={t.circuit.battery} style={[styles.battery, { height: size * 0.6 }]} />
+        </View>
+        <View style={[styles.consoleScreen, { width: size * COLS + 8, height: size * ROWS + 8 }]}>
+          {Array.from({ length: ROWS }, (_, y) => (
+            <View key={y} style={styles.boardRow}>
+              {Array.from({ length: COLS }, (_, x) => {
+                const i = y * COLS + x;
+                const tile = TILES[i];
+                const isOn = on.has(i);
+                return (
+                  <Pressable
+                    key={i}
+                    testID={`circuit-cell-${i}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={t.circuit.cell(x, y, isOn, tile.fixed)}
+                    onPress={() => tapTile(i)}
+                    style={[{ width: size, height: size }, styles.tile, tile.kind === 'O' && styles.tileBurnt]}
+                  >
+                    {pipe(ends(tile.kind, board[i]), isOn)}
+                    {tile.fixed ? <View style={styles.rivet} /> : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))}
+        </View>
+        <View style={[styles.consoleSide, { height: size }, { marginTop: BULB_ROW * size }]}>
+          <View accessibilityLabel={t.circuit.bulb} style={[styles.bulb, { width: size * 0.6, height: size * 0.6, borderRadius: size * 0.3 }, won && styles.bulbOn]} />
+        </View>
+        <View style={styles.consolePanel}>
+          <Text style={styles.consoleTitle}>{t.circuit.title}</Text>
+          {won ? (
+            <Text testID="circuit-solved" style={styles.consoleWin}>
+              {t.circuit.solved}
+            </Text>
+          ) : (
+            <Text style={styles.consoleHint}>{t.circuit.hint}</Text>
+          )}
+          <Button label={t.circuit.reset} onPress={() => !won && setBoard([...START_BOARD])} variant="secondary" testID="circuit-reset" compact />
+          <Button label={t.circuit.close} onPress={() => !won && onClose(board)} variant="secondary" testID="circuit-close" compact />
+        </View>
+      </View>
+    </View>
+  );
+}
+
 export function NotebookOverlay({ notes, unread, onClose }: { notes: readonly NoteId[]; unread: readonly NoteId[]; onClose: () => void }) {
   const { t } = useI18n();
   const newestFirst = [...notes].reverse();
@@ -392,6 +480,22 @@ const styles = StyleSheet.create({
   chessSide: { width: 210, gap: spacing.sm },
   chessTitle: { color: colors.text, fontFamily: font.family, fontSize: font.small, lineHeight: 18 },
   chessMessage: { color: colors.accent, fontFamily: font.family, fontSize: font.body, fontWeight: '700' },
+  consoleBezel: { backgroundColor: '#2a2a33', alignItems: 'center', justifyContent: 'center', borderWidth: 6, borderColor: '#4a4a58' },
+  consoleRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  consoleScreen: { backgroundColor: '#0f2a1c', borderWidth: 4, borderColor: '#111118', borderRadius: 4 },
+  consoleSide: { width: 28, alignItems: 'center', justifyContent: 'center' },
+  battery: { width: 18, backgroundColor: '#c0303c', borderWidth: 2, borderColor: '#e8d8b0' },
+  bulb: { backgroundColor: '#3a3a30', borderWidth: 2, borderColor: '#e8d8b0' },
+  bulbOn: { backgroundColor: '#ffe14a' },
+  tile: { borderWidth: 1, borderColor: '#1c4a32', backgroundColor: '#163a26' },
+  tileBurnt: { backgroundColor: '#0a140e' },
+  pipeOn: { backgroundColor: '#ffe14a' },
+  pipeOff: { backgroundColor: '#7c8a80' },
+  rivet: { position: 'absolute', right: 3, top: 3, width: 6, height: 6, borderRadius: 3, backgroundColor: '#c8c8d0' },
+  consolePanel: { width: 200, gap: spacing.sm, marginLeft: spacing.md },
+  consoleTitle: { color: '#ffe14a', fontFamily: font.family, fontSize: font.body, fontWeight: '700' },
+  consoleHint: { color: colors.text, fontFamily: font.family, fontSize: font.small, lineHeight: 18 },
+  consoleWin: { color: '#ffe14a', fontFamily: font.family, fontSize: font.heading, fontWeight: '700' },
   sheet: { width: '70%', maxHeight: '88%', gap: spacing.sm },
   screenPanel: { backgroundColor: 'rgba(20, 52, 54, 0.96)' },
   sheetTitle: { color: colors.accent, fontFamily: font.family, fontSize: font.heading, fontWeight: '700', textAlign: 'center' },
