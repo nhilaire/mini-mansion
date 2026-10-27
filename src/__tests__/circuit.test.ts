@@ -41,6 +41,38 @@ describe("the level (Florent's console, AC-73)", () => {
     expect(on.has(BULB_ROW * COLS + COLS - 1)).toBe(true);
     expect(on.size).toBeGreaterThanOrEqual(paths(1)[0].length);
     expect(lit(START_BOARD).size).toBeLessThan(on.size);
+    // Reference: grow the set until no tile joins, a tile joining a lit neighbour when both open towards each other.
+    const reference = (board: readonly number[]) => {
+      const open = (i: number, d: number) => (ends(TILES[i].kind, board[i]) & d) !== 0;
+      const set = new Set<number>(open(BATTERY_ROW * COLS, 8) ? [BATTERY_ROW * COLS] : []);
+      for (let grew = true; grew; ) {
+        grew = false;
+        for (let i = 0; i < TILES.length; i++) {
+          if (set.has(i)) continue;
+          const x = i % COLS;
+          const joins =
+            (x > 0 && set.has(i - 1) && open(i, 8) && open(i - 1, 2)) ||
+            (x < COLS - 1 && set.has(i + 1) && open(i, 2) && open(i + 1, 8)) ||
+            (i >= COLS && set.has(i - COLS) && open(i, 1) && open(i - COLS, 4)) ||
+            (i + COLS < TILES.length && set.has(i + COLS) && open(i, 4) && open(i + COLS, 1));
+          if (joins) {
+            set.add(i);
+            grew = true;
+          }
+        }
+      }
+      return set;
+    };
+    const sorted = (s: Set<number>) => [...s].sort((a, b) => a - b);
+    // Every board on the way from the start to the solution, then pseudo-random boards.
+    const boards: number[][] = [[...START_BOARD]];
+    for (const i of taps(START_BOARD, SOLUTION_BOARD)) boards.push([...turn(boards[boards.length - 1], i)]);
+    let seed = 1;
+    const rand = () => (seed = (seed * 16807) % 2147483647) % 4;
+    for (let n = 0; n < 200; n++) boards.push(TILES.map((t) => (t.fixed ? t.start : rand())));
+    for (const b of boards) expect(sorted(lit(b))).toEqual(sorted(reference(b)));
+    // On the solved board, some pipe tiles off the current stay dark.
+    expect(TILES.some((t, i) => t.kind !== 'O' && !on.has(i))).toBe(true);
   });
 });
 

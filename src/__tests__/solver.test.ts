@@ -42,7 +42,7 @@ const DEPENDS: Record<number, number[]> = {
   5: [4],
   6: [5],
   7: [6],
-  8: [3, 17],
+  8: [3, 17, 31],
   9: [8],
   10: [9, 17],
   14: [2],
@@ -55,11 +55,12 @@ const DEPENDS: Record<number, number[]> = {
   23: [7],
   24: [23],
   25: [7, 22],
-  26: [24],
+  26: [24, 31],
   27: [26],
   28: [25, 27],
   29: [28],
   30: [19, 24],
+  31: [3],
 };
 
 const has = (s: GameState, i: GameState['inventory'][number]) => s.inventory.includes(i);
