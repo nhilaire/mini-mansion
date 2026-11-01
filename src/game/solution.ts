@@ -133,11 +133,6 @@ export const SOLUTION: readonly Input[] = [
   go('front.toHall'),
   go('hall.toLiving'),
   take('living.remote'), // the battery
-  go('living.toMusic'),
-  go('music.toKitchen'),
-  give('tonka', 'kitchen.robot'), // E30: the secret touch in Papa's dough
-  go('kitchen.toMusic'),
-  go('music.toLiving'),
   go('living.toHall'),
   go('hall.toCorridor'),
   go('corridor0.toGarage'),
@@ -172,13 +167,14 @@ export const SOLUTION: readonly Input[] = [
   go('cellar.toGarage'),
   go('garage.toAttic'),
   give('thinner', 'attic.stain'), // E11
+  use('attic.trunk'),
+  pad('trunk', ['red', 'yellow', 'blue', 'green']), // E29
+  combine('scrap', 'scrap2'),
+  combine('recipeHalf', 'scrap3'), // the recipe put together: the lab code on its back (N17)
   give('oldkey', 'attic.door'),
   use('attic.door'),
   code('lab', '2510'), // E12
-  use('attic.trunk'),
-  pad('trunk', ['red', 'yellow', 'blue', 'green']), // E29
   go('attic.toLaundry'),
-  give('scrap', 'laundry.notebook'),
-  give('scrap2', 'laundry.notebook'),
-  give('scrap3', 'laundry.notebook'), // E13: CUT11, the family gathers, the Ending
+  give('tonka', 'laundry.etuve'), // E30: the secret touch in the dough Papa carried up
+  give('recipe', 'laundry.notebook'), // E13: CUT11, the family gathers, the Ending
 ];

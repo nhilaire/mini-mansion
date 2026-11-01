@@ -52,7 +52,7 @@ describe('clue notebook (AC-29)', () => {
     }
   });
 
-  it('the other triggers: ball look, chessboard look, CUT07, E06, E07, CUT08, E10', () => {
+  it('the other triggers: ball look, chessboard look, CUT07, E06, E07, CUT08, E10, the recipe put together', () => {
     expect(interact(at('pool'), { kind: 'verb', verb: 'look', target: 'pool.ball' }).state.notes).toContain('n02');
     expect(interact(at('living'), { kind: 'verb', verb: 'look', target: 'living.chess' }).state.notes).toContain('n04');
     const steps = firstNoteSteps();
@@ -64,6 +64,7 @@ describe('clue notebook (AC-29)', () => {
     expect(stepOf('n10')).toBe(stepOf('n09'));
     expect(stepOf('n11')).toBe(indexOf((i) => i.kind === 'verb' && i.verb === 'use' && i.target === 'parents.shower'));
     expect(stepOf('n12')).toBe(indexOf((i) => i.kind === 'keypad' && i.keypad === 'safe'));
+    expect(stepOf('n17')).toBe(indexOf((i) => i.kind === 'item' && i.item === 'recipeHalf'));
   });
 
   it('no entry appears before its trigger', () => {

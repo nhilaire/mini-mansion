@@ -498,6 +498,8 @@ const PROPS: Record<string, Prop> = {
   },
   'kitchen.robot': (b, r, s) => {
     b.rect(r.x + 4, r.y + 12, 16, r.h - 12, C.white).frame(r.x + 4, r.y + 12, 16, r.h - 12, C.stone3);
+    // Papa took the bowl up to the lab with the dough.
+    if (on(s, 'dough_up')) return;
     b.rect(r.x + 6, r.y + 2, 12, 10, C.glassHi).frame(r.x + 6, r.y + 2, 12, 10, C.stone2);
     if (on(s, 'dough_mixed')) b.rect(r.x + 7, r.y + 6, 10, 5, C.beech);
     else if (on(s, 'milk_in') || on(s, 'chestnut_in') || on(s, 'riceflour_in')) b.rect(r.x + 7, r.y + 9, 10, 2, C.cream);
@@ -698,6 +700,16 @@ const PROPS: Record<string, Prop> = {
     textLines(b, { x: r.x + 2, y: r.y + 3, w: 13, h: 11 }, C.stone2);
   },
   'laundry.cake': (b, r) => b.ellipse(r.x + 15, r.y + 12, 13, 13, C.glassHi).rect(r.x + 5, r.y + 14, 20, 10, C.choc).rect(r.x + 5, r.y + 14, 20, 3, C.chocHi).set(r.x + 15, r.y + 12, C.red),
+  // An old cupboard with a heat lamp; Papa's bowl of dough inside once he has carried it up, specks of tonka on it.
+  'laundry.etuve': (b, r, s) => {
+    b.rect(r.x, r.y, r.w, r.h, C.wood2).frame(r.x, r.y, r.w, r.h, C.wood4).rect(r.x + 3, r.y + 8, r.w - 6, r.h - 12, C.wood4);
+    b.rect(r.x + r.w / 2 - 4, r.y + 2, 8, 4, C.candle).ellipse(r.x + r.w / 2, r.y + 12, 9, 3, C.candle);
+    if (on(s, 'dough_up')) {
+      b.ellipse(r.x + r.w / 2, r.y + 38, 10, 5, C.chrome).ellipse(r.x + r.w / 2, r.y + 36, 8, 2, C.beech);
+      if (on(s, 'tonka_in')) b.set(r.x + r.w / 2 - 3, r.y + 36, C.choc).set(r.x + r.w / 2 + 2, r.y + 36, C.choc).set(r.x + r.w / 2, r.y + 35, C.choc);
+    }
+    b.vline(r.x + r.w - 5, r.y + 28, r.y + 34, C.brass);
+  },
   'laundry.form': (b, r) => {
     b.rect(r.x + 3, r.y + 2, 24, 28, C.white).frame(r.x + 3, r.y + 2, 24, 28, C.stone3).rect(r.x + 6, r.y + 5, 18, 4, C.gold);
     textLines(b, { x: r.x + 3, y: r.y + 10, w: 24, h: 18 }, C.stone2);
@@ -1153,7 +1165,7 @@ export const VISUAL_FLAGS: Record<PlaceId, (keyof Flags)[]> = {
   hall: ['gatekey_taken', 'fuse_taken'],
   living: ['booklet_taken', 'queen_placed', 'bay_open', 'battery_taken'],
   music: ['sticks_taken'],
-  kitchen: ['milk_taken', 'sardines_taken', 'dough_mixed', 'fridge_open'],
+  kitchen: ['milk_taken', 'sardines_taken', 'dough_mixed', 'dough_up', 'fridge_open'],
   corridor0: [],
   wc0: ['wc_wet'],
   office: ['pliers_taken', 'drawer_open'],
@@ -1161,7 +1173,7 @@ export const VISUAL_FLAGS: Record<PlaceId, (keyof Flags)[]> = {
   garage: ['pole_taken', 'wrench_taken', 'power_on', 'bike_fixed', 'fuse_in', 'wire_taken'],
   cellar: ['bar_taken', 'hatch_open', 'bottles_done', 'stone_left', 'stone_right'],
   attic: ['door_revealed', 'secret_open', 'lab_code', 'trunk_open'],
-  laundry: [],
+  laundry: ['dough_up', 'tonka_in'],
   landing: [],
   wc1: [],
   julien: ['queen_taken'],

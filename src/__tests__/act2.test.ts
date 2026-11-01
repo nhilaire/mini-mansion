@@ -3,7 +3,7 @@
 import { interact, newGame, PADS, playAll, TIMER_MS } from '../game/rules';
 import { Beat, CharacterStates, Flag, GameEvent, GameState, Input, ItemId, PlaceId } from '../game/types';
 import { characterPlacement, findHotspot, occupant } from '../game/world';
-import { line } from '../content/index';
+import { line, noteText } from '../content/index';
 import { guestSpots } from '../render/Scene';
 import { fr as frStrings } from '../i18n/fr';
 
@@ -47,11 +47,12 @@ describe('lures and wariness (AC-59)', () => {
   it('back from cooking after E07, he becomes wary as well', () => {
     const s = at('music', { flags: flags('computer_read', 'dough_mixed'), chars: chars({ dad: 'cooking' }), timers: { dad: 5000, dough: null, mom: null, delivery: null, machine: null } });
     const o = interact(s, tick(5000));
-    expect(keys(o.beats)).toEqual(['line.dadOven', 'line.dadWary', 'line.dadKey']);
+    expect(keys(o.beats)).toEqual(['line.dadEtuve', 'line.dadWary', 'line.dadKey']);
     expect(o.state.flags.dad_wary).toBe(true);
+    expect(o.state.flags.dough_up).toBe(true);
   });
 
-  it('a wary Papa ignores the doorbell and the dough, and says so through his door', () => {
+  it('a wary Papa ignores the doorbell, says so through his door, and the dough no longer frees his office', () => {
     const bell = interact(wary('front'), use('front.bell'));
     expect(bell.beats).toContainEqual(said('dad', 'line.bellIgnored'));
     expect(bell.state.chars.dad).toBe('at_desk');
@@ -65,17 +66,24 @@ describe('lures and wariness (AC-59)', () => {
       give('riceflour', 'kitchen.robot'),
     ]);
     const last = dough.outcomes[2];
-    expect(last.beats).toContainEqual(said('dad', 'line.doughIgnored'));
     expect(puzzles(last)).toEqual([19]);
-    expect(dough.state.timers.dough).toBeNull();
+    // The dough still brings him once (see below), but only to carry it up to his lab.
+    expect(dough.state.timers.dough).toBe(dough.state.clock + TIMER_MS.dough);
   });
 
-  it('a dough timer ending once Papa is wary plays his refusal instead of CUT12', () => {
+  it('a dough timer ending once Papa is wary: he grabs the bowl and carries it up at once, his office never free', () => {
     const s = wary('music', { flags: flags('computer_read', 'dad_wary', 'dough_mixed'), timers: { dad: null, dough: 1000, mom: null, delivery: null, machine: null } });
     const o = interact(s, tick(1000));
-    expect(o.beats).toEqual([said('dad', 'line.doughIgnored')]);
+    expect(o.beats).toContainEqual({ type: 'view', view: 'kitchen' });
+    expect(keys(o.beats)).toEqual(['line.dadDoughWary']);
     expect(o.state.chars.dad).toBe('at_desk');
-    expect(o.state.cuts).not.toContain('cut12');
+    expect(o.state.timers.dad).toBeNull();
+    expect(occupant('office', o.state.chars)).toBe('dad');
+    expect(o.state.flags.dough_up).toBe(true);
+    // Still in the kitchen then: caught.
+    const caught = interact({ ...s, place: 'kitchen' }, tick(1000));
+    expect(caught.state.place).toBe('cellar');
+    expect(caught.state.flags.dough_up).toBe(true);
   });
 });
 
@@ -312,27 +320,57 @@ describe('the desk drawer and the attic trunk (AC-66)', () => {
   });
 });
 
-describe('the tonka bean and the end (AC-67, AC-68)', () => {
-  const lab = (flagsOn: Flag[]) => at('laundry', { inventory: ['scrap', 'scrap2', 'scrap3'], flags: flags('secret_open', ...flagsOn), captures: 3 });
-  const pieces = [give('scrap', 'laundry.notebook'), give('scrap2', 'laundry.notebook'), give('scrap3', 'laundry.notebook')];
+describe('the recipe, the tonka bean and the end (AC-67, AC-68)', () => {
+  const combine = (item: ItemId, other: ItemId): Input => ({ kind: 'item', item, target: `item:${other}` });
+  const lab = (extra: Partial<GameState> = {}) => at('laundry', { inventory: ['recipe', 'tonka'], flags: flags('secret_open', 'dough_up'), captures: 3, ...extra });
+  const casts = (beats: readonly Beat[]) => beats.flatMap((b) => (b.type === 'cast' ? [b.characters.length] : []));
 
-  it('the tonka bean goes into Papa\'s dough in the food processor once the dough is made (E30)', () => {
-    const none = interact(at('kitchen', { inventory: ['tonka'] }), give('tonka', 'kitchen.robot'));
-    expect(none.beats).toEqual([said('hero', 'line.tonkaNoDough')]);
-    expect(none.state.inventory).toEqual(['tonka']);
-    const o = interact(at('kitchen', { inventory: ['tonka'], flags: flags('dough_mixed') }), give('tonka', 'kitchen.robot'));
-    expect(puzzles(o)).toEqual([30]);
-    expect(o.state.flags.tonka_in).toBe(true);
-    expect(o.state.inventory).toEqual([]);
+  it.each([
+    ['scrap', 'scrap2', 'scrap3'],
+    ['scrap3', 'scrap', 'scrap2'],
+    ['scrap2', 'scrap3', 'scrap'],
+  ] as const)('%s and %s make the torn recipe, %s completes it and notes the lab code (N17) once', (a, b, c) => {
+    const s = at('hall', { inventory: ['scrap', 'scrap2', 'scrap3'], notes: ['n01'] });
+    const half = interact(s, combine(a, b));
+    expect(half.beats).toContainEqual(said('hero', 'combine.recipeHalf'));
+    expect([...half.state.inventory].sort()).toEqual(['recipeHalf', c].sort());
+    expect(half.state.notes).not.toContain('n17');
+    // The third fragment on the torn recipe, or the torn recipe on the third fragment.
+    for (const last of [combine(c, 'recipeHalf'), combine('recipeHalf', c)]) {
+      const whole = interact(half.state, last);
+      expect(whole.state.inventory).toEqual(['recipe']);
+      expect(whole.beats).toContainEqual(said('hero', 'line.recipeJoined'));
+      expect(whole.state.notes.filter((n) => n === 'n17')).toEqual(['n17']);
+    }
   });
 
-  it('with the tonka bean in the dough, the last fragment gathers the family one after the other, then the Ending', () => {
-    const { outcomes, state } = playAll(lab(['tonka_in']), pieces);
-    const o = outcomes[2];
+  it('the lab code is on the back of the recipe, and the fragments each hold a bit of it', () => {
+    expect(line(frStrings, 'item.recipe.look')).toMatch(/Labo\s*: 2510/);
+    expect(line(frStrings, 'line.recipeJoined')).toMatch(/Labo\s*: 2510/);
+    expect(noteText(frStrings, 'n10')).toMatch(/au dos de sa recette/);
+    expect(noteText(frStrings, 'n10')).not.toMatch(/2510/);
+    for (const scrap of ['scrap', 'scrap2', 'scrap3']) expect(line(frStrings, `item.${scrap}.look`)).toMatch(/Au dos/);
+  });
+
+  it('the proofing cabinet takes the tonka bean only once Papa has carried his dough up (E30); the food processor never takes it', () => {
+    const empty = interact(lab({ flags: flags('secret_open') }), give('tonka', 'laundry.etuve'));
+    expect(empty.beats).toEqual([said('hero', 'line.tonkaNoDough')]);
+    expect(empty.state.inventory).toContain('tonka');
+    const kitchen = interact(at('kitchen', { inventory: ['tonka'], flags: flags('dough_mixed') }), give('tonka', 'kitchen.robot'));
+    expect(kitchen.beats).toEqual([said('hero', 'line.tonkaKitchen')]);
+    expect(kitchen.state.inventory).toEqual(['tonka']);
+    const o = interact(lab(), give('tonka', 'laundry.etuve'));
+    expect(puzzles(o)).toEqual([30]);
+    expect(o.state.flags.tonka_in).toBe(true);
+    expect(o.state.inventory).toEqual(['recipe']);
+    expect(o.state.finished).toBe(false);
+  });
+
+  it('the recipe back in the notebook (E13) with the tonka bean already in the dough: the family gathers in the lab, then the Ending', () => {
+    const o = interact(lab({ inventory: ['recipe'], flags: flags('secret_open', 'dough_up', 'tonka_in'), solved: [30] }), give('recipe', 'laundry.notebook'));
     expect(o.events).toEqual([{ type: 'puzzle', puzzle: 13 }, { type: 'complete', captures: 3 }]);
-    expect(state.finished).toBe(true);
-    const casts = o.beats.flatMap((b) => (b.type === 'cast' ? [b.characters.length] : []));
-    expect(casts).toEqual([1, 2, 3, 4, 5]);
+    expect(o.state.finished).toBe(true);
+    expect(casts(o.beats)).toEqual([1, 2, 3, 4, 5]);
     // In the lab, Charlie in the middle of the floor so that nobody hides anybody.
     expect(o.beats).toContainEqual({ type: 'room', place: 'laundry', pos: { x: 160, y: 124 }, facing: 'down' });
     expect(keys(o.beats)).toContain('line.final1');
@@ -340,26 +378,29 @@ describe('the tonka bean and the end (AC-67, AC-68)', () => {
     expect(keys(o.beats).slice(-2)).toEqual(['line.dadThanks', 'line.finalBakery']);
   });
 
-  it('the tonka bean put in the dough after the recipe is complete: the family gathers in the kitchen, then the Ending', () => {
-    const o = interact(at('kitchen', { inventory: ['tonka'], flags: flags('dough_mixed'), solved: [13] }), give('tonka', 'kitchen.robot'));
+  it('the tonka bean last, after the recipe: the family gathers in the lab as well', () => {
+    const o = interact(lab({ inventory: ['tonka'], solved: [13] }), give('tonka', 'laundry.etuve'));
     expect(o.state.flags.tonka_in).toBe(true);
     expect(o.state.finished).toBe(true);
-    expect(o.state.place).toBe('kitchen');
-    expect(o.beats).toContainEqual({ type: 'room', place: 'kitchen', pos: { x: 160, y: 124 }, facing: 'down' });
-    expect(keys(o.beats)).toEqual(expect.arrayContaining(['e30.tonka', 'line.final1Kitchen', 'line.final2Kitchen', 'line.final8']));
-    expect(keys(o.beats)).not.toContain('line.final1');
-    const casts = o.beats.flatMap((b) => (b.type === 'cast' ? [b.characters.length] : []));
-    expect(casts).toEqual([1, 2, 3, 4, 5]);
+    expect(o.beats).toContainEqual({ type: 'room', place: 'laundry', pos: { x: 160, y: 124 }, facing: 'down' });
+    expect(keys(o.beats)).toEqual(expect.arrayContaining(['e30.tonka', 'line.final1', 'line.final8']));
+    expect(casts(o.beats)).toEqual([1, 2, 3, 4, 5]);
     expect(o.beats[o.beats.length - 1]).toEqual({ type: 'ending' });
   });
 
-  it('without it, the recipe asks for the secret touch, and coming back to the lab does not end the game', () => {
-    const done = playAll(lab([]), pieces);
-    expect(done.outcomes[2].beats).toContainEqual(said('hero', 'line.recipeTonka'));
+  it('without the tonka bean, the recipe asks for the secret touch, and coming back to the lab does not end the game', () => {
+    const done = interact(lab(), give('recipe', 'laundry.notebook'));
+    expect(done.beats).toContainEqual(said('hero', 'line.recipeTonka'));
     expect(done.state.finished).toBe(false);
     expect(done.state.solved).toContain(13);
     const away = interact(done.state, go('laundry.toAttic')).state;
     expect(interact({ ...away, place: 'attic' }, go('attic.toLaundry')).state.finished).toBe(false);
+  });
+
+  it('the fragments no longer go on the notebook one by one', () => {
+    const o = interact(lab({ inventory: ['scrap'] }), give('scrap', 'laundry.notebook'));
+    expect(o.state.inventory).toEqual(['scrap']);
+    expect(o.state.solved).not.toContain(13);
   });
 });
 
@@ -374,8 +415,8 @@ describe('the timer order (AC-69)', () => {
   it('timers ending at the same time fire in a fixed order: dough, Papa, Maman, delivery', () => {
     const s = wary('hall', { chars: chars({ mom: 'changing', dad: 'fuses' }), flags: flags('computer_read', 'dad_wary', 'dough_mixed'), timers: { dad: 1000, dough: 1000, mom: 1000, delivery: 1000, machine: null } });
     const o = interact(s, tick(1000));
-    expect(keys(o.beats).filter((k) => ['line.doughIgnored', 'line.dadFusesDone', 'line.momBack', 'cut13'].includes(k))).toEqual([
-      'line.doughIgnored',
+    expect(keys(o.beats).filter((k) => ['line.dadDoughWary', 'line.dadFusesDone', 'line.momBack', 'cut13'].includes(k))).toEqual([
+      'line.dadDoughWary',
       'line.dadFusesDone',
       'line.momBack',
       'cut13',

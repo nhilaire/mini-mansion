@@ -40,8 +40,10 @@
 //   - the hose is explored as one step (see hoseSteps): the tap, the garden actions of the window (the cat, the
 //     parcel), Maman back with Charlie out of the garden or caught there. During the window only the garden opens (and
 //     the parents' room closes), and nothing else depends on Maman: actions elsewhere can be done before or after;
-//   - Florent's bike and the recipe book are explored once all their parts are held: a part put in alone only says a
-//     line and waits for the others (see partSteps);
+//   - Florent's bike is explored once all its parts are held: a part put in alone only says a line and waits for the
+//     other (see partSteps);
+//   - the three fragments are only ever used to put the recipe together, in the inventory: they are put together once
+//     all three are held (the first two, then the third), never two by two earlier;
 // - the timers are explored by firing each running timer next (whatever the deadlines), which covers every order
 //   a player can obtain by choosing when to ring, mix, use the hose or blow the fuses. Papa's doorbell phases are reduced to two: while
 //   he answers he still guards his office, so the story goes on exactly as at his desk (an action done then can be
@@ -61,7 +63,7 @@ import { Beat, Flag, GameState, Input, ItemId, KeypadId, NoteId, PadId } from '.
 import { exitsIn, hotspotsIn } from './world';
 
 // Notebook entries that change the rules: the keypads only open once their code is noted.
-const GATING_NOTES: readonly NoteId[] = ['n08', 'n10', 'n11', 'n13', 'n14'];
+const GATING_NOTES: readonly NoteId[] = ['n08', 'n11', 'n13', 'n14', 'n17'];
 const KEYPADS: readonly KeypadId[] = ['computer', 'safe', 'lab'];
 
 // Flags and items left out of the story part (see above): connectivity flags (replaced by one bit), the gate key,
@@ -103,11 +105,15 @@ const MAGNET_PARTS: readonly ItemId[] = ['wire', 'nail', 'battery', 'plug', 'coi
 const MAGNET_FLAGS: readonly Flag[] = ['wire_taken', 'nail_taken', 'battery_taken', 'plug_taken'];
 // Items taken on the way when used (see above), with the flag their take sets.
 export const LAZY_ITEMS: Readonly<Partial<Record<ItemId, Flag>>> = { magnetPlug: 'magnet_ready', sardines: 'sardines_taken', keyring: 'keyring_taken' };
-// The pieces put together in one step: the bike (E26), the recipe book (E13).
-export const PART_GROUPS: readonly { target: string; items: readonly ItemId[] }[] = [
-  { target: 'garage.bike', items: ['patches', 'pump'] },
-  { target: 'laundry.notebook', items: ['scrap', 'scrap2', 'scrap3'] },
-];
+// The pieces put together in one step: the bike (E26).
+export const PART_GROUPS: readonly { target: string; items: readonly ItemId[] }[] = [{ target: 'garage.bike', items: ['patches', 'pump'] }];
+// The fragments of the recipe, put together in the inventory once all three are held.
+export const FRAGMENT_ITEMS: readonly ItemId[] = ['scrap', 'scrap2', 'scrap3'];
+// Two fragments, or the torn recipe and a fragment, put together: a side input (explored once all three are held).
+export function isRecipeCombination(item: ItemId, target: string): boolean {
+  const pieces: readonly ItemId[] = [...FRAGMENT_ITEMS, 'recipeHalf'];
+  return target.startsWith('item:') && pieces.includes(item) && pieces.includes(target.slice(5) as ItemId);
+}
 const isPart = (item: ItemId, target: string) => PART_GROUPS.some((g) => g.target === target && g.items.includes(item));
 export const TAP = 'pool.tap';
 const isLazy = (i: ItemId) => i in LAZY_ITEMS;
@@ -190,7 +196,8 @@ export function isSideInput(input: Input): boolean {
       REDUCED_ITEMS.includes(input.item) ||
       isPart(input.item, input.target) ||
       (input.item === 'magnetPlug' && input.target === 'florent.strip') ||
-      (input.target.startsWith('item:') && REDUCED_ITEMS.includes(input.target.slice(5) as ItemId))
+      (input.target.startsWith('item:') && REDUCED_ITEMS.includes(input.target.slice(5) as ItemId)) ||
+      isRecipeCombination(input.item, input.target)
     );
   return false;
 }
@@ -220,6 +227,8 @@ export function actionInputs(s: GameState): Input[] {
     }
   }
   if (s.inventory.includes('pole') && s.inventory.includes('extension')) out.push({ kind: 'item', item: 'pole', target: 'item:extension' });
+  if (FRAGMENT_ITEMS.every((i) => s.inventory.includes(i))) out.push({ kind: 'item', item: 'scrap', target: 'item:scrap2' });
+  if (s.inventory.includes('recipeHalf') && s.inventory.includes('scrap3')) out.push({ kind: 'item', item: 'recipeHalf', target: 'item:scrap3' });
   for (const keypad of KEYPADS) out.push({ kind: 'keypad', keypad, code: CODES[keypad] }, { kind: 'keypad', keypad, code: '0000' });
   for (const pad of PAD_IDS) out.push({ kind: 'pad', pad, code: [...PADS[pad].code] });
   out.push({ kind: 'chess', moves: [...SOLUTION_MOVES] }, { kind: 'circuit', board: [...SOLUTION_BOARD] });
@@ -246,7 +255,7 @@ export function lazyItem(s: GameState, input: Input): GameState {
   return { ...s, inventory: [...inventory, input.item], flags: { ...s.flags, ...parts, [LAZY_ITEMS[input.item]!]: true }, solved };
 }
 
-// The pieces of a group put in together, once all are held (the bike, the recipe book).
+// The pieces of a group put in together, once all are held (the bike).
 export function partSteps(members: readonly GameState[]): { state: GameState; beats: Beat[] }[] {
   const out: { state: GameState; beats: Beat[] }[] = [];
   for (const g of PART_GROUPS) {

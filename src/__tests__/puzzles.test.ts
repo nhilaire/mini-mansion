@@ -221,11 +221,13 @@ describe('E07 / E10 / E12: the keypads (AC-27)', () => {
     expect(safe.state.notes).toContain('n12');
   });
 
-  it('the lab door keypad opens once N10 is known and only takes 2510', () => {
+  it('the lab door keypad opens once N17 (the back of the recipe) is known and only takes 2510', () => {
     const attic = (extra: Partial<GameState> = {}) => at('attic', { flags: flags('door_revealed'), ...extra });
     expectRefusal(attic(), use('attic.door'), 'line.doorLocked');
     expect(interact(attic(), { kind: 'keypad', keypad: 'lab', code: '2510' }).accepted).toBe(false);
-    const s = attic({ notes: ['n01', 'n10'] });
+    // The computer (N10) only says where the code is written.
+    expectRefusal(attic({ notes: ['n01', 'n10'] }), use('attic.door'), 'line.doorLocked');
+    const s = attic({ notes: ['n01', 'n10', 'n17'] });
     expect(interact(s, use('attic.door')).beats).toEqual([{ type: 'keypad', keypad: 'lab' }]);
     for (const code of ['0000', '7867', '1987']) expectRefusal(s, { kind: 'keypad', keypad: 'lab', code }, 'line.codeWrong');
     const ok = interact(s, { kind: 'keypad', keypad: 'lab', code: '2510' });
@@ -314,7 +316,7 @@ describe('E14: draining the pool (AC-28)', () => {
 
 describe('E11-E13: the attic, the lab door, the lab', () => {
   it('the thinner reveals a door with a lock and a keypad; it opens once both the old key and the code are used', () => {
-    const attic = at('attic', { inventory: ['thinner', 'oldkey'], notes: ['n01', 'n10'] });
+    const attic = at('attic', { inventory: ['thinner', 'oldkey'], notes: ['n01', 'n10', 'n17'] });
     const revealed = interact(attic, item('thinner', 'attic.stain'));
     expect(revealed.events).toEqual([{ type: 'puzzle', puzzle: 11 }]);
     const keyFirst = playAll(revealed.state, [item('oldkey', 'attic.door'), { kind: 'keypad', keypad: 'lab', code: '2510' }]);
@@ -327,15 +329,12 @@ describe('E11-E13: the attic, the lab door, the lab', () => {
     expect(codeFirst.outcomes[2].events).toEqual([{ type: 'puzzle', puzzle: 12 }]);
   });
 
-  it('the three fragments on the recipe notebook, with the tonka bean in the dough, lead to the revelation (E13, AC-67)', () => {
-    let s = at('laundry', { inventory: ['scrap', 'scrap2', 'scrap3'], captures: 2, flags: { door_unlocked: true, tonka_in: true } });
-    for (const piece of ['scrap3', 'scrap'] as const) {
-      const more = interact(s, item(piece, 'laundry.notebook'));
-      expect(more.beats).toContainEqual({ type: 'say', speaker: 'hero', key: 'line.recipeMore' });
-      expect(more.events).toEqual([]);
-      s = more.state;
-    }
-    const o = interact(s, item('scrap2', 'laundry.notebook'));
+  it('the three fragments put together, then the recipe on the notebook with the tonka bean in the dough, lead to the revelation (E13, AC-67)', () => {
+    const together = playAll(at('attic', { inventory: ['scrap', 'scrap2', 'scrap3'] }), [item('scrap3', 'item:scrap'), item('scrap2', 'item:recipeHalf')]);
+    expect(together.outcomes.flatMap((x) => x.events)).toEqual([]);
+    expect(together.state.inventory).toEqual(['recipe']);
+    const s = { ...together.state, place: 'laundry' as const, captures: 2, flags: { ...together.state.flags, tonka_in: true as const } };
+    const o = interact(s, item('recipe', 'laundry.notebook'));
     expect(o.events).toEqual([{ type: 'puzzle', puzzle: 13 }, { type: 'complete', captures: 2 }]);
     expect(o.state.finished).toBe(true);
     expect(o.state.inventory).toEqual([]);

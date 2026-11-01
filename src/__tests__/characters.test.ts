@@ -216,7 +216,8 @@ describe('the dough (AC-52)', () => {
     expect(occupant('kitchen', o.state.chars)).toBe('dad');
     expect(interact(o.state, tick(TIMER_MS.cook - 1)).state.chars.dad).toBe('cooking');
     const back = interact(o.state, tick(TIMER_MS.cook));
-    expect(back.beats).toContainEqual(said('dad', 'line.dadOven'));
+    expect(back.beats).toContainEqual(said('dad', 'line.dadEtuve'));
+    expect(back.state.flags.dough_up).toBe(true);
     expect(back.state.chars.dad).toBe('at_desk');
     expect(back.state.timers.dad).toBeNull();
   });

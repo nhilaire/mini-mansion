@@ -1168,53 +1168,6 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "exit-living.toMusic"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "exit-music.toKitchen"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "inv-tonka"
-- runFlow:
-    when:
-      notVisible:
-        id: "selected-tonka"
-    commands:
-      - extendedWaitUntil:
-          visible:
-            id: "scene-idle"
-          timeout: 15000
-      - tapOn:
-          id: "inv-tonka"
-- extendedWaitUntil:
-    visible:
-      id: "selected-tonka"
-    timeout: 5000
-- tapOn:
-    id: "hs-kitchen.robot"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "exit-kitchen.toMusic"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "exit-music.toLiving"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
     id: "exit-living.toHall"
 - extendedWaitUntil:
     visible:
@@ -1598,6 +1551,72 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
+    id: "hs-attic.trunk"
+- tapOn:
+    id: "verb-use"
+- extendedWaitUntil:
+    visible:
+      id: "pad"
+    timeout: 15000
+- tapOn:
+    id: "pad-red"
+- tapOn:
+    id: "pad-yellow"
+- tapOn:
+    id: "pad-blue"
+- tapOn:
+    id: "pad-green"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-scrap"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-scrap"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-scrap"
+- extendedWaitUntil:
+    visible:
+      id: "selected-scrap"
+    timeout: 5000
+- tapOn:
+    id: "inv-scrap2"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
+    id: "inv-recipeHalf"
+- runFlow:
+    when:
+      notVisible:
+        id: "selected-recipeHalf"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "scene-idle"
+          timeout: 15000
+      - tapOn:
+          id: "inv-recipeHalf"
+- extendedWaitUntil:
+    visible:
+      id: "selected-recipeHalf"
+    timeout: 5000
+- tapOn:
+    id: "inv-scrap3"
+- extendedWaitUntil:
+    visible:
+      id: "scene-idle"
+    timeout: 15000
+- tapOn:
     id: "inv-oldkey"
 - runFlow:
     when:
@@ -1643,93 +1662,50 @@ tags:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "hs-attic.trunk"
-- tapOn:
-    id: "verb-use"
-- extendedWaitUntil:
-    visible:
-      id: "pad"
-    timeout: 15000
-- tapOn:
-    id: "pad-red"
-- tapOn:
-    id: "pad-yellow"
-- tapOn:
-    id: "pad-blue"
-- tapOn:
-    id: "pad-green"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
     id: "exit-attic.toLaundry"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "inv-scrap"
+    id: "inv-tonka"
 - runFlow:
     when:
       notVisible:
-        id: "selected-scrap"
+        id: "selected-tonka"
     commands:
       - extendedWaitUntil:
           visible:
             id: "scene-idle"
           timeout: 15000
       - tapOn:
-          id: "inv-scrap"
+          id: "inv-tonka"
 - extendedWaitUntil:
     visible:
-      id: "selected-scrap"
+      id: "selected-tonka"
     timeout: 5000
 - tapOn:
-    id: "hs-laundry.notebook"
+    id: "hs-laundry.etuve"
 - extendedWaitUntil:
     visible:
       id: "scene-idle"
     timeout: 15000
 - tapOn:
-    id: "inv-scrap2"
+    id: "inv-recipe"
 - runFlow:
     when:
       notVisible:
-        id: "selected-scrap2"
+        id: "selected-recipe"
     commands:
       - extendedWaitUntil:
           visible:
             id: "scene-idle"
           timeout: 15000
       - tapOn:
-          id: "inv-scrap2"
+          id: "inv-recipe"
 - extendedWaitUntil:
     visible:
-      id: "selected-scrap2"
-    timeout: 5000
-- tapOn:
-    id: "hs-laundry.notebook"
-- extendedWaitUntil:
-    visible:
-      id: "scene-idle"
-    timeout: 15000
-- tapOn:
-    id: "inv-scrap3"
-- runFlow:
-    when:
-      notVisible:
-        id: "selected-scrap3"
-    commands:
-      - extendedWaitUntil:
-          visible:
-            id: "scene-idle"
-          timeout: 15000
-      - tapOn:
-          id: "inv-scrap3"
-- extendedWaitUntil:
-    visible:
-      id: "selected-scrap3"
+      id: "selected-recipe"
     timeout: 5000
 - tapOn:
     id: "hs-laundry.notebook"

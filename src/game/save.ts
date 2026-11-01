@@ -1,20 +1,22 @@
 // Serialisation of the single autosaved game. Anything that does not match the current format exactly is rejected
 // (the caller then ignores the save and reports a non-fatal error). Older saves are migrated: format 2 (v0.1) has no
 // hose or delivery timer and Papa cooking had no end; formats 2 and 3 have no washing machine timer, gave the house
-// key away at E01, took both flours at once and had no fuse in the breaker.
+// key away at E01, took both flours at once and had no fuse in the breaker; formats 2 to 4 put the fragments one by one
+// on the lab's recipe notebook and left the dough in the kitchen (v0.4 puts the recipe together in the inventory and
+// Papa carries the dough up to his lab).
 import { CHARACTERS, FLAGS, ITEMS, PLACES } from './world';
 import { isBoard } from './circuit';
 import { PUZZLE_COUNT } from './ctx';
 import { TIMER_MS } from './rules';
 import { CharacterStates, CutId, GameState, NoteId } from './types';
 
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 export function serialize(s: GameState): string {
   return JSON.stringify(s);
 }
 
-const NOTE_IDS: readonly NoteId[] = ['n01', 'n02', 'n03', 'n04', 'n05', 'n06', 'n07', 'n08', 'n09', 'n10', 'n11', 'n12', 'n13', 'n14', 'n15', 'n16'];
+const NOTE_IDS: readonly NoteId[] = ['n01', 'n02', 'n03', 'n04', 'n05', 'n06', 'n07', 'n08', 'n09', 'n10', 'n11', 'n12', 'n13', 'n14', 'n15', 'n16', 'n17'];
 const CUT_IDS: readonly CutId[] = ['cut01', 'cut04', 'cut05', 'cut06', 'cut07', 'cut08', 'cut09', 'cut10', 'cut11', 'cut12', 'cut13', 'cut15', 'cut16', 'cut17'];
 const CHAR_STATES: { [C in keyof CharacterStates]: readonly CharacterStates[C][] } = {
   dad: ['at_desk', 'answering', 'outside', 'returning', 'cooking', 'fuses'],
@@ -41,9 +43,11 @@ export function deserialize(json: string): GameState {
     throw new SaveError('save is not JSON');
   }
   if (!isObj(raw)) throw new SaveError('save is not an object');
-  if (raw.v !== SAVE_VERSION && raw.v !== 2 && raw.v !== 3) throw new SaveError(`unknown save version ${String(raw.v)}`);
+  if (raw.v !== SAVE_VERSION && raw.v !== 2 && raw.v !== 3 && raw.v !== 4) throw new SaveError(`unknown save version ${String(raw.v)}`);
   const v2 = raw.v === 2;
-  const old = raw.v !== SAVE_VERSION;
+  // Formats 2 and 3 (before v0.2).
+  const old = raw.v === 2 || raw.v === 3;
+  const pre5 = raw.v !== SAVE_VERSION;
   const chars = raw.chars;
   const ok =
     typeof raw.place === 'string' &&
@@ -92,12 +96,25 @@ export function deserialize(json: string): GameState {
     if (flags.flours_taken) Object.assign(flags, { chestnut_taken: true, riceflour_taken: true });
     if (flags.power_on) Object.assign(flags, { fuse_taken: true, fuse_in: true });
   }
+  if (pre5) {
+    // Fragments put on the notebook before the recipe was complete come back to the inventory, to be put together.
+    if (!(raw.solved as number[]).includes(13)) {
+      for (const [item, flag] of [['scrap', 'frag1_in'], ['scrap2', 'frag2_in'], ['scrap3', 'frag3_in']] as const) {
+        if (!flags[flag]) continue;
+        delete flags[flag];
+        if (!inventory.includes(item)) inventory.push(item);
+      }
+    }
+    // A dough already worked (or ignored by a wary Papa) now rests in the lab.
+    const doughDone = (raw.timers as { dough: unknown }).dough === null && c.dad !== 'cooking';
+    if (flags.dough_mixed && doughDone) flags.dough_up = true;
+  }
   const t = raw.timers as Partial<GameState['timers']>;
   const clock = raw.clock as number;
   // v0.1: Papa cooked for good; he now cooks 90 s, counted from the load.
   const dad = v2 && c.dad === 'cooking' && t.dad === null ? clock + TIMER_MS.cook : (t.dad as number | null);
   return {
-    v: 4,
+    v: 5,
     place: raw.place as GameState['place'],
     pos: { x: (raw.pos as { x: number }).x, y: (raw.pos as { y: number }).y },
     facing: raw.facing as GameState['facing'],

@@ -19,7 +19,7 @@ import { CharacterId, DoorRoom, Facing, Flag, GameState, GuardedRoom, Input, Ite
 
 export const CODES: Record<KeypadId, string> = { computer: '7867', safe: '1987', lab: '2510' };
 // The notebook entry that tells each code: the keypad does not open before it is known (no guessing).
-export const CODE_NOTE: Record<KeypadId, NoteId> = { computer: 'n08', safe: 'n11', lab: 'n10' };
+export const CODE_NOTE: Record<KeypadId, NoteId> = { computer: 'n08', safe: 'n11', lab: 'n17' };
 const KEYPAD_PLACE: Record<KeypadId, PlaceId> = { computer: 'office', safe: 'parents', lab: 'attic' };
 
 // The sequence pads: the buttons shown (in this order) and the expected sequence, once its notebook entry is known.
@@ -33,7 +33,7 @@ export const TIMER_MS = { answer: 15_000, outside: 60_000, back: 30_000, dough: 
 
 export function newGame(): GameState {
   return {
-    v: 4,
+    v: 5,
     place: 'front',
     pos: { ...START_POS },
     facing: 'right',
@@ -201,8 +201,9 @@ function dadTimer(c: Ctx): void {
       c.s.timers.dad = now + TIMER_MS.back;
       c.say('dad', 'line.dadGoingBack');
       return;
+    // Done cooking, he carries the dough up to the proofing cabinet of his lab.
     case 'cooking':
-      c.say('dad', 'line.dadOven');
+      c.set('dough_up').say('dad', 'line.dadEtuve');
       backAtDesk(c);
       return;
     case 'fuses':
@@ -237,7 +238,7 @@ function machineDone(c: Ctx): void {
 }
 
 // Papa back at his desk. The first time after the computer was used, he notices it and becomes wary: no more doorbell
-// or dough for him, and the parcel is delivered 60 s later (PRD "Lures and wariness").
+// for him, the dough no longer frees his office, and the parcel is delivered 60 s later (PRD "Lures and wariness").
 function backAtDesk(c: Ctx): void {
   c.move('dad', 'at_desk');
   c.s.timers.dad = null;
@@ -249,11 +250,15 @@ function backAtDesk(c: Ctx): void {
   }
 }
 
-// E19: the dough is ready; Papa comes to cook (CUT12), whatever the doorbell sequence was doing, unless he is wary.
+// E19: the dough is ready; Papa comes to cook (CUT12), whatever the doorbell sequence was doing. Wary, he only grabs
+// the bowl and carries it up to his lab at once: his office is never free, but the dough is never lost.
 function doughReady(c: Ctx): void {
   c.s.timers.dough = null;
   if (c.is('dad_wary')) {
-    c.say('dad', 'line.doughIgnored');
+    c.set('dough_up');
+    c.cut('cut12', (k) => view(k, 'kitchen', (q) => q.say('dad', 'line.dadDoughWary')));
+    // He only passes through the kitchen: Charlie there then is caught all the same.
+    if (c.s.place === 'kitchen') capture(c, 'kitchen', 'dad');
     return;
   }
   // Called away from the front of the house, he goes back in and locks the door.
@@ -425,7 +430,7 @@ export const GAGS: Readonly<Record<string, SfxName>> = {
 
 const GATES = ['front.gateLeft', 'front.gateRight', 'football.gate', 'pool.gate'];
 const INGREDIENTS: Partial<Record<ItemId, Flag>> = { ricemilk: 'milk_in', chestnut: 'chestnut_in', riceflour: 'riceflour_in' };
-// The three pieces of the recipe (E13), from the safe, the cellar and the attic trunk.
+// The three pieces of the recipe, from the safe, the cellar and the attic trunk, put together in the inventory.
 const FRAGMENTS: Partial<Record<ItemId, Flag>> = { scrap: 'frag1_in', scrap2: 'frag2_in', scrap3: 'frag3_in' };
 
 // A take hotspot that gives its item(s) once: [flag set when taken, item or items, line, puzzle solved if any].
@@ -530,10 +535,11 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       return;
     // E19: the food processor.
     case 'kitchen.robot:look':
-      c.hero(c.is('dough_mixed') ? 'kitchen.robot.lookDone' : 'kitchen.robot.look');
+      c.hero(c.is('dough_up') ? 'kitchen.robot.lookUp' : c.is('dough_mixed') ? 'kitchen.robot.lookDone' : 'kitchen.robot.look');
       return;
     case 'kitchen.robot:use':
-      if (c.is('dough_mixed')) c.hero('kitchen.robot.done');
+      if (c.is('dough_up')) c.hero('kitchen.robot.lookUp');
+      else if (c.is('dough_mixed')) c.hero('kitchen.robot.done');
       else if (Object.values(INGREDIENTS).some((f) => c.is(f!))) c.hero('line.doughMissing');
       else c.hero('kitchen.robot.empty');
       return;
@@ -668,6 +674,13 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
     case 'laundry.notebook:use':
       c.hero(c.isSolved(13) ? 'laundry.notebook.lookDone' : 'laundry.notebook.use');
       return;
+    // E30: Papa's proofing cabinet, where his dough rests once he has carried it up.
+    case 'laundry.etuve:look':
+      c.hero(c.is('tonka_in') ? 'laundry.etuve.lookTonka' : c.is('dough_up') ? 'laundry.etuve.lookDough' : 'laundry.etuve.look');
+      return;
+    case 'laundry.etuve:use':
+      c.hero(c.is('dough_up') ? 'laundry.etuve.useDough' : 'line.tonkaNoDough');
+      return;
     // E22: the garden tap; the hose soaks Maman when she gardens (CUT14), as long as the garden still holds something.
     case 'pool.tap:use':
       if (c.state('mom') !== 'gardening') c.sfx('water').hero('line.hoseLawn');
@@ -792,7 +805,7 @@ export const USE_RULES: readonly string[] = [
   'pliers>pool.pump',
   'thinner>attic.stain',
   'oldkey>attic.door',
-  'scrap>laundry.notebook',
+  'recipe>laundry.notebook',
   'ricemilk>kitchen.robot',
   'chestnut>kitchen.robot',
   'riceflour>kitchen.robot',
@@ -802,8 +815,7 @@ export const USE_RULES: readonly string[] = [
   'magnetPlug>florent.strip',
   'note>bathroom.hairdryer',
   'keyring>office.drawer',
-  'scrap2>laundry.notebook',
-  'scrap3>laundry.notebook',
+  'tonka>laundry.etuve',
   'tonka>kitchen.robot',
 ];
 
@@ -817,25 +829,27 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
     c.remove(item).set(ingredient).hero('kitchen.robot.add');
     if (Object.values(INGREDIENTS).every((f) => c.is(f!))) {
       c.set('dough_mixed').sfx('robot').hero('line.doughMixed').solve(19);
-      // A wary Papa does not come for the dough any more.
-      if (c.is('dad_wary')) c.say('dad', 'line.doughIgnored');
-      else c.s.timers.dough = c.s.clock + TIMER_MS.dough;
+      c.s.timers.dough = c.s.clock + TIMER_MS.dough;
     }
     return;
   }
-  const fragment = FRAGMENTS[item];
-  if (fragment && target === 'laundry.notebook') {
-    c.remove(item).set(fragment).sfx('take');
-    if (Object.values(FRAGMENTS).every((f) => c.is(f!))) recipeComplete(c);
-    else c.hero('line.recipeMore');
+  // E13: the recipe put back in Papa's notebook. With the tonka bean already in the dough, the family gathers (CUT11);
+  // otherwise the recipe says the secret touch is still missing.
+  if (item === 'recipe' && target === 'laundry.notebook') {
+    c.remove('recipe').sfx('take').solve(13);
+    if (c.is('tonka_in')) reunion(c);
+    else c.hero('line.recipeTonka');
     return;
   }
-  // E30: the tonka bean grated into Papa's dough, in the food processor.
+  // E30: the tonka bean grated into Papa's dough, resting in the proofing cabinet of his lab.
   if (item === 'tonka' && target === 'kitchen.robot') {
-    if (!c.is('dough_mixed')) c.hero('line.tonkaNoDough');
+    c.hero('line.tonkaKitchen');
+    return;
+  }
+  if (item === 'tonka' && target === 'laundry.etuve') {
+    if (!c.is('dough_up')) c.hero('line.tonkaNoDough');
     else {
       c.remove('tonka').set('tonka_in').sfx('robot').hero('e30.tonka').solve(30);
-      // The recipe already complete in the lab: the family gathers here, in the kitchen.
       if (c.isSolved(13)) reunion(c);
     }
     return;
@@ -949,30 +963,21 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
   c.wrong();
 }
 
-// E13: the three fragments complete the recipe. With the tonka bean already in the dough, the family gathers (CUT11);
-// otherwise the recipe says the secret touch is still missing.
-function recipeComplete(c: Ctx): void {
-  c.solve(13);
-  if (c.is('tonka_in')) reunion(c);
-  else c.hero('line.recipeTonka');
-}
-
-// CUT11, the end: where the last step was made (the lab, or the kitchen when the tonka bean came last), Papa then the
-// whole family join Charlie one after the other, Charlie in the middle so that everybody is seen; then the Ending.
+// CUT11, the end, in the lab: Papa then the whole family join Charlie one after the other, Charlie in the middle so
+// that everybody is seen; then the Ending.
 // Where Charlie stands for the final scene: the middle of the floor, room for three people on each side.
 const REUNION_SPOT: Point = { x: 160, y: 124 };
 
 function reunion(c: Ctx): void {
-  const kitchen = c.s.place === 'kitchen';
   c.finish();
   c.cut('cut11', (k) => {
     const cast = (characters: CharacterId[]) => k.beats.push({ type: 'cast', characters });
     k.s.pos = { ...REUNION_SPOT };
     k.s.facing = 'down';
     k.beats.push({ type: 'room', place: k.s.place, pos: { ...REUNION_SPOT }, facing: 'down' });
-    k.cinematic(true).narrator(kitchen ? 'line.final1Kitchen' : 'line.final1');
+    k.cinematic(true).narrator('line.final1');
     cast(['dad']);
-    k.say('dad', kitchen ? 'line.final2Kitchen' : 'line.final2').hero('line.final3').say('dad', 'line.final4');
+    k.say('dad', 'line.final2').hero('line.final3').say('dad', 'line.final4');
     cast(['dad', 'mom']);
     k.say('mom', 'line.final5');
     cast(['dad', 'mom', 'theo']);
@@ -1004,7 +1009,18 @@ function openLab(c: Ctx): void {
 }
 
 // The item-on-item rules (checked by a test, used to prune the exhaustive search).
-export const COMBINE_RULES: readonly string[] = ['extension+pole', 'nail+wire', 'battery+coil', 'magnet+plug'];
+export const COMBINE_RULES: readonly string[] = [
+  'extension+pole',
+  'nail+wire',
+  'battery+coil',
+  'magnet+plug',
+  'scrap+scrap2',
+  'scrap+scrap3',
+  'scrap2+scrap3',
+  'recipeHalf+scrap',
+  'recipeHalf+scrap2',
+  'recipeHalf+scrap3',
+];
 
 function combine(c: Ctx, a: ItemId, b: ItemId): void {
   const pair = [a, b].sort().join('+');
@@ -1023,6 +1039,18 @@ function combine(c: Ctx, a: ItemId, b: ItemId): void {
   }
   if (pair === 'magnet+plug') {
     c.remove('magnet').remove('plug').give('magnetPlug').set('magnet_ready').hero('combine.magnetPlug');
+    return;
+  }
+  // The recipe: two fragments give the torn recipe, the third completes it; the lab code is on its back (N17).
+  const fa = FRAGMENTS[a];
+  const fb = FRAGMENTS[b];
+  if (fa && fb) {
+    c.remove(a).remove(b).set(fa).set(fb).give('recipeHalf').sfx('take').hero('combine.recipeHalf');
+    return;
+  }
+  const third = a === 'recipeHalf' ? fb : b === 'recipeHalf' ? fa : undefined;
+  if (third) {
+    c.remove(a).remove(b).set(third).give('recipe').sfx('secret').hero('line.recipeJoined').note('n17');
     return;
   }
   c.wrong();

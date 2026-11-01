@@ -55,6 +55,9 @@ export type ItemId =
   | 'keyring'
   | 'scrap2'
   | 'scrap3'
+  // The fragments put together (two of them, then all three: the lab code on its back).
+  | 'recipeHalf'
+  | 'recipe'
   | 'hat'
   | 'fuse'
   // Théo's electromagnet experiment (E27).
@@ -135,6 +138,8 @@ export type Flag =
   | 'chestnut_in'
   | 'riceflour_in'
   | 'dough_mixed'
+  // Papa has carried the dough up to the proofing cabinet of his lab.
+  | 'dough_up'
   | 'wc_wet'
   | 'fridge_open'
   // Act II.
@@ -159,6 +164,7 @@ export type Flag =
   | 'fuses_cut'
   | 'drawer_open'
   | 'trunk_open'
+  // The fragments joined into the recipe being put together.
   | 'frag1_in'
   | 'frag2_in'
   | 'frag3_in'
@@ -174,7 +180,7 @@ export type Flag =
   | 'tonka_given'
   | 'ending';
 
-export type NoteId = 'n01' | 'n02' | 'n03' | 'n04' | 'n05' | 'n06' | 'n07' | 'n08' | 'n09' | 'n10' | 'n11' | 'n12' | 'n13' | 'n14' | 'n15' | 'n16';
+export type NoteId = 'n01' | 'n02' | 'n03' | 'n04' | 'n05' | 'n06' | 'n07' | 'n08' | 'n09' | 'n10' | 'n11' | 'n12' | 'n13' | 'n14' | 'n15' | 'n16' | 'n17';
 
 // Cutscenes that play once (PRD "Cutscenes"; CUT02, CUT14 and CUT18 play each time and are not recorded).
 export type CutId = 'cut01' | 'cut04' | 'cut05' | 'cut06' | 'cut07' | 'cut08' | 'cut09' | 'cut10' | 'cut11' | 'cut12' | 'cut13' | 'cut15' | 'cut16' | 'cut17';
@@ -216,7 +222,7 @@ export interface Timers {
 }
 
 export interface GameState {
-  v: 4;
+  v: 5;
   place: PlaceId;
   pos: Point;
   facing: Facing;

@@ -53,6 +53,8 @@ describe('places drawn in code', () => {
       sardines_taken: { fridge_open: true },
       cat_fed: { delivered: true },
       parcel_taken: { delivered: true },
+      // The tonka bean goes into the dough Papa brought up to the proofing cabinet.
+      tonka_in: { dough_up: true },
       // Maman's basket (with the drawer key) is only in the garden while she changes, once Papa is wary.
       keyring_taken: { dad_wary: true },
     };

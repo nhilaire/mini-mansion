@@ -5,7 +5,7 @@ import { deserialize, SaveError, serialize } from '../game/save';
 import { SOLUTION } from '../game/solution';
 import { GameState } from '../game/types';
 
-describe('save format v4 (AC-35, AC-58)', () => {
+describe('save format v5 (AC-35, AC-58)', () => {
   it('restores every state of the walkthrough identically', () => {
     let s: GameState = newGame();
     for (const input of SOLUTION) {
@@ -50,7 +50,7 @@ describe('save format v4 (AC-35, AC-58)', () => {
   it('migrates a v0.1 save (format 2): no hose or delivery timer, and Papa cooking for good now cooks 90 s from the load', () => {
     const old = { ...newGame(), v: 2, clock: 5000, timers: { dad: null, dough: null }, chars: { ...newGame().chars, dad: 'cooking' } };
     const back = deserialize(JSON.stringify(old));
-    expect(back.v).toBe(4);
+    expect(back.v).toBe(5);
     expect(back.timers).toEqual({ dad: 5000 + TIMER_MS.cook, dough: null, mom: null, delivery: null, machine: null });
     const ringing = { ...old, chars: newGame().chars, timers: { dad: 9000, dough: 20000 } };
     expect(deserialize(JSON.stringify(ringing)).timers).toEqual({ dad: 9000, dough: 20000, mom: null, delivery: null, machine: null });
@@ -67,13 +67,25 @@ describe('save format v4 (AC-35, AC-58)', () => {
       flags: { door_unlocked: true, flours_taken: true, power_on: true, machine_running: true },
     };
     const back = deserialize(JSON.stringify(old));
-    expect(back.v).toBe(4);
+    expect(back.v).toBe(5);
     expect(back.inventory).toEqual(['key', 'pole']);
     expect(back.flags).toMatchObject({ chestnut_taken: true, riceflour_taken: true, fuse_taken: true, fuse_in: true });
     expect(back.timers.machine).toBe(8000);
     const idle = deserialize(JSON.stringify({ ...old, flags: {}, inventory: [] }));
     expect(idle.inventory).toEqual([]);
     expect(idle.timers.machine).toBeNull();
+  });
+
+  it('migrates a v0.3 save (format 4): fragments put on the notebook come back to be put together, a worked dough rests in the lab', () => {
+    const old = { ...newGame(), v: 4, inventory: ['key', 'scrap2'], flags: { door_unlocked: true, frag1_in: true, frag3_in: true, dough_mixed: true }, solved: [1, 19] };
+    const back = deserialize(JSON.stringify(old));
+    expect(back.v).toBe(5);
+    expect(back.inventory).toEqual(['key', 'scrap2', 'scrap', 'scrap3']);
+    expect(back.flags).toEqual({ door_unlocked: true, dough_mixed: true, dough_up: true });
+    // A recipe already complete keeps its fragments in the notebook; a dough still on its timer stays in the kitchen.
+    const done = deserialize(JSON.stringify({ ...old, inventory: [], flags: { ...old.flags, frag2_in: true }, solved: [1, 13, 19], timers: { ...newGame().timers, dough: 9000 } }));
+    expect(done.inventory).toEqual([]);
+    expect(done.flags).toEqual({ door_unlocked: true, frag1_in: true, frag2_in: true, frag3_in: true, dough_mixed: true });
   });
 
   const valid = JSON.parse(serialize(newGame()));

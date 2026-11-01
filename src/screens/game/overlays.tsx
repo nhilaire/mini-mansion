@@ -308,6 +308,19 @@ export function CircuitGame({ initial, onSolved, onClose }: { initial: Board2; o
       </>
     );
   };
+  // A burnt cell: a scorched component with soot marks, a crack and a small wisp of smoke, so that it reads as broken.
+  const burnt = (i: number) => {
+    const box = (left: number, top: number, w: number, h: number) => ({ position: 'absolute' as const, left: size * left, top: size * top, width: size * w, height: size * h });
+    return (
+      <>
+        <View style={[box(0.12, 0.3, 0.76, 0.5), styles.soot]} />
+        <View testID={`circuit-burnt-${i}`} style={[box(0.24, 0.38, 0.52, 0.34), styles.chip]} />
+        <View style={[box(0.3, 0.53, 0.44, 0.04), styles.crack, { transform: [{ rotate: '-24deg' }] }]} />
+        <View style={[box(0.52, 0.2, 0.1, 0.1), styles.smoke]} />
+        <View style={[box(0.42, 0.08, 0.14, 0.14), styles.smoke, { opacity: 0.35 }]} />
+      </>
+    );
+  };
   return (
     <View testID="circuit" style={[StyleSheet.absoluteFill, styles.consoleBezel]}>
       <View style={styles.consoleRow}>
@@ -326,11 +339,11 @@ export function CircuitGame({ initial, onSolved, onClose }: { initial: Board2; o
                     key={i}
                     testID={`circuit-cell-${i}`}
                     accessibilityRole="button"
-                    accessibilityLabel={t.circuit.cell(x, y, isOn, tile.fixed)}
+                    accessibilityLabel={t.circuit.cell(x, y, isOn, tile.fixed, tile.kind === 'O')}
                     onPress={() => tapTile(i)}
                     style={[{ width: size, height: size }, styles.tile, tile.kind === 'O' && styles.tileBurnt]}
                   >
-                    {pipe(ends(tile.kind, board[i]), isOn)}
+                    {tile.kind === 'O' ? burnt(i) : pipe(ends(tile.kind, board[i]), isOn)}
                     {tile.fixed ? <View style={styles.rivet} /> : null}
                   </Pressable>
                 );
@@ -488,7 +501,11 @@ const styles = StyleSheet.create({
   bulb: { backgroundColor: '#3a3a30', borderWidth: 2, borderColor: '#e8d8b0' },
   bulbOn: { backgroundColor: '#ffe14a' },
   tile: { borderWidth: 1, borderColor: '#1c4a32', backgroundColor: '#163a26' },
-  tileBurnt: { backgroundColor: '#0a140e' },
+  tileBurnt: { backgroundColor: '#1b2a20' },
+  soot: { backgroundColor: '#0c120e', borderRadius: 999, opacity: 0.85 },
+  chip: { backgroundColor: '#3a332b', borderWidth: 2, borderColor: '#5a4c3c', borderRadius: 3 },
+  crack: { backgroundColor: '#0c0a08' },
+  smoke: { backgroundColor: '#9aa29c', borderRadius: 999, opacity: 0.55 },
   pipeOn: { backgroundColor: '#ffe14a' },
   pipeOff: { backgroundColor: '#7c8a80' },
   rivet: { position: 'absolute', right: 3, top: 3, width: 6, height: 6, borderRadius: 3, backgroundColor: '#c8c8d0' },

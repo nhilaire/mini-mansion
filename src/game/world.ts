@@ -65,6 +65,8 @@ export const ITEMS: readonly ItemId[] = [
   'keyring',
   'scrap2',
   'scrap3',
+  'recipeHalf',
+  'recipe',
   'hat',
   'fuse',
   'wire',
@@ -124,6 +126,7 @@ export const FLAGS: readonly Flag[] = [
   'chestnut_in',
   'riceflour_in',
   'dough_mixed',
+  'dough_up',
   'wc_wet',
   'fridge_open',
   'dad_wary',
@@ -342,6 +345,8 @@ export const HOTSPOTS: readonly HotspotDef[] = [
   hs('laundry.notebook', 'laundry', r(150, 66, 30, 22), p(165, 110), ['look', 'use']),
   hs('laundry.cake', 'laundry', r(200, 62, 30, 30), p(215, 110), ['look']),
   hs('laundry.form', 'laundry', r(250, 40, 30, 30), p(265, 108), ['look']),
+  // Papa's proofing cabinet: his dough rests there once he has carried it up (E30).
+  hs('laundry.etuve', 'laundry', r(284, 40, 30, 60), p(296, 110), ['look', 'use']),
   // Upstairs.
   hs('landing.lamp', 'landing', r(110, 6, 24, 24), p(125, 108), ['look', 'use']),
   hs('landing.picture', 'landing', r(200, 6, 30, 24), p(215, 108), ['look']),

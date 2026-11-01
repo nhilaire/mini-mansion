@@ -7,6 +7,7 @@
 import {
   actionInputs,
   allInputs,
+  isRecipeCombination,
   canFinish,
   exploreStory,
   deliver,
@@ -47,8 +48,8 @@ const DEPENDS: Record<number, number[]> = {
   10: [9, 17],
   14: [2],
   11: [14],
-  12: [10, 11, 7],
-  13: [12, 21, 29],
+  12: [10, 11, 21, 29],
+  13: [12],
   20: [10],
   21: [20],
   22: [17],
@@ -59,7 +60,7 @@ const DEPENDS: Record<number, number[]> = {
   27: [26],
   28: [25, 27],
   29: [28],
-  30: [19, 24],
+  30: [12, 19, 24],
   31: [3],
 };
 
@@ -129,8 +130,8 @@ describe('story graph (AC-31)', () => {
       if (s.solved.includes(7) && !s.solved.includes(16) && !s.solved.includes(19)) problems.push(`E07 before E16/E19: ${storyKey(s)}`);
       if (s.solved.includes(14) && !s.solved.includes(16) && !s.solved.includes(19) && !s.solved.includes(27)) problems.push(`E14 before E16/E19/E27 (the pliers are in the office): ${storyKey(s)}`);
       if (s.solved.includes(28) && !s.flags.dad_wary) problems.push(`E28 before Papa is wary: ${storyKey(s)}`);
-      // Only the reunion ends the game, once the recipe is complete and the tonka bean is in the dough: in the lab or the kitchen.
-      if (s.finished && !(s.solved.includes(13) && s.solved.includes(30) && (s.place === 'laundry' || s.place === 'kitchen'))) problems.push(`ended elsewhere: ${storyKey(s)}`);
+      // Only the reunion ends the game, once the recipe is complete and the tonka bean is in the dough: in the lab.
+      if (s.finished && !(s.solved.includes(13) && s.solved.includes(30) && s.place === 'laundry')) problems.push(`ended elsewhere: ${storyKey(s)}`);
     });
   });
 
@@ -191,6 +192,9 @@ describe('story graph (AC-31)', () => {
           if (input.kind === 'item' && input.target === 'florent.strip' && storyKey({ ...o.state, chars: s.chars, timers: s.timers, solved: s.solved }) === storyKey(s)) continue;
           // The basket gives the drawer key and solves E25 (the key is taken on the way, see lazyItem).
           if (input.kind === 'verb' && input.target === 'garden.basket' && storyKey({ ...o.state, solved: s.solved }) === storyKey(s)) continue;
+          // The fragments put together early or in another order: the same recipe in the end (act2.test.ts), and
+          // nothing else uses them.
+          if (input.kind === 'item' && isRecipeCombination(input.item, input.target)) continue;
           // A piece put in alone: checked with the pieces below.
           if (input.kind === 'item' && PART_GROUPS.some((g) => g.target === input.target && g.items.includes(input.item))) continue;
           if (k === storyKey(s) || k === bay || (dough && k === storyKey(dough))) continue;

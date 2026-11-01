@@ -76,7 +76,7 @@ export const fr = {
     battery: 'Pile',
     bulb: 'Ampoule',
     // Accessibility label of a tile: "Pièce 3, 2, allumée".
-    cell: (x: number, y: number, on: boolean, fixed: boolean) => `Pièce ${x + 1}, ${y + 1}${on ? ', allumée' : ''}${fixed ? ', fixe' : ''}`,
+    cell: (x: number, y: number, on: boolean, fixed: boolean, burnt = false) => `Pièce ${x + 1}, ${y + 1}${burnt ? ', grillée' : ''}${on ? ', allumée' : ''}${fixed ? ', fixe' : ''}`,
   },
   documents: { title: "Les documents secrets de Papa", close: 'Fermer' },
   pause: { title: 'Pause', resume: 'Reprendre', settings: 'Paramètres', home: 'Menu principal' },

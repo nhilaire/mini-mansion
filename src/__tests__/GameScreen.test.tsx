@@ -525,9 +525,9 @@ describe('GameScreen', () => {
     expect(saved.notes).toContain('n11');
   });
 
-  it('the last recipe scrap, with the tonka bean in the dough, gathers the family and ends the game, saved as finished (AC-32, AC-50, AC-67)', async () => {
+  it('the recipe back in the notebook, with the tonka bean in the dough, gathers the family and ends the game, saved as finished (AC-32, AC-50, AC-67)', async () => {
     const props = await mount(stateAt(SOLUTION.length - 1));
-    await fireEvent.press(screen.getByTestId('inv-scrap3'));
+    await fireEvent.press(screen.getByTestId('inv-recipe'));
     await fireEvent.press(screen.getByTestId('hs-laundry.notebook'));
     // The save is already finished while the reunion plays (killed now, nothing would resume).
     expect(lastSaved(props).finished).toBe(true);
@@ -565,6 +565,22 @@ describe("Florent's console", () => {
     await fireEvent.press(screen.getByTestId('circuit-close'));
     expect(screen.queryByTestId('circuit')).toBeNull();
     expect(lastSaved(props).circuit?.[free]).toBe((START_BOARD[free] + 1) % 4);
+  });
+
+  it('draws each burnt cell as a burnt component, named so, that never turns (AC-73)', async () => {
+    const props = await mount(room());
+    await open();
+    const burnt = TILES.flatMap((t, i) => (t.kind === 'O' ? [i] : []));
+    expect(burnt.length).toBeGreaterThan(0);
+    for (const i of burnt) {
+      const cell = screen.getByTestId(`circuit-cell-${i}`);
+      expect(cell.props.accessibilityLabel).toMatch(/grillée/);
+      // The scorched chip (with its soot, crack and smoke) is drawn inside the cell, and no pipe.
+      expect(screen.getByTestId(`circuit-burnt-${i}`)).toBeTruthy();
+    }
+    await fireEvent.press(screen.getByTestId(`circuit-cell-${burnt[0]}`));
+    await fireEvent.press(screen.getByTestId('circuit-close'));
+    expect(lastSaved(props).circuit?.[burnt[0]]).toBe(START_BOARD[burnt[0]]);
   });
 
   it('lighting the bulb shows the win, then closes the game and opens the Nerf kit (E31)', async () => {

@@ -13,7 +13,7 @@ export const CLUES: Record<number, readonly string[]> = {
   9: ['parents.shower.lookRepaired', 'parents.mirror.look'],
   10: ['parents.painting.look'],
   11: ['attic.stain.look', 'line.theoMono2', 'garage.paint.look'],
-  12: ['line.doorLocked', 'attic.door.look', 'item.oldkey.look'],
+  12: ['line.doorLocked', 'attic.door.look', 'item.oldkey.look', 'item.recipe.look'],
   13: ['laundry.notebook.look', 'item.note.look'],
   14: ['pool.cover.lookOpen', 'pool.pump.look', 'garage.drawer.look', 'office.shelf.look'],
   15: ['cellar.hatch.look', 'cellar.rack.look', 'cellar.stone.look', 'line.stoneAlone'],
@@ -32,5 +32,5 @@ export const CLUES: Record<number, readonly string[]> = {
   27: ['florent.strip.look', 'julien.magazine.look', 'line.magnetWorks', 'dad.doorWary'],
   28: ['office.drawer.lookWary', 'item.keyring.look', 'line.drawerLocked'],
   29: ['attic.trunk.look', 'line.trunkUnknown'],
-  30: ['item.scrap2.look', 'line.recipeTonka', 'item.tonka.look'],
+  30: ['item.scrap2.look', 'line.recipeTonka', 'item.tonka.look', 'line.dadEtuve', 'laundry.etuve.look'],
 };

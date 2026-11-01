@@ -70,7 +70,7 @@ export const en: Strings = {
     close: 'Quit',
     battery: 'Battery',
     bulb: 'Bulb',
-    cell: (x: number, y: number, on: boolean, fixed: boolean) => `Piece ${x + 1}, ${y + 1}${on ? ', lit' : ''}${fixed ? ', fixed' : ''}`,
+    cell: (x: number, y: number, on: boolean, fixed: boolean, burnt = false) => `Piece ${x + 1}, ${y + 1}${burnt ? ', burnt' : ''}${on ? ', lit' : ''}${fixed ? ', fixed' : ''}`,
   },
   documents: { title: "Papa's secret documents", close: 'Close' },
   pause: { title: 'Pause', resume: 'Resume', settings: 'Settings', home: 'Main menu' },
