@@ -4,8 +4,8 @@ Status: approved
 Project slug: mini-mansion
 Final app name: Mini Mansion
 Android package: io.github.nhilaire.minimansion
-Version target: 0.3.0
-Last updated: 2026-10-24
+Version target: 0.4.0
+Last updated: 2026-11-01
 
 > Written in English. Player-facing text is quoted in the "Player copy" section, in every language of the game
 > (`factory-app.json` "languages"; French is the reference).
@@ -24,8 +24,11 @@ Last updated: 2026-10-24
 > the doorbell answered in 15 s, the garden ways marked by wicket gates; 2026-10-25, after a test by another player:
 > the hair dryer stays plugged on its hook, and the power cut comes from Théo's electromagnet experiment, explained by a
 > second science magazine in Julien's room and assembled from four found objects; 2026-10-26, v0.3.0: Florent's console
-> runs a full-screen "broken circuit" game, and beating its level 99 opens his Nerf kit), which amend this PRD: timed doorbell sequence, kitchen/garden/front captures, side gates, merged music corner and dining
-> room, breaker, cellar hatch, lab door code, optional kitchen recipe, art from the author's room photos. Every rule
+> runs a full-screen "broken circuit" game, and beating its level 99 opens his Nerf kit; 2026-11-01, v0.4.0: the
+> story ends in the lab only: the lab door code is written on the back of the recipe, so the three fragments must be
+> found and put together before the lab opens; Papa carries the dough up to the proofing cabinet of his lab, where the
+> tonka bean goes; the burnt cells of the console are drawn as burnt components), which amend this PRD: timed doorbell sequence, kitchen/garden/front captures, side gates, merged music corner and dining
+> room, breaker, cellar hatch, lab door code, art from the author's room photos. Every rule
 > kept is restated here: this PRD is the only source of truth.
 
 ## Summary
@@ -39,9 +42,10 @@ doorbell, the washing machine, a new dough, a runaway garden hose, a repaired bi
 cracks a chess problem, a computer and a safe. Act II: the father has cut his recipe in three (one piece in the
 safe, one hidden in the wine cellar, one in an old trunk of the attic) and its secret ingredient is delivered today.
 Charlie reads invisible ink, wins the parcel back from the neighbours' cat, puts the cellar bottles in order, opens the
-trunk and the father's lab behind a painted-over door in the attic. The truth: a gluten-free, lactose-free chocolate
-cake for the town baking contest, whose secret touch, the delivered tonka bean, Charlie grates into the dough before the
-whole family gathers, one after the other, where the last step was made (the lab or the kitchen). The fun
+trunk, puts the recipe back together, whose back gives the code of the father's lab behind a painted-over door in
+the attic. The truth: a gluten-free, lactose-free chocolate
+cake for the town baking contest, whose secret touch, the delivered tonka bean, Charlie grates into the dough resting in the lab's proofing
+cabinet before the whole family gathers in the lab, one after the other. The fun
 is in observing, sneaking, a few tense timed escapes and the "aha" of each puzzle, with family humour; being caught
 only sends Charlie to the wine cellar, never loses progress, and there is no hint system.
 
@@ -192,7 +196,7 @@ means the front of the house (`front`).
 | garage | Garage (tools, Florent's bike with a flat tyre, crate, circuit breaker, ladder, hatch) | stairs up -> corridor0; ladder -> attic; hatch -> cellar (always open from the garage) |
 | cellar | Cave à vin (wine racks, the bottle rack with Papa's four old bottles, two stones sticking out of the wall, the hatch from below) | hatch -> garage (stuck from below until E15) |
 | attic | Grenier (lots of junk, paint stain, an old trunk with a colour padlock) | ladder -> garage; secret door -> laundry (after E12) |
-| laundry | Buanderie secrète (Papa's lab, his recipe notebook with three torn pages) | door -> attic |
+| laundry | Buanderie secrète (Papa's lab, his recipe notebook with three torn pages, his proofing cabinet: an old cupboard with a heat lamp where his dough rests) | door -> attic |
 | landing | Couloir de l'étage (doors in this order from the stairs) | stairs -> hall; door 1 -> wc1; door 2 -> julien; door 3 -> bathroom; door 4 -> theo; door 5 -> florent; door 6 -> parents |
 | wc1 | WC de l'étage (Théo's science magazine, open at « l'encre invisible au citron ») | door -> landing |
 | julien | Chambre de Julien (trophies, medals, a science magazine Théo left there, open at « l'électroaimant ») | door -> landing |
@@ -282,7 +286,7 @@ means the front of the house (`front`).
 | dad | outside | front | 60 s later: `line.dadGoingBack` is heard; or at once when Charlie is in `front` (`line.dadSalesman`) | returning; at_desk when he met Charlie |
 | dad | returning | none (on his way back) | 30 s later | at_desk |
 | dad | at_desk, answering, outside or returning | - | E19: 120 s after the dough is mixed (Papa not wary), Papa comes to the kitchen (CUT12) | cooking (kitchen) |
-| dad | cooking | kitchen | 90 s later: `line.dadOven` (the dough is in the oven) | at_desk |
+| dad | cooking | kitchen | 90 s later: `line.dadEtuve` (he carries the dough up to the proofing cabinet of his lab) | at_desk |
 | dad | at_desk (wary) | office | E27: the power cut | fuses (garage) |
 | dad | fuses | garage | 60 s later: `line.dadFusesDone` | at_desk |
 | mom | folding | parents | E17: the washing machine's cycle ends, 60 s after it was started (`line.machineDing` heard wherever Charlie is) | gardening (garden) |
@@ -295,8 +299,8 @@ means the front of the house (`front`).
 | theo | in_room | theo | E04: the white queen is put back on the chessboard | chess (living) |
 | theo | chess | living | the Rubik's Cube is solved and Charlie leaves `theo` | in_room (theo) again, CUT07 plays |
 
-- The end: CUT11 gathers the whole family whatever their state, where the last of E13 and E30 was made (the lab or
-  the kitchen), Charlie in the middle of the floor so that everybody is seen; then the Ending.
+- The end: CUT11 gathers the whole family in the lab whatever their state, once E13 and E30 are both done (both are
+  made in the lab), Charlie in the middle of the floor so that everybody is seen; then the Ending.
 - The doorbell sequence: ringing shows `line.dadAnswer` (Papa heard from inside); Charlie has 15 s to go away from the
   front door. Then the front door view plays (no control, cannot be skipped): Papa in front of the house says
   `line.dadAtDoor`. If Charlie is still in `front` at that moment, there is no front door view: Papa comes out next to
@@ -306,12 +310,14 @@ means the front of the house (`front`).
   `line.dadGoingBack` is heard; 30 s later Papa is back at his desk, and if Charlie is in the office then, Papa catches
   Charlie. Whenever Papa goes back in, he locks the front door (`line.dadLocks`). The doorbell can be rung again once Papa is back at his desk (`line.bellBusy` meanwhile),
   until Papa is wary.
-- The dough (E19, optional): the Lait de riz (fridge), the Farine de châtaigne and the Farine de riz (utility room
+- The dough (E19): the Lait de riz (fridge), the Farine de châtaigne and the Farine de riz (utility room
   shelf) used on the food processor in any order; with all three, `line.doughMixed`, E19 is solved and the 120 s
   timer starts. When it ends CUT12 plays wherever Charlie is (as the front door view): Papa walks into the kitchen
   delighted (`line.dadDough`) and cancels any doorbell sequence; if Charlie is in the kitchen then, Papa catches Charlie.
-  He cooks 90 s (the office is free, the kitchen guarded), then `line.dadOven` and he is back at his desk (Charlie
-  caught if in the office). The dough is mixed once; its ingredients are used up.
+  He cooks 90 s (the office is free, the kitchen guarded), then `line.dadEtuve` (« Voilà ! Cette pâte va reposer
+  dans l'étuve de mon labo. »): the bowl leaves the kitchen and now rests in the proofing cabinet of the lab (flag
+  `dough_up`), and he is back at his desk (Charlie caught if in the office). The dough is mixed once; its ingredients
+  are used up.
 
 ### Lures and wariness
 
@@ -324,9 +330,10 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
   desk drawer and gives its key to Maman (`line.dadKey`); before that, the drawer is simply locked and its key
   cannot be found. From
   then on the doorbell answers `line.bellIgnored`, and his door line becomes `dad.doorWary` (« … sauf panne de
-  courant ! »). The dough: mixed while Papa is wary, `line.doughIgnored` is heard at once from the office (E19 still
-  counts if it was not solved yet); if Papa becomes wary while the dough timer runs, CUT12 does not play when it ends
-  and `line.doughIgnored` is heard instead.
+  courant ! »). The dough still brings him once wary, but not as a lure: when its timer ends while Papa is wary, the
+  kitchen view shows him grabbing the bowl (`line.dadDoughWary`: « Ma pâte ! Je la monte vite à l'étuve… et je
+  retourne surveiller mon bureau. »), the bowl goes to the proofing cabinet (`dough_up`) and he is back at his desk at
+  once: the office is never free (Charlie in the kitchen then is caught). So the dough can never be lost.
 - Papa, 2nd exit: the power cut (E27). It needs Florent's room free for good (E26, his bike), which needs the bike
   pump of the parcel, delivered only after Papa became wary. The power cut can be caused again as
   long as the office still holds something needed (E28 not solved, i.e. N14 not found, or the Pince not taken): the first one
@@ -371,24 +378,26 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
 
 Puzzle ids keep the draft's numbering (E01-E15), then the lures and the gates (E16-E19), then Act II (E20-E30), then
 Florent's console (E31).
-Needed to finish: E01-E15, E17 and E19-E30 (the dough is needed for the tonka bean, E30; it frees the office the
-first time unless the doorbell, E16, did it before);
+Needed to finish: E01-E15, E17 and E19-E30 (the dough is needed for the tonka bean, E30, once Papa has carried it up
+to his lab; it frees the office the first time unless the doorbell, E16, did it before);
 E15 is needed since the bottle rack is in the cellar, whose hatch only opens from below with the iron bar; E22 (the
 hose) is needed for Papa's drawer key, which Maman leaves in the garden only while she changes; E18 is optional (the keypads, the bottle rack and the trunk only
 accept a code once it is in the notebook, so nothing can be guessed).
 
 Dependencies (checked by AC-31; the drawer of E28 only gives N14 once Papa is wary): E02, E03, E16, E17, E18, E19 in any order after E01; E04 after E02; E05 after E04; E06
 after CUT07 (E05); E07 after E06 and (E16 or E19); E08 after E03 and E17; E09 after E08; E10 after E09; E14 after
-(E16 or E19, or later E27: the power cut stays possible until the Pince is taken) and E02; E11 after E14; E12 after E10, E11 and E07; E20 after E10; E21 after E20; E22 after
+(E16 or E19, or later E27: the power cut stays possible until the Pince is taken) and E02; E11 after E14; E12 after E10, E11 and the Recette de Papa (E21, E29); E20 after E10; E21 after E20; E22 after
 E17; CUT13 (the delivery) after E07 (60 s after Papa is wary); E23 after CUT13, with the garden free (Maman still folding, or E22); E24 after E23; E25 after E22 and Papa wary (E07);
-E26 after E24 and the Nerf kit taken (E08's Joint torique); E27 after E26 and the Électroaimant à brancher assembled; E28 after E25 and E27; E29 after E28; E13
-after E12, E21 and E29; E30 after E19 and E24; E31 after E03 (Florent's room free); the Nerf kit (E08's Joint torique, E26's Rustines) after
-E31; the end (CUT11) once E13 and E30 are done, where the last of them was made. E16 and E18 are
+E26 after E24 and the Nerf kit taken (E08's Joint torique); E27 after E26 and the Électroaimant à brancher assembled; E28 after E25 and E27; E29 after E28; the
+Recette de Papa (the three fragments put together) after E10, E21 and E29; E13 after E12; E30 after E12, E24 and the
+dough resting in the lab (E19, then Papa carries it up); E31 after E03 (Florent's room free); the Nerf kit (E08's Joint torique, E26's Rustines) after
+E31; the end (CUT11) once E13 and E30 are done. E16 and E18 are
 optional.
 
 Items: Clé de la maison, Fusible, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du
 Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau,
-Fragment n° 1, Fragment n° 2, Fragment n° 3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz,
+Fragment n° 1, Fragment n° 2, Fragment n° 3, Recette déchirée, Recette de Papa, Mot de Papa, Barre de fer, Lait de riz,
+Farine de châtaigne, Farine de riz,
 Boîte de sardines, Fève tonka, Pompe à vélo, Clé du tiroir, Fil de cuivre, Gros clou, Pile, Vieille fiche, Bobine,
 Électroaimant, Électroaimant à brancher (names in the Player
 copy).
@@ -403,15 +412,15 @@ copy).
 | E05 | Take the Livret du Rubik's Cube (living bookshelf), use it on the Rubik's Cube (theo, Théo away) | - | - Livret; cube solved; when Charlie then leaves `theo`: theo -> in_room and CUT07 |
 | E06 | After CUT07, use the chess set (living): Théo's chess problem, mate in 2 (see Chess problem) | before CUT07: `line.chessBusy` or the look line (queen missing) | notebook N08 (computer code 7867) |
 | E16 | Ring the doorbell (front): the doorbell sequence (see Character states) | before E01: `line.bellRefuse`; Papa not at his desk: `line.bellBusy`; Papa cooking: `line.bellNobody`; Papa wary: `line.bellIgnored` | dad -> answering; the timers run |
-| E19 | Mix the Lait de riz, the Farine de châtaigne and the Farine de riz in the food processor (kitchen) | an ingredient used twice: "already in" line; fewer than three: `line.doughMissing` | ingredients used up; E19 solved at the third ingredient; 120 s later CUT12, Papa cooks 90 s (not if wary: `line.doughIgnored`) |
-| E07 | Use the computer (office, Papa away), type 7867 | N08 not in the notebook: `line.codeUnknown`; wrong code: `line.codeWrong`, unlimited tries | documents shown (`docs`); notebook N09, N10 (the lab is reached through the attic; door code 2510), N15 (Papa's order, delivered today) |
+| E19 | Mix the Lait de riz, the Farine de châtaigne and the Farine de riz in the food processor (kitchen) | an ingredient used twice: "already in" line; fewer than three: `line.doughMissing` | ingredients used up; E19 solved at the third ingredient; 120 s later CUT12, Papa cooks 90 s, then carries the dough up to his lab (wary: he only carries it up, `line.dadDoughWary`) |
+| E07 | Use the computer (office, Papa away), type 7867 | N08 not in the notebook: `line.codeUnknown`; wrong code: `line.codeWrong`, unlimited tries | documents shown (`docs`); notebook N09, N10 (the lab is reached through the attic; its door code is written on the back of the recipe Papa tore in three), N15 (Papa's order, delivered today) |
 | E17 | Take the Fusible (hall cabinet drawer), put it in the circuit breaker (garage) and switch it back on; take the Lessive (utility shelf), use it on the washing machine | breaker switched without a fuse: `line.breakerFuse` (a fuse is missing); no power: `line.machinePower` (the Lessive is kept); no detergent: `line.machineEmpty`; after E17: `line.machineDone` | - Fusible; - Lessive; the machine runs; 60 s later: `line.machineDing`, mom -> gardening |
 | E08 | Repair the shower (parents, Maman away): the Joint torique (florent: the Nerf modding kit, which also holds the Rustines), then the Clé à molette (garage workbench) | shower states: broken (look « Il manque un joint. », use `line.showerBroken`, wrench `line.wrenchNothing`); joint fitted (Joint used up, flag `shower_joint`, look `parents.shower.lookLoose`, use `line.showerLoose`); repaired (wrench used up) | taking the kit: + Joint torique, + Rustines; - Joint, - Clé à molette; shower repaired (E08 solved at the wrench) |
 | E09 | Use the shower: hot water runs, the steam reveals a code on the mirror (CUT08) | shower not repaired: the lines above | notebook N11 (safe code 1987) at the end of CUT08; the digits stay on the mirror for good |
 | E10 | Look at the crooked painting (parents): it hides the safe; use the safe, type 1987 | N11 not in the notebook: `line.codeUnknown`; wrong code: `line.codeWrong` | + Clé ancienne, + Photo du gâteau, + Fragment n° 1, + Mot de Papa; notebook N12 |
 | E14 | Drain the pool: open the cover (switch), the Pince (office shelves, Papa's toolbox) on the pump, use the pump, take the Dissolvant from the pool floor | cover switch before E02: `line.coverBall`; pump before the Pince: `line.pumpPlug`; pump with cover closed: `line.pumpCover` | - Pince; the pool empties; + Dissolvant when taken (E14 solved when taken); using the pump again on the drained pool fills it up again, and again drains it (a gag: the Dissolvant can only be taken from the drained pool) |
 | E11 | Use the Dissolvant on the paint stain (attic) | - | - Dissolvant; CUT09: a door with a lock and a keypad appears |
-| E12 | Open the revealed door: the Clé ancienne in the lock and the code 2510 on its keypad, in any order | door used without the code known: `line.doorLocked`; wrong code: `line.codeWrong` | - Clé ancienne; CUT10 when both are done: the door opens; exit attic -> laundry |
+| E12 | Open the revealed door: the Clé ancienne in the lock and the code 2510 on its keypad, in any order | door used without the code known (N17): `line.doorLocked`; wrong code: `line.codeWrong` | - Clé ancienne; CUT10 when both are done: the door opens; exit attic -> laundry |
 | E20 | Heat the Mot de Papa with the hair dryer, hooked and plugged in the corridor bathroom (use the note on it): invisible ink written with lemon juice appears; the idea comes from Théo's science magazine in the upstairs WC (« L'encre invisible au citron : chauffe le papier et le message apparaît ! ») and the note itself smells of lemon (`item.note.look`: « Ce papier sent drôlement le citron… ») | - | notebook N13 (« Ma cachette de la cave s'ouvre si l'on range mes bouteilles de la plus vieille à la plus jeune. »); the note keeps its revealed text (look `item.note.lookInk`) |
 | E21 | The bottle rack (cellar): tap Papa's four bottles from the oldest to the youngest vintage (1987, 1994, 2003, 2011) on the sequence pad | N13 not in the notebook: `line.bottlesUnknown`; wrong order: `line.bottlesWrong`, the bottles go back, unlimited tries | a hidden compartment opens: + Fragment n° 2 |
 | E22 | Open the garden tap (pool): the hose runs wild in the garden (CUT14) | Maman not gardening: `line.hoseLawn` (the water only waters the lawn) | Maman soaked: mom -> changing for 90 s (the garden is free, her room guarded) |
@@ -422,8 +431,9 @@ copy).
 | E27 | Théo's electromagnet experiment, explained by his science magazine left in Julien's room (« Expérience n° 7 : l'électroaimant ! Enroule du fil de cuivre autour d'un gros clou et relie-le à une pile… ⚠ Ne JAMAIS le brancher sur une prise : court-circuit garanti, tous les plombs de la maison sautent ! »): the Fil de cuivre (garage, on the shelf above the bench) on the Gros clou (garden shed) gives the Bobine; the Pile (TV remote, living room) on the Bobine gives the Électroaimant (Charlie tests it: it attracts a spoon, `line.magnetWorks`); the Vieille fiche (attic boxes) on the Électroaimant gives the Électroaimant à brancher; plug it into Florent's overloaded power strip, which carries Papa's yellow post-it « Florent ! Plus RIEN sur cette multiprise, ça fait sauter les plombs ! » (florent, Florent riding) | a combination out of this order: the generic wrong lines; Florent not riding: `line.stripNotNow`; Papa not at his desk: `line.fusesNobody`; nothing left to get in the office: `line.fusesNoNeed` | - Fil de cuivre, Gros clou, Pile, Vieille fiche as they are combined; the power cut (CUT18): dad -> fuses (garage) for 60 s; the Électroaimant à brancher is kept |
 | E28 | Open Papa's desk drawer (office) with the Clé du tiroir: his sketchbook, « Rouge, jaune, bleu, vert… C'est vraiment étrange, ce code couleur. » (`e28.open`) | drawer looked at: `office.drawer.look` (« Le tiroir du bureau de Papa. Fermé à clé. »); used without the key: `line.drawerLocked` (« C'est fermé à clé. »), nothing about the key | - Clé du tiroir; Papa's sketchbook: notebook N14 (the trunk colours) |
 | E29 | Open the attic trunk: the colour padlock on the sequence pad (red, yellow, blue, green), its six colour buttons shown in a mixed order (blue, orange, green, red, purple, yellow) | N14 not in the notebook: `line.trunkUnknown`; wrong colours: `line.codeWrong`, unlimited tries | + Fragment n° 3 |
-| E13 | In the laundry, put the three fragments on Papa's recipe notebook, in any order | fewer than three yet: `line.recipeMore` (the fragment is kept in the notebook) | - Fragments; the recipe is complete: with the tonka bean already in the dough, CUT11 and the Ending; otherwise `line.recipeTonka` (the secret touch is missing), and CUT11 plays in the kitchen when the tonka bean goes into the dough (E30) |
-| E30 | Grate the Fève tonka into Papa's dough in the food processor (kitchen) | no dough yet: `line.tonkaNoDough` | - Fève tonka; flag `tonka_in` (`e30.tonka`) |
+| - | Put the three fragments together in the inventory (combine them two by two, in any order) | - | two fragments: - both, + Recette déchirée (`combine.recipeHalf`); the Recette déchirée and the third fragment: + Recette de Papa, `line.recipeJoined` (on its back, Papa's note « Labo : 2510 »), notebook N17 |
+| E13 | In the lab, put the Recette de Papa back in his recipe notebook | - | - Recette de Papa; the recipe is complete (`e13.done`); E30 not done yet: `line.recipeTonka` (the secret touch is missing: the tonka bean grated into the dough of the proofing cabinet); E30 done: CUT11 and the Ending |
+| E30 | Grate the Fève tonka into Papa's dough resting in the proofing cabinet (lab) | no dough in the cabinet yet: `line.tonkaNoDough` (« L'étuve est vide : Papa n'y a encore mis aucune pâte. »); the Fève tonka on the food processor: `line.tonkaKitchen` (« Pas ici : cette fève, c'est la touche secrète de Papa. Elle ira dans sa pâte. ») | - Fève tonka; flag `tonka_in` (`e30.tonka`); E13 done: CUT11 and the Ending |
 | E31 | Beat level 99 of Florent's console (florent, his room free): the broken circuit game (see Florent's console) | room not free: not reachable; kit before E31: `line.kitLocked` | the Nerf kit can be taken (`line.kitOpen`) |
 | E15 | Unlock the cellar hatch from below: wedge one of the two wall stones with the Barre de fer, then press the other one | hatch used: `line.hatchStuck`; one stone pressed alone: `line.stoneAlone`; the bar on the hatch: `line.hatchStuck` | - Barre de fer (wedged in the stone, `line.stoneWedged`); pressing the other stone: the hatch unlocks (`e15.open`), open both ways for good |
 
@@ -444,7 +454,8 @@ copy).
   « Florent a mis un cadenas à code sur son kit… Son post-it dit qu'il faut d'abord battre son niveau 99. »).
 - Using the console opens the circuit game **full screen** (it covers the whole phone screen, landscape, scene,
   inventory and buttons hidden), in a retro console frame.
-- The board: 7 columns x 5 rows of tiles (straight, corner, T, and a few burnt cells with no pipe). A battery on the left edge feeds one tile, a bulb on
+- The board: 7 columns x 5 rows of tiles (straight, corner, T, and a few burnt cells with no pipe, each drawn as a burnt component: a scorched square with soot
+  marks, a crack and a small wisp of smoke, so that it reads as broken, not as a hole). A battery on the left edge feeds one tile, a bulb on
   the right edge is fed by one tile. Tapping a tile turns it a quarter turn clockwise. Some tiles are fixed (a rivet
   drawn on them) and do not turn. The current lights in yellow every tile connected to the battery; when the bulb is
   connected it lights, `sfx` win, `console.solved` (« NIVEAU 99 TERMINÉ ! »), the game closes after 1.5 s and E31 is
@@ -486,12 +497,12 @@ CUT12, CUT13, CUT14, CUT15, CUT18) play wherever Charlie is, without control, an
 | CUT08 | E09 shower used | steam fills the bathroom area, digits 1987 appear on the mirror; notebook N11 |
 | CUT09 | E11 | the stain dissolves, a door with a lock and a keypad appears |
 | CUT10 | E12 | the secret door opens |
-| CUT12 | dough timer ends (E19) | the kitchen view: Papa walks in delighted, `line.dadDough`; he starts cooking |
+| CUT12 | dough timer ends (E19) | the kitchen view: Papa walks in delighted, `line.dadDough`; he starts cooking (wary: he grabs the bowl, `line.dadDoughWary`, and carries it up) |
 | CUT13 | 60 s after Papa becomes wary | the delivery view: a van stops in front of the house, the driver rings (`line.deliveryRing`), Papa from inside: `line.bellIgnored`; the driver: `line.deliveryThrow` and throws the parcel over the gate; then the garden view: the parcel lands among Maman's flowers and the neighbours' cat lies down on it; notebook N16 |
 | CUT14 | E22 (each time) | the garden view: the hose writhes and soaks Maman (`line.momSoaked`, later `line.momSoakedAgain`); she runs inside to change |
 | CUT15 | Charlie leaves the garage after E26 | the front view: Florent runs out to his bike, `line.florentBike`, and rides away down the street |
 | CUT18 | E27 (each time) | the power cut: the scene goes dark and flickers, `sfx` fuse pop, Papa heard: `line.dadFuses` (the first time) or `line.fusesAgain`; he goes down to the garage; the house then stays dark (dimmed, still playable; outside stays lit) until he has fixed the fuses |
-| CUT11 | E13 and E30 done: in the lab (the third fragment last) or in the kitchen (the tonka bean last) | Papa climbs into his lab (`line.final1-8`; in the kitchen he walks in, `line.final1Kitchen`, `line.final2Kitchen`), then Maman, Théo, Julien and Florent join one after the other until the whole family stands around Charlie: the "disaster" is a gluten-free, lactose-free chocolate cake for the town baking contest, and its secret touch is the tonka bean; Papa thanks Charlie (`line.dadThanks`), the narrator ends (`line.finalBakery`: tomorrow every bakery in town will be empty); then the Ending |
+| CUT11 | E13 and E30 done (both in the lab) | Papa climbs into his lab (`line.final1-8`), then Maman, Théo, Julien and Florent join one after the other until the whole family stands around Charlie: the "disaster" is a gluten-free, lactose-free chocolate cake for the town baking contest, and its secret touch is the tonka bean; Papa thanks Charlie (`line.dadThanks`), the narrator ends (`line.finalBakery`: tomorrow every bakery in town will be empty); then the Ending |
 
 ### Clue notebook
 
@@ -510,7 +521,8 @@ newest first in the notebook; the ids only name them.
 | N08 | E06 | computer code 7867 |
 | N09 | E07 | "Opération Moelleux" and the town baking contest |
 | N15 | E07 | Papa's order: a tonka bean ("the secret ingredient") and a bike pump for Florent's birthday, delivered today |
-| N10 | E07 | the lab is reached through the attic; door code 2510 |
+| N10 | E07 | the lab is reached through the attic; Papa wrote its door code on the back of his recipe, which he tore in three |
+| N17 | the Recette de Papa put together | lab door code 2510, written on the back of the recipe |
 | N11 | CUT08 | safe code 1987 |
 | N12 | E10 | Papa's note: he cut the recipe in three (one piece in the safe, one in the cellar, one in the attic trunk) and keeps it in his lab; the paper smells of lemon |
 | N13 | E20 | invisible ink: Papa's cellar hiding place opens when his bottles are put in order from the oldest to the youngest |
@@ -538,8 +550,9 @@ checked by a unit test:
 - E09: the hot water itself (CUT08); mirror look. E10: painting look (crooked).
 - E14: pool look after opening the cover (a bottle at the bottom); pump look (bent plug, « Avec une pince, je la redresserais »); garage drawer
   look (the pliers went up to the office); office shelf look (Papa's toolbox, pliers sticking out).
-- E11: stain look; garage paint look (the same white as the attic wall). E12: N10, N12; door look (lock + keypad).
-- E13: N12; recipe notebook look (three torn pages). E15: hatch look from below (no handle, a mechanism); stones look (two stones sticking out, too far apart to press both
+- E11: stain look; garage paint look (the same white as the attic wall). E12: N10, N17, N12; door look (lock + keypad).
+- Recette de Papa: N10 (the code on the back of the recipe), N12 (three pieces), each fragment look (« Au dos, un bout
+  d'écriture de Papa… »). E13: N12; recipe notebook look (three torn pages). E15: hatch look from below (no handle, a mechanism); stones look (two stones sticking out, too far apart to press both
   at once); `line.stoneAlone`; wine rack look (an iron bar).
 - E20: Mot de Papa look (« Ce papier sent fortement le citron… »); Théo's science magazine in the upstairs WC (lemon
   ink, heat the paper); hair dryer look (bathroom: plugged in, ready to dry something); N12.
@@ -554,7 +567,8 @@ checked by a unit test:
   les plombs ! »); `line.magnetWorks`; `dad.doorWary`.
 - E28: `line.dadKey` (Papa gave his drawer key to Maman); drawer look (only says it is locked); drawer key look. E29: trunk look (a padlock with
   colour wheels); N14; N12 (a piece in the attic trunk).
-- E30: fragment n° 2 look (« une fève tonka râpée dans la pâte du robot »); `line.recipeTonka`; N15 and the parcel look (the
+- E30: fragment n° 2 look (« une fève tonka râpée dans la pâte, quand elle repose à l'étuve »); `line.dadEtuve`;
+  proofing cabinet look; `line.recipeTonka`; N15 and the parcel look (the
   tonka bean is the secret ingredient).
 - E31: console look (paused on « Niveau 99 », Florent's challenge post-it); Nerf kit look (a code lock: beat level 99
   first).
@@ -731,8 +745,8 @@ Puzzles, characters, captures, timers
 - AC-52 [unit] Given the Lait de riz, the Farine de châtaigne and the Farine de riz used on the food processor in any
   order (Papa not wary), then `line.doughMixed` plays, E19 is solved, and 120 s later CUT12 shows Papa coming to the
   kitchen (`line.dadDough`), the doorbell sequence is cancelled and Charlie is caught if in the kitchen at that moment;
-  Papa cooks 90 s (office free, kitchen guarded), then `line.dadOven` plays and he is back at his desk (Charlie caught if
-  in the office).
+  Papa cooks 90 s (office free, kitchen guarded), then `line.dadEtuve` plays, the bowl leaves the kitchen for the
+  proofing cabinet of the lab (`dough_up`) and he is back at his desk (Charlie caught if in the office).
 - AC-53 [unit] Given the side gates, then the front-to-garden exits (and back) are closed until the Clé du portail
   from the hall shoes is used on a gate, after which both stay open; the bay window still gives access from inside.
 - AC-55 [unit] Given the shower broken, then its look line is « Il manque un joint. », using it gives
@@ -748,7 +762,7 @@ Puzzles, characters, captures, timers
   writes code 7867 in the notebook, any other move shows `chess.wrong` and resets, and a legal-move generator proves
   Qg8+ is the only first move mating in 2 and Nf7 the only mating reply.
 - AC-27 [unit] Given the computer, the safe and the lab door keypads, then they do not open (`line.codeUnknown` or
-  `line.doorLocked`) until N08 / N11 / N10 is in the notebook; once open, only 7867 / 1987 / 2510 are accepted, any
+  `line.doorLocked`) until N08 / N11 / N17 is in the notebook; once open, only 7867 / 1987 / 2510 are accepted, any
   other 4-digit code shows `line.codeWrong` with unlimited tries; the lab door opens only once both the Clé ancienne
   and the code are used.
 - AC-28 [unit] Given the pool, then the cover switch refuses before E02, the pump refuses without the Pince or with
@@ -762,7 +776,7 @@ Puzzles, characters, captures, timers
 - AC-73 [unit] Given Florent's console, then it can be used only while his room is free; its board is 7x5, not
   connected at the start, solvable with between 12 and 30 quarter turns, with a single path of tiles linking the
   battery to the bulb; a tap turns a non-fixed tile a quarter turn clockwise and fixed tiles never turn; the lit tiles
-  are exactly those connected to the battery; connecting the bulb solves E31 once; the board survives a close and a
+  are exactly those connected to the battery; burnt cells never turn and are drawn as burnt components; connecting the bulb solves E31 once; the board survives a close and a
   save; the Nerf kit answers `line.kitLocked` before E31 and gives the Joint torique and the Rustines after it.
 - AC-74 [e2e] Given the full walkthrough on the release build, when Charlie uses Florent's console, then the circuit
   game fills the whole screen (screenshot), and solving it lets the walkthrough take the Nerf kit.
@@ -770,7 +784,7 @@ Puzzles, characters, captures, timers
   Bobine, the Pile on the Bobine gives the Électroaimant (`line.magnetWorks`), the Vieille fiche on it gives the
   Électroaimant à brancher (each pair in either order), any other combination answers the generic wrong lines; the
   magazine in Julien's room explains the experiment and warns that plugging it in trips every fuse of the house.
-- AC-29 [unit] Given the notebook, then each entry N01-N16 is added once on its trigger (N11 at the end of CUT08,
+- AC-29 [unit] Given the notebook, then each entry N01-N17 is added once on its trigger (N11 at the end of CUT08,
   N16 at the end of CUT13),
   is marked unread until the notebook is opened, and no entry appears before its trigger.
 - AC-30 [unit] Given every puzzle step, then at least one in-world clue key from the "Clues" list exists in every
@@ -782,8 +796,8 @@ Puzzles, characters, captures, timers
   CUT11 and the ending, the save is marked finished and `game_complete` is emitted exactly once with duration and captures.
 - AC-59 [unit] Given Papa lured before E07, then the doorbell and the dough work as in AC-51 and AC-52 and can be
   used again; given E07 done, then the next time Papa is back at his desk `line.dadWary` plays, and from then on the
-  doorbell answers `line.bellIgnored`, a dough mixed does not bring him (`line.doughIgnored` at once, E19 still solved
-  if it was not), a dough timer ending while he is wary plays `line.doughIgnored` instead of CUT12, and his door line
+  doorbell answers `line.bellIgnored`, a dough timer ending while he is wary plays the kitchen view with
+  `line.dadDoughWary`, puts the dough in the proofing cabinet (`dough_up`) and never frees the office, and his door line
   is `dad.doorWary`.
 - AC-60 [unit] Given Papa wary, then 60 s later CUT13 plays wherever Charlie is (no capture, cannot be skipped), N16 is
   added, and the parcel lies in the garden under the cat.
@@ -811,13 +825,14 @@ Puzzles, characters, captures, timers
 - AC-66 [unit] Given the desk drawer, then it refuses without the Clé du tiroir (`line.drawerLocked`) and with it adds
   N14 (E28); given the trunk, then it refuses before N14 (`line.trunkUnknown`), accepts only red, yellow,
   blue, green and gives the Fragment n° 3 once (E29).
-- AC-67 [unit] Given the tonka bean, then the food processor refuses it without dough (`line.tonkaNoDough`) and with
-  the dough takes it (E30); given the recipe notebook, then it takes the three fragments in any order
-  (`line.recipeMore` before the third), the third completes the recipe (E13).
-- AC-68 [unit] Given E13 and E30 both done, then CUT11 plays where the last of them was made (in the lab at the third
-  fragment, in the kitchen when the tonka bean goes into the dough), Charlie in the middle of the floor and the family
-  joining one after the other, nobody hiding anybody, then the Ending; with E13 done but not E30,
-  `line.recipeTonka` plays and the game goes on; nothing else ends the game.
+- AC-67 [unit] Given the three fragments, then any two combine into the Recette déchirée and it takes the third into
+  the Recette de Papa, which adds N17 (code 2510) once; given the recipe notebook of the lab, then it takes the Recette
+  de Papa (E13); given the tonka bean, then the proofing cabinet refuses it before the dough rests there
+  (`line.tonkaNoDough`) and takes it after (E30), and the food processor never takes it (`line.tonkaKitchen`).
+- AC-68 [unit] Given E13 and E30 both done, in either order, then CUT11 plays in the lab, Charlie in the middle of the
+  floor and the family joining one after the other, nobody hiding anybody, then the Ending; with E13 done but not E30,
+  `line.recipeTonka` plays and the game goes on; nothing else ends the game, and the lab cannot be opened before the
+  three fragments are put together.
 - AC-69 [unit] Given several timer deadlines due at once or during a scene, then timers do not advance while a scene
   without control (capture, outside view, final gathering) or an overlay plays, they do while a caption shows, and the due events fire one after another in deadline order, each scene
   in full.
@@ -874,7 +889,7 @@ Technical and feel
 - AC-57 [manual] Given the APK on the user's phone, then the photographed rooms are recognisable from the photos
   (layout, colours, characteristic objects), the stairs are seen from the front in a doorway, the attic is cluttered,
   Florent drums and Théo plays chess seen from the back, Julien's ball lies on the grass, Théo's chess set is electronic,
-  the whole family gathers at the end (lab or kitchen), the garden ways are seen at once, and the Act II scenes (delivery, cat, soaked Maman, Florent's ride,
+  the whole family gathers at the end in the lab, the garden ways are seen at once, and the Act II scenes (delivery, cat, soaked Maman, Florent's ride,
   power cut, the family gathering one after the other) are readable and funny.
 
 ## Player copy
@@ -952,7 +967,7 @@ Final app name: fr "Mini Mansion", en "Mini Mansion". Language-specific assets: 
 | about.story | Enfant, je passais des heures à fouiller chaque pièce du manoir de Maniac Mansion, chez une famille complètement folle. Cette fois, j'ai voulu que le manoir soit une vraie maison : la mienne, transformée en pixel art, avec ses habitants loufoques et un secret bien gardé. | As a child, I spent hours searching every room of the Maniac Mansion manor, home to a completely crazy family. This time, I wanted the mansion to be a real house: mine, turned into pixel art, with its zany inhabitants and a well-kept secret. |
 | about.authorTitle | Un mot de l'auteur | A word from the author |
 | about.dataTitle | Tes données | Your data |
-| item names | Clé de la maison, Fusible, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau, Fragment n° 1, Fragment n° 2, Fragment n° 3, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz, Boîte de sardines, Fève tonka, Pompe à vélo, Clé du tiroir, Fil de cuivre, Gros clou, Pile, Vieille fiche, Bobine, Électroaimant, Électroaimant à brancher | House key, Fuse, Gate key, Pole, Extension, Extended pole, Drumsticks, White queen, Rubik's Cube booklet, O-ring, Puncture patches, Adjustable wrench, Pliers, Detergent, Paint thinner, Old key, Cake photo, Scrap no. 1, Scrap no. 2, Scrap no. 3, Papa's note, Iron bar, Rice milk, Chestnut flour, Rice flour, Tin of sardines, Tonka bean, Bike pump, Drawer key, Copper wire, Big nail, Battery, Old plug, Coil, Electromagnet, Electromagnet with a plug |
+| item names | Clé de la maison, Fusible, Clé du portail, Perche, Rallonge, Perche rallongée, Baguettes, Dame blanche, Livret du Rubik's Cube, Joint torique, Rustines, Clé à molette, Pince, Lessive, Dissolvant, Clé ancienne, Photo du gâteau, Fragment n° 1, Fragment n° 2, Fragment n° 3, Recette déchirée, Recette de Papa, Mot de Papa, Barre de fer, Lait de riz, Farine de châtaigne, Farine de riz, Boîte de sardines, Fève tonka, Pompe à vélo, Clé du tiroir, Fil de cuivre, Gros clou, Pile, Vieille fiche, Bobine, Électroaimant, Électroaimant à brancher | House key, Fuse, Gate key, Pole, Extension, Extended pole, Drumsticks, White queen, Rubik's Cube booklet, O-ring, Puncture patches, Adjustable wrench, Pliers, Detergent, Paint thinner, Old key, Cake photo, Scrap no. 1, Scrap no. 2, Scrap no. 3, Torn recipe, Papa's recipe, Papa's note, Iron bar, Rice milk, Chestnut flour, Rice flour, Tin of sardines, Tonka bean, Bike pump, Drawer key, Copper wire, Big nail, Battery, Old plug, Coil, Electromagnet, Electromagnet with a plug |
 
 ## Out of scope
 
