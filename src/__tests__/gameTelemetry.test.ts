@@ -4,7 +4,8 @@ import { logEvent } from '@react-native-firebase/analytics';
 import { newGame, playAll } from '../game/rules';
 import { SOLUTION } from '../game/solution';
 import { DOOR_SPAWN } from '../game/world';
-import { sanitizeParams } from '../telemetry/events';
+import { GuardedRoom } from '../game/types';
+import { CaptureRoom, sanitizeParams } from '../telemetry/events';
 import { eventsFor, gameStart, languageChange, settingsChange, Tracked } from '../telemetry/gameTelemetry';
 import { applyConsent, track } from '../telemetry/telemetry';
 
@@ -30,6 +31,18 @@ describe('telemetry events (AC-06, AC-07)', () => {
     const block = src.slice(start, src.indexOf('\n};', start));
     const names = [...block.matchAll(/^ {2}(\w+):/gm)].map((m) => m[1]);
     expect(names.sort()).toEqual(Object.keys(PRD_EVENTS).sort());
+  });
+
+  it('the capture rooms are exactly the PRD ones, the rooms where an inhabitant catches Charlie', () => {
+    const src: string = fs.readFileSync(path.join(process.cwd(), 'src', 'telemetry', 'events.ts'), 'utf8');
+    const rooms = [.../export type CaptureRoom = ([^;]+);/.exec(src)![1].matchAll(/'(\w+)'/g)].map((m) => m[1]);
+    const prd: string = fs.readFileSync(path.join(process.cwd(), 'docs', 'PRD.md'), 'utf8');
+    const row = prd.split('\n').find((l) => l.startsWith('| capture |'))!;
+    const listed = [.../room \(([^)]+)\)/.exec(row)![1].matchAll(/`(\w+)`/g)].map((m) => m[1]);
+    expect(rooms.sort()).toEqual(listed.sort());
+    // Both ways at compile time: every capture room is guarded, every guarded room can be reported.
+    const same: [CaptureRoom] extends [GuardedRoom] ? ([GuardedRoom] extends [CaptureRoom] ? true : false) : false = true;
+    expect(same).toBe(true);
   });
 
   it('maps the engine facts of a whole game to puzzle_solved, capture and game_complete with numbers and enums only', () => {

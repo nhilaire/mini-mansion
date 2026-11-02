@@ -1,7 +1,8 @@
 // Typed catalog of the only telemetry events this app may send (must match docs/PRD.md "Telemetry events").
 // Params are numbers or short lowercase enums. Never identifiers, names, free text or locations.
 
-export type CaptureRoom = 'office' | 'front' | 'kitchen' | 'parents' | 'garden' | 'julien' | 'florent' | 'theo' | 'garage';
+// The rooms where an inhabitant catches Charlie (GuardedRoom in src/game/types.ts), as listed in the PRD.
+export type CaptureRoom = 'office' | 'kitchen' | 'parents' | 'garden' | 'julien' | 'florent' | 'theo' | 'garage';
 export type SettingName = 'sfx' | 'music' | 'telemetry' | 'language';
 export type SettingValue = 'on' | 'off' | 'auto' | 'fr' | 'en';
 
