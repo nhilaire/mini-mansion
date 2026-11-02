@@ -1,6 +1,6 @@
 # Device checks: Mini Mansion v0.4.1
 
-Commit: 7a74fbe (verified and built on this commit; the checks below were made for v0.4.0 (b3d3130, 01dea9d) and touch no code changed since: v0.4.1 only narrows the `CaptureRoom` telemetry type, T-92)
+Commit: b9bbc35 (verified and built on this commit; the checks below were made for v0.4.0 (b3d3130, 01dea9d) and touch no code changed since: v0.4.1 narrows the `CaptureRoom` telemetry type (T-92) and adds three refusal lines on the power strip (T-93))
 APK: dist/mini-mansion-0.4.0-universal.apk, SHA-256 3eb2a369abd4fe6a01bebfbe782c00c5e4260cddf687574d2c9a8f01609847d9
 Device: emulator sdk_gphone64_x86_64, Android 16 (API 36), 2400x1080 landscape
 Date: 2026-11-02
@@ -14,7 +14,7 @@ in `raw/device-*.txt` (local, git-ignored).
 | Landscape orientation (AC-05) | `aapt dump xmltree <apk> AndroidManifest.xml` (raw/device-manifest.txt) | PASS: MainActivity `android:screenOrientation=0x0` (landscape) |
 | Immersive fullscreen (AC-05) | `adb shell dumpsys window` with the game in front (raw/device-window.txt) | PASS: focused window is MainActivity; `statusBars visible=false`, `navigationBars visible=false` |
 | No advertising ID, few permissions (privacy) | `aapt dump badging <apk>` | PASS: no `AD_ID` / ad services permission; only INTERNET, VIBRATE, ACCESS_NETWORK_STATE, WAKE_LOCK, MODIFY_AUDIO_SETTINGS and the dynamic receiver permission |
-| Nothing sent after « Refuser » (AC-06) | v0.2.0 DEVICE-CHECKS refused run (a0908c4 APK) | PASS by carry-over: `git diff 72e2c17 7a74fbe -- src/telemetry` only removes the unused `front` from the `CaptureRoom` type (no runtime change), so the consent and telemetry code is the one checked then |
+| Nothing sent after « Refuser » (AC-06) | v0.2.0 DEVICE-CHECKS refused run (a0908c4 APK) | PASS by carry-over: `git diff 72e2c17 b9bbc35 -- src/telemetry` only removes the unused `front` from the `CaptureRoom` type (no runtime change), so the consent and telemetry code is the one checked then |
 | Events sent after « Accepter » (AC-08) | `verify.mjs --telemetry` (REPORT.md, raw/logcat-telemetry.txt) | PASS: game_start, tutorial_complete, puzzle_solved seen |
 | Cold start < 3 s (AC-46) | `verify.mjs` (REPORT.md) | PASS: median 1135 ms |
 | No crash during the flows (AC-47) | `verify.mjs` (REPORT.md: crash buffer cleared before the run, empty after) | PASS: 0 fatal log lines |
