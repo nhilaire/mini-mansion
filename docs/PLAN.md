@@ -104,6 +104,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-87 Test by another player: the hair dryer stays plugged on its hook ("Je n'ai rien à sécher." alone, Papa's note warmed on it); the power cut comes from Théo's electromagnet (wire + nail + battery + old plug), explained by his magazine in Julien's room, with Papa's post-it on Florent's power strip (AC-64, AC-65, AC-72) - proof: unit
 - [x] T-88 v0.3.0: Florent's console runs the broken circuit game full screen (7x5, one path, 18 quarter turns, fixed and burnt tiles); beating level 99 (E31) opens his Nerf kit (AC-73, AC-74) - proof: unit, e2e
 - [x] T-89 v0.4.0: the ending is in the lab only: the three fragments put together in the inventory give the Recette de Papa with the lab code on its back (N17; the computer only says where it is written), Papa carries the dough up to the proofing cabinet of his lab (even wary, without freeing his office), the tonka bean goes there (E30) and the recipe back in the notebook (E13); the console's burnt cells drawn as burnt components (AC-27, AC-29, AC-52, AC-59, AC-67, AC-68, AC-73) - proof: unit, e2e
+- [x] T-90 v0.4.0 phone feedback: the computer note no longer gives the lab code (it says it is on the back of the torn recipe), and Théo says at the end of his game that he left a problem on the chessboard for the next player (AC-27, CUT07) - proof: unit
 
 ## Notes
 

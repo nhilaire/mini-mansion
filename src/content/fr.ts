@@ -83,7 +83,7 @@ const lines = typoAll({
 
   // Inhabitants moving.
   'florent.back': 'En bas, la batterie se tait. Des pas dans l\'escalier : Florent remonte dans sa chambre et rallume sa console.',
-  'line.theoBack': "Bon, j'ai battu le bot. Je remonte.",
+  'line.theoBack': "Bon, j'ai battu le bot. Je laisse un problème sur l'échiquier : qui sera le prochain à le résoudre ? Je remonte.",
   'line.theoMono1': "Comment se fait-il que mon Rubik's Cube se soit résolu tout seul ? Il y en a, des mystères ici.",
   'line.theoMono2': "C'est comme ce passage secret du grenier : je suis sûr qu'il existe, mais je n'ai jamais réussi à le découvrir…",
   'line.machineDing': 'DING ! Au loin, la machine à laver a fini son cycle.',
@@ -806,7 +806,7 @@ export const story = {
   docs: [
     typo('Opération Moelleux — essai n° 12 : catastrophe ! La cuisine ressemble à un champ de bataille. Ingrédients INTERDITS : farine de blé, lait, beurre.'),
     typo('Mail de la mairie : « Concours du meilleur gâteau de la ville. Votre dossier doit être déposé avant samedi. »'),
-    typo("Note à moi-même : le labo est accessible par le grenier. Code de la porte : 2510."),
+    typo("Note à moi-même : le labo est accessible par le grenier. Le code de la porte, je l'ai écrit au dos de ma recette… que j'ai déchirée en trois de rage. Il faudra recoller les morceaux."),
     typo("Commande n° 4521 : 1 fève tonka « ingrédient secret » + 1 pompe à vélo (cadeau d'anniversaire de Florent). Livraison : aujourd'hui."),
   ],
 } as const;

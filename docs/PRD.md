@@ -493,7 +493,7 @@ CUT12, CUT13, CUT14, CUT15, CUT18) play wherever Charlie is, without control, an
 | CUT04 | E02 | the ball rolls away; Julien: `line.julienBall`; he runs to the football corner |
 | CUT05 | E03 | drum noise; Florent: `line.florentDrums`; he drums in the music corner |
 | CUT06 | E04 | Théo: `line.theoQueen`; he plays online against a bot on the electronic chess set |
-| CUT07 | cube solved and Charlie leaves `theo` | Théo comes back up (`line.theoBack`), then behind his door: `line.theoMono1-2` (the cube that solved itself, the secret passage of the attic he never found); notebook N07 |
+| CUT07 | cube solved and Charlie leaves `theo` | Théo comes back up (`line.theoBack`: he beat the bot and left a problem on the chessboard, "who will be next to solve it?"), then behind his door: `line.theoMono1-2` (the cube that solved itself, the secret passage of the attic he never found); notebook N07 |
 | CUT08 | E09 shower used | steam fills the bathroom area, digits 1987 appear on the mirror; notebook N11 |
 | CUT09 | E11 | the stain dissolves, a door with a lock and a keypad appears |
 | CUT10 | E12 | the secret door opens |

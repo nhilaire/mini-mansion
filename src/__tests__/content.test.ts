@@ -62,6 +62,13 @@ describe('story content in every language', () => {
     expect(itemName(DICTIONARIES.en, 'sticks')).toBe('Drumsticks');
   });
 
+  it.each(LANGUAGES)('in %s, the computer documents never give the lab code: only the back of the recipe does (AC-27)', (language) => {
+    const { story } = DICTIONARIES[language];
+    expect(story.docs.filter((d) => d.includes('2510'))).toEqual([]);
+    expect(story.notes.n10).not.toContain('2510');
+    expect(story.notes.n17).toContain('2510');
+  });
+
   it('has no empty or placeholder text', () => {
     for (const language of LANGUAGES) for (const s of texts(DICTIONARIES[language])) expect([s, /TODO|\{\{|undefined/.test(s)]).toEqual([s, false]);
   });

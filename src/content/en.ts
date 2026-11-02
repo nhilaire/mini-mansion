@@ -77,7 +77,7 @@ export const story: Content = {
     'e15.open': "Clonk! With both stones pushed in, the hatch unlocks. The way is clear.",
 
     'florent.back': "Downstairs, the drums stop. Footsteps on the stairs: Florent goes back to his room and switches his console back on.",
-    'line.theoBack': 'Right, I beat the bot. Going back up.',
+    'line.theoBack': "Right, I beat the bot. I've left a problem on the chessboard: who'll be next to solve it? Going back up.",
     'line.theoMono1': "How come my Rubik's Cube solved itself? There are mysteries in this house.",
     'line.theoMono2': "Like that secret passage in the attic: I'm sure it exists, but I've never managed to find it…",
     'line.machineDing': 'DING! In the distance, the washing machine has finished its cycle.',
@@ -786,7 +786,7 @@ export const story: Content = {
   docs: [
     'Operation Melting — attempt no. 12: disaster! The kitchen looks like a battlefield. FORBIDDEN ingredients: wheat flour, milk, butter.',
     'Email from the town hall: "Best cake in town contest. Your entry must be submitted before Saturday."',
-    'Note to self: the lab is reached through the attic. Door code: 2510.',
+    "Note to self: the lab is reached through the attic. The door code, I wrote it on the back of my recipe… which I tore in three in a rage. I'll have to piece it back together.",
     'Order no. 4521: 1 tonka bean "secret ingredient" + 1 bike pump (Florent\'s birthday present). Delivery: today.',
   ],
 };
