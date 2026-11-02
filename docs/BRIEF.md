@@ -6,9 +6,9 @@ Final app name: Mini Mansion
 
 ## Original brief
 
-> Je veux faire un jeu point to click dans le même genre que celui-là C:\dev\android\midnight-mansion avec
+> Je veux faire un jeu point to click dans le même genre que celui-là the local POC (midnight-mansion) avec
 > inspiration maniac mansion. Le repertoire contient un POC de faisabilité, c'est ok.
-> Tu trouveras le premier jet de PRD du jeu ici [C:\dev\prd]
+> Tu trouveras le premier jet de PRD du jeu ici [local draft folder]
 > Je te donnerai les photos de mes pièces et il faudra reproduire globalement la pièce en pixel art mais pour
 > l'instant, on prépare le reste, on vérifie la cohérence du scénario, etc.
 > quitte même à faire une première version qui ressemble pas tout à fait.
@@ -16,7 +16,7 @@ Final app name: Mini Mansion
 
 ### Source material (kept local, outside the repository)
 
-- `C:\dev\prd\gameprd.txt`: the user's first PRD draft "Le Secret de la Maison" (French, 23 sections): a young
+- the local draft `gameprd.txt`: the user's first PRD draft "Le Secret de la Maison" (French, 23 sections): a young
   detective sneaks into a family house to investigate a rumour that the father invented a secret, dangerous recipe;
   the truth is a gluten-free, lactose-free chocolate cake. Characters: the father, the mother, three children
   (football fan, drums/Nerf/video games fan, chess/Rubik's Cube fan). Puzzles E01-E15 (doormat key, ball on the pool
@@ -24,9 +24,9 @@ Final app name: Mini Mansion
   computer, broken shower, steamed mirror code, safe, paint stain hiding the attic door, secret laundry room, optional
   pool pump, escape from the wine cellar after a capture), light stealth (doorbell distraction, capture rules),
   clue notebook, optional 3-level hints.
-- `C:\dev\prd\plan.txt`: the canonical navigation plan of the house (3 outdoor zones, ground floor, garage / wine
+- the local plan `plan.txt`: the canonical navigation plan of the house (3 outdoor zones, ground floor, garage / wine
   cellar / attic, upstairs corridor door order, list of transitions).
-- `C:\dev\android\midnight-mansion`: the feasibility POC ("Minuit moins 13", v0.1.0) whose engine (walkable areas,
+- the local POC `midnight-mansion`: the feasibility POC ("Minuit moins 13", v0.1.0) whose engine (walkable areas,
   pathfinding, verbs, inventory, dialogues, autosave) is the technical starting point.
 - Room photos of the user's real house will be supplied later; each room is to be reproduced roughly in pixel art.
   A first version may use approximate rooms.
@@ -151,7 +151,7 @@ Mark assumptions the user accepted as `(default accepted)`.
 
 ## Decisions taken during discovery
 
-- Content baseline: the user's draft `C:\dev\prd\gameprd.txt` and plan `C:\dev\prd\plan.txt`, amended by the answers
+- Content baseline: the user's draft the local draft `gameprd.txt` and plan the local plan `plan.txt`, amended by the answers
   above. The PRD (`/write-prd`) must restate every rule it keeps; the draft files are not part of the repository.
 - Coherence review done on the draft during discovery; fixed: dead-end tracks (ball, drums) now feed the main
   chain, mirror clue given by Théo, chess problem reduced to a guided mate in 2, parents' bedroom guarded by the

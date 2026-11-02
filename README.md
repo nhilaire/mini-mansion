@@ -22,7 +22,14 @@ Android phone (allow installation from unknown sources).
 
 - No account, no ads, no personal data.
 - Anonymous usage statistics and crash reports (Firebase) are sent **only if you accept** on first launch.
-  You can change your choice at any time in *Paramètres*.
+  You can change your choice at any time in *Settings*.
+- What is sent then: play progress (puzzle number, play time in seconds), captures (room, count), settings and
+  language changes, crash reports. No identifier, no advertising ID.
+
+## Credits
+
+Inspired by Maniac Mansion; not affiliated with or endorsed by Lucasfilm or LucasArts. All art, sound and text are
+original: images are drawn in code and sounds are synthesised (see [assets/LICENSES.md](assets/LICENSES.md)).
 
 ## Build from source
 

@@ -12,7 +12,7 @@ Launch check: alive after 10 s, no fatal error
 
 ## Notes from the user test
 
-2026-10-21, on the phone (OnePlus Nord N10): not accepted yet. The user's feedback, to turn into a PRD amendment:
+2026-10-21, on the phone: not accepted yet. The user's feedback, to turn into a PRD amendment:
 
 1. Rooms feel empty: one thing to take per room, used further on. Diversify (more objects and interactions).
 2. Intro: do not name "Papa" in the rumour ("in this house, someone has invented..."). Sam is not a friend of the boys:
