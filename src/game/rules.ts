@@ -844,9 +844,25 @@ export const USE_RULES: readonly string[] = [
   'tonka>kitchen.robot',
 ];
 
+// The parts of Théo's electromagnet before it has its plug (E27), on the power strip: what is still missing.
+const STRIP_PARTS: Partial<Record<ItemId, string>> = {
+  wire: 'line.stripParts',
+  nail: 'line.stripParts',
+  coil: 'line.stripParts',
+  battery: 'line.stripParts',
+  magnet: 'line.stripNoPlug',
+  plug: 'line.stripPlugAlone',
+};
+
 function useItem(c: Ctx, item: ItemId, target: string): void {
   if (item === 'gatekey' && GATES.includes(target)) {
     c.remove('gatekey').set('gates_open').sfx('door').hero('e18.open').solve(18);
+    return;
+  }
+  // E27: an unfinished electromagnet tried on Florent's power strip says what is still missing.
+  const missing = STRIP_PARTS[item];
+  if (missing && target === 'florent.strip') {
+    c.hero(missing);
     return;
   }
   const ingredient = INGREDIENTS[item];

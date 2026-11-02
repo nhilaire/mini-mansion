@@ -227,6 +227,25 @@ describe('the power cut (AC-64)', () => {
     }
   });
 
+  it('an unfinished electromagnet on the power strip says what is still missing, and changes nothing', () => {
+    const cases = [
+      ['wire', 'line.stripParts'],
+      ['nail', 'line.stripParts'],
+      ['coil', 'line.stripParts'],
+      ['battery', 'line.stripParts'],
+      ['magnet', 'line.stripNoPlug'],
+      ['plug', 'line.stripPlugAlone'],
+    ] as const;
+    for (const [item, key] of cases) {
+      const s = room({ inventory: [item] });
+      const o = interact(s, give(item, 'florent.strip'));
+      expect(o.beats).toContainEqual(said('hero', key));
+      expect(o.state.inventory).toEqual([item]);
+      expect(o.state.flags).toEqual(s.flags);
+      expect(o.state.chars).toEqual(s.chars);
+    }
+  });
+
   it('the fuses blow (CUT18): Papa is at the garage fuse box for 60 s, the office is free, then he comes back', () => {
     const o = interact(room(), give('magnetPlug', 'florent.strip'));
     expect(o.beats).toContainEqual({ type: 'view', view: 'dark' });

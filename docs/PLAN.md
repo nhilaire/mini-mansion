@@ -107,6 +107,7 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-90 v0.4.0 phone feedback: the computer note no longer gives the lab code (it says it is on the back of the torn recipe), and Théo says at the end of his game that he left a problem on the chessboard for the next player (AC-27, CUT07) - proof: unit
 - [x] T-91 v0.4.0 phone feedback: the garden keeps its look (no parcel) until the delivery view starts, even with a caption still running when the van arrives; the electromagnet stays plugged into the power strip (out of the inventory, drawn on it) and switching the strip back on blows the fuses again (AC-60, AC-64) - proof: unit
 - [x] T-92 v0.4.1: the capture telemetry rooms are exactly the PRD ones (the unused `front` removed, a test ties `CaptureRoom` to the PRD row and to `GuardedRoom`); GitHub release with the arm64 APK (AC-06, AC-07) - proof: unit
+- [x] T-93 phone feedback on v0.4.1: an unfinished electromagnet (a loose part, the magnet without its plug, the plug alone) used on the power strip says what is still missing instead of the generic refusal (AC-64) - proof: unit
 
 ## Notes
 

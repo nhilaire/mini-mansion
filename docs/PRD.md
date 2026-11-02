@@ -342,6 +342,9 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
   plays `line.dadFuses`, the later ones `line.fusesAgain`; after that, the power strip answers `line.fusesNoNeed`.
   While Florent is not riding (in his room, or drumming with his room free), the power strip answers
   `line.stripNotNow`: his console runs on it and he would come straight up to check it.
+  An unfinished electromagnet tried on the power strip says what is still missing, whatever Florent is doing, and
+  changes nothing: a loose part (wire, nail, coil, battery) gives `line.stripParts` (the magazine's recipe plus the plug
+  still needed), the working electromagnet without its plug `line.stripNoPlug`, the old plug alone `line.stripPlugAlone`.
 - Florent, 1st exit: the drums (E03). 2nd exit: his repaired bike (E26), which needs the Rustines, found in his Nerf
   kit together with the Joint torique (so only during or after his 1st exit, once his console challenge is beaten,
   E31), and the bike pump of the parcel.
@@ -820,7 +823,9 @@ Puzzles, characters, captures, timers
   caught if in the office); the first cut plays `line.dadFuses`, later ones `line.fusesAgain`; it can be caused again
   until E28 is solved (N14 found) and the Pince is taken, then `line.fusesNoNeed`; while Florent is not riding the strip
   answers `line.stripNotNow`; the Électroaimant à brancher then stays plugged in (out of the inventory) and later cuts
-  come from using the power strip; no other object changes state.
+  come from using the power strip; no other object changes state. An unfinished electromagnet (a loose part, the magnet
+  without its plug, the plug alone) on the strip answers `line.stripParts`, `line.stripNoPlug` or `line.stripPlugAlone`
+  and changes nothing.
 - AC-65 [unit] Given the Mot de Papa used on the hair dryer in the bathroom, then N13 is added once (E20); the hair
   dryer used alone answers `line.dryNothing` and it cannot be taken; given the bottle rack,
   then it refuses before N13 (`line.bottlesUnknown`), accepts only 1987, 1994, 2003, 2011 in that order, resets on a
