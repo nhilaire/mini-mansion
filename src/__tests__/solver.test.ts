@@ -86,7 +86,7 @@ const USED: [Flag, (s: GameState) => boolean][] = [
   ['sardines_taken', (s) => has(s, 'sardines') || s.flags.cat_fed === true],
   ['keyring_taken', (s) => has(s, 'keyring') || s.flags.drawer_open === true],
   ['patches_taken', (s) => has(s, 'patches') || s.flags.patches_in === true],
-  ['magnet_ready', (s) => has(s, 'magnetPlug')],
+  ['magnet_ready', (s) => has(s, 'magnetPlug') || s.flags.magnet_plugged === true],
   ['parcel_taken', (s) => (has(s, 'tonka') || s.flags.tonka_in === true) && (has(s, 'pump') || s.flags.pump_in === true)],
   ['bottles_done', (s) => has(s, 'scrap2') || s.flags.frag2_in === true],
   ['trunk_open', (s) => has(s, 'scrap3') || s.flags.frag3_in === true],
@@ -188,8 +188,9 @@ describe('story graph (AC-31)', () => {
             if (storyKey(back) !== storyKey(s)) wrong.push(`${input.target} changes more: ${JSON.stringify(input)}`);
             continue;
           }
-          // The power cut: only Papa, his timer and E27 change (see fuseSteps).
-          if (input.kind === 'item' && input.target === 'florent.strip' && storyKey({ ...o.state, chars: s.chars, timers: s.timers, solved: s.solved }) === storyKey(s)) continue;
+          // The power cut (the electromagnet plugged in, or the power strip switched back on): only Papa, his timer and E27
+          // change (see fuseSteps).
+          if ((input.kind === 'item' || (input.kind === 'verb' && input.verb === 'use')) && input.target === 'florent.strip' && storyKey({ ...o.state, chars: s.chars, timers: s.timers, solved: s.solved }) === storyKey(s)) continue;
           // The basket gives the drawer key and solves E25 (the key is taken on the way, see lazyItem).
           if (input.kind === 'verb' && input.target === 'garden.basket' && storyKey({ ...o.state, solved: s.solved }) === storyKey(s)) continue;
           // The fragments put together early or in another order: the same recipe in the end (act2.test.ts), and

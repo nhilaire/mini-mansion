@@ -450,6 +450,7 @@ const lines = typoAll({
   'line.florentBike': "Mon vélo est réparé ?! Trop bien, je vais faire un tour !",
   'florent.strip.look': "Une multiprise surchargée : console, ampli, guirlande… Et un post-it de Papa : « Florent ! Plus RIEN sur cette multiprise, ça fait sauter les plombs ! »",
   'florent.strip.use': "Je n'ai rien à brancher dessus. Pour l'instant.",
+  'florent.strip.lookPlugged': "L'électroaimant de Théo est resté branché sur la multiprise. Il suffit de rallumer l'interrupteur pour refaire sauter les plombs.",
   'line.stripNotNow': "Pas maintenant : la console de Florent est branchée dessus, il remonterait voir tout de suite.",
   'line.fusesNoNeed': "Plus besoin de faire sauter les plombs : j'ai tout ce qu'il me faut du bureau.",
   'line.fusesNobody': "Papa est déjà en bas, devant les plombs. Inutile d'en rajouter.",

@@ -277,6 +277,26 @@ function momBack(c: Ctx): void {
   arrival(c, 'garden');
 }
 
+// E27: the electromagnet on Florent's power strip blows the fuses; Papa goes down to the garage. False when refused.
+function blowFuses(c: Ctx): boolean {
+  if (c.is('drawer_open') && c.is('pliers_taken')) {
+    c.hero('line.fusesNoNeed');
+    return false;
+  }
+  if (c.state('dad') !== 'at_desk' && c.state('dad') !== 'answering') {
+    c.hero('line.fusesNobody');
+    return false;
+  }
+  const first = !c.is('fuses_cut');
+  c.set('fuses_cut').sfx('fuse');
+  view(c, 'dark', (k) => k.say('dad', first ? 'line.dadFuses' : 'line.fusesAgain'));
+  c.move('dad', 'fuses');
+  c.s.timers.dad = c.s.clock + TIMER_MS.fuses;
+  c.solve(27);
+  arrival(c, 'garage');
+  return true;
+}
+
 // CUT13: the parcel is delivered; nobody opens, the driver throws it over the gate and the cat lies on it.
 function deliveryArrives(c: Ctx): void {
   c.s.timers.delivery = null;
@@ -735,8 +755,13 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
       else if (!c.s.notes.includes(PADS.trunk.note)) c.hero('line.trunkUnknown');
       else c.beats.push({ type: 'pad', pad: 'trunk' });
       return;
+    case 'florent.strip:look':
+      c.hero(c.is('magnet_plugged') ? 'florent.strip.lookPlugged' : 'florent.strip.look');
+      return;
+    // The electromagnet left plugged in (E27): switching the power strip back on blows the fuses again.
     case 'florent.strip:use':
-      c.hero('florent.strip.use');
+      if (c.is('magnet_plugged')) blowFuses(c);
+      else c.hero('florent.strip.use');
       return;
     // E31: Florent's console, level 99 of the broken circuit game; his Nerf kit is locked until it is beaten.
     case 'florent.console:use':
@@ -934,19 +959,10 @@ function useItem(c: Ctx, item: ItemId, target: string): void {
       else c.set('ink_revealed').hero('e20.ink').hero('e20.read').note('n13').solve(20);
       return;
     // E27: Théo's electromagnet plugged into Florent's power strip blows the fuses; Papa goes down to the garage.
+    // It stays plugged in, out of the inventory.
     case 'magnetPlug>florent.strip':
       if (c.state('florent') !== 'riding') c.hero('line.stripNotNow');
-      else if (c.is('drawer_open') && c.is('pliers_taken')) c.hero('line.fusesNoNeed');
-      else if (c.state('dad') !== 'at_desk' && c.state('dad') !== 'answering') c.hero('line.fusesNobody');
-      else {
-        const first = !c.is('fuses_cut');
-        c.set('fuses_cut').sfx('fuse');
-        view(c, 'dark', (k) => k.say('dad', first ? 'line.dadFuses' : 'line.fusesAgain'));
-        c.move('dad', 'fuses');
-        c.s.timers.dad = c.s.clock + TIMER_MS.fuses;
-        c.solve(27);
-        arrival(c, 'garage');
-      }
+      else if (blowFuses(c)) c.remove('magnetPlug').set('magnet_plugged');
       return;
     // E28: the drawer key opens Papa's desk drawer: his sketchbook.
     case 'keyring>office.drawer':

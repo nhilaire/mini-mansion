@@ -433,6 +433,7 @@ export const story: Content = {
     'line.florentBike': "My bike is fixed?! Awesome, I'm going for a ride!",
     'florent.strip.look': "An overloaded power strip: console, amp, fairy lights… And a post-it from Papa: \"Florent! NOTHING more on this power strip, it blows the fuses!\"",
     'florent.strip.use': "I have nothing to plug into it. For now.",
+    'florent.strip.lookPlugged': "Théo's electromagnet is still plugged into the power strip. Flicking the switch back on would blow the fuses again.",
     'line.stripNotNow': "Not now: Florent's console is plugged into it, he would come straight up to check.",
     'line.fusesNoNeed': "No need to blow the fuses any more: I have everything I need from the office.",
     'line.fusesNobody': "Papa is already downstairs at the fuse box. No need to make it worse.",

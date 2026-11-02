@@ -17,6 +17,19 @@ import { applyTestingLink, FAST_LINK, resetFastModeForTests } from '../testing/f
 
 const t = DICTIONARIES.fr;
 
+// The scene painted in Charlie's place (not an outside view) exposes the flags it was drawn with.
+jest.mock('../render/Scene', () => {
+  const actual = jest.requireActual('../render/Scene');
+  const { View } = jest.requireActual('react-native');
+  const Painted = (props: { state: GameState; extras?: unknown[] }) => (
+    <>
+      <actual.Scene {...props} />
+      {!props.extras && <View testID="scene-painted" accessibilityHint={JSON.stringify(props.state.flags)} />}
+    </>
+  );
+  return { ...actual, Scene: Painted };
+});
+
 async function mount(state: GameState, extra: { startPaused?: boolean } = {}) {
   const props = {
     initialState: state,
@@ -84,6 +97,29 @@ describe('GameScreen, Act II', () => {
     for (const b of ['red', 'yellow', 'blue', 'green']) await fireEvent.press(screen.getByTestId(`pad-${b}`));
     await dismissLines();
     expect(lastSaved(props).inventory).toEqual(['scrap3']);
+  });
+
+  it('Charlie in the garden: the parcel only appears once the delivery scene has started, then stays (AC-60)', async () => {
+    const props = await mount({ ...newGame(), place: 'garden', chars: chars({ mom: 'changing' }), flags: { door_unlocked: true, dad_wary: true }, timers: { dad: null, dough: null, mom: null, delivery: 1000, machine: null }, tutorial: 3 });
+    const painted = () => JSON.parse(screen.getByTestId('scene-painted').props.accessibilityHint) as GameState['flags'];
+    // A caption still running when the van arrives: the scene waits for it, and the garden must not change meanwhile.
+    for (let i = 0; i < 200 && !screen.queryByTestId('view-delivery'); i++) {
+      const delivered = props.onChange.mock.calls.length > 0 && lastSaved(props).flags.delivered;
+      if (!delivered && !screen.queryByText(line(t, 'garden.gnome.look'))) {
+        await fireEvent.press(screen.getByTestId('hs-garden.gnome'));
+        await fireEvent.press(screen.getByTestId('verb-look'));
+      }
+      expect(painted().delivered).toBeUndefined();
+      await act(async () => {
+        jest.advanceTimersByTime(20);
+      });
+    }
+    expect(lastSaved(props).flags.delivered).toBe(true);
+    expect(screen.getByTestId('view-delivery')).toBeTruthy();
+    expect(painted().delivered).toBe(true);
+    await dismissLines();
+    expect(screen.queryByTestId('view-garden')).toBeNull();
+    expect(screen.getByTestId('hs-garden.parcel')).toBeTruthy();
   });
 
   it('the hose view shows Maman soaked in the garden and cannot be skipped; timers wait while it plays (AC-49, AC-61, AC-69)', async () => {

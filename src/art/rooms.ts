@@ -797,11 +797,13 @@ const PROPS: Record<string, Prop> = {
     b.line(r.x + 34, r.y + 14, r.x + 38, r.y + 2, C.ink).rect(r.x + 34, r.y, 8, 4, C.mustard);
   },
   // The overloaded power strip: console, amp and fairy lights all plugged in.
-  'florent.strip': (b, r) => {
+  'florent.strip': (b, r, s) => {
     b.rect(r.x + 2, r.y + r.h - 6, r.w - 4, 5, C.white).frame(r.x + 2, r.y + r.h - 6, r.w - 4, 5, C.stone2).set(r.x + 4, r.y + r.h - 4, C.red);
     for (let i = 0; i < 4; i++) b.line(r.x + 7 + i * 4, r.y + r.h - 6, r.x + 4 + i * 6, r.y + 2, [C.ink, C.stone1, C.green3, C.ink][i]);
     // Papa's yellow post-it on the strip.
     b.rect(r.x + r.w - 9, r.y + r.h - 12, 7, 6, C.yellow).hline(r.x + r.w - 8, r.x + r.w - 4, r.y + r.h - 10, C.ink).hline(r.x + r.w - 8, r.x + r.w - 5, r.y + r.h - 8, C.ink);
+    // Théo's electromagnet left plugged in: the coiled nail on the floor, its wire to the strip.
+    if (on(s, 'magnet_plugged')) b.rect(r.x + 2, r.y + r.h - 12, 7, 4, C.brass).vline(r.x + 5, r.y + r.h - 14, r.y + r.h - 7, C.stone2).line(r.x + 8, r.y + r.h - 8, r.x + 10, r.y + r.h - 6, C.red);
   },
   // Théo's science magazine on the floor of Julien's room.
   'julien.magazine': (b, r) => {
@@ -1179,7 +1181,7 @@ export const VISUAL_FLAGS: Record<PlaceId, (keyof Flags)[]> = {
   julien: ['queen_taken'],
   bathroom: [],
   theo: ['cube_solved'],
-  florent: ['oring_taken'],
+  florent: ['oring_taken', 'magnet_plugged'],
   parents: ['safe_found', 'safe_open', 'mirror_code', 'shower_repaired', 'oring_fitted'],
 };
 

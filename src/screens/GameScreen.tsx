@@ -140,6 +140,9 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   // The place on screen: it changes on the place-change beat, so that a capture scene plays where Charlie was caught
   // even though the saved state is already in the cellar.
   const [shown, setShown] = useState<PlaceId>(initialState.place);
+  // The flags painted until an outside view starts: what the scene reveals (the parcel landing in the garden) does not
+  // appear in Charlie's place before it.
+  const [heldFlags, setHeldFlags] = useState<GameState['flags'] | null>(null);
 
   const commit = useCallback(
     (s: GameState) => {
@@ -173,6 +176,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
     for (;;) {
       const b = queue.current.shift();
       if (!b) {
+        setHeldFlags(null);
         setView(null);
         setCaptor(null);
         cinematicRef.current = false;
@@ -214,6 +218,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
           show({ kind: 'capture', until: now + (isFastMode() ? 200 : CAPTURE_MS) });
           return;
         case 'view':
+          setHeldFlags(null);
           setView(b.view);
           break;
         case 'cinematic':
@@ -276,8 +281,10 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
 
   const apply = useCallback(
     (input: Input) => {
-      const o = interact(gameRef.current, input);
+      const before = gameRef.current;
+      const o = interact(before, input);
       if (!o.accepted) return;
+      if (o.beats.some((b) => b.type === 'view')) setHeldFlags((held) => held ?? before.flags);
       commit(o.state);
       if (input.kind === 'verb' || input.kind === 'item') signal('verbUsed');
       for (const e of eventsFor(o.events, o.state)) track(e.name, e.params as never);
@@ -458,7 +465,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
     signal('itemSelected');
   };
 
-  const hotspots = hotspotsIn(game);
+  const hotspots = hotspotsIn(heldFlags ? { ...game, flags: heldFlags } : game);
   const exits = exitsIn(game);
   const inv = inventoryPage(game.inventory, page);
   const bubble = !blocked ? tutorialBubble(game) : null;
@@ -485,7 +492,7 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
     <View testID="game-screen" style={styles.screen}>
       <StatusBar hidden />
       <Scene
-        state={shown === game.place ? game : { ...game, place: shown }}
+        state={shown === game.place && !heldFlags ? game : { ...game, place: shown, flags: heldFlags ?? game.flags }}
         hero={pose}
         guests={captor ? [captor] : cast}
         transform={transform}

@@ -138,6 +138,7 @@ export const FLAGS: readonly Flag[] = [
   'battery_taken',
   'plug_taken',
   'magnet_ready',
+  'magnet_plugged',
   'patches_taken',
   'cat_fed',
   'parcel_taken',

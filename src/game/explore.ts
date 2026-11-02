@@ -65,6 +65,8 @@ import { exitsIn, hotspotsIn } from './world';
 // Notebook entries that change the rules: the keypads only open once their code is noted.
 const GATING_NOTES: readonly NoteId[] = ['n08', 'n11', 'n13', 'n14', 'n17'];
 const KEYPADS: readonly KeypadId[] = ['computer', 'safe', 'lab'];
+// Florent's power strip, where the electromagnet blows the fuses (E27).
+const STRIP = 'florent.strip';
 
 // Flags and items left out of the story part (see above): connectivity flags (replaced by one bit), the gate key,
 // the dough ingredients and the wet toilet floor (only drawn).
@@ -95,6 +97,7 @@ export const REDUCED_FLAGS: readonly Flag[] = [
   'battery_taken',
   'plug_taken',
   'magnet_ready',
+  'magnet_plugged',
   'keyring_taken',
   'patches_taken',
   'fuses_cut',
@@ -190,7 +193,8 @@ export function allInputs(s: GameState): Input[] {
 
 // Whether an input belongs to a reduced side system (the gates, the dough ingredients).
 export function isSideInput(input: Input): boolean {
-  if (input.kind === 'verb') return SIDE_TAKES.includes(input.target) || GATE_TARGETS.includes(input.target) || input.target === BELL;
+  if (input.kind === 'verb')
+    return SIDE_TAKES.includes(input.target) || GATE_TARGETS.includes(input.target) || input.target === BELL || (input.verb === 'use' && input.target === STRIP);
   if (input.kind === 'item')
     return (
       REDUCED_ITEMS.includes(input.item) ||
@@ -240,6 +244,8 @@ export function actionInputs(s: GameState): Input[] {
 export function lazyAvailable(s: GameState, item: ItemId): boolean {
   if (!s.solved.includes(1)) return false;
   if (item === 'keyring' && !s.inventory.includes(item) && !(s.flags.dad_wary && s.flags.machine_done)) return false;
+  // The electromagnet left plugged in stays at hand: the power strip switched back on.
+  if (item === 'magnetPlug' && s.flags.magnet_plugged) return true;
   return s.inventory.includes(item) || !s.flags[LAZY_ITEMS[item]!];
 }
 
@@ -416,11 +422,12 @@ export function doughSteps(members: readonly GameState[]): Step[] {
   });
 }
 
-// The power cut in one step: Théo's electromagnet on Florent's power strip, then Papa's absence at the fuse box.
+// The power cut in one step: Théo's electromagnet on Florent's power strip (or the strip switched back on once it is
+// plugged in), then Papa's absence at the fuse box.
 export function fuseSteps(members: readonly GameState[]): Step[] {
   const room = members.find((m) => m.place === 'florent' && lazyAvailable(m, 'magnetPlug'));
   if (!room) return [];
-  const input: Input = { kind: 'item', item: 'magnetPlug', target: 'florent.strip' };
+  const input: Input = room.flags.magnet_plugged ? { kind: 'verb', verb: 'use', target: STRIP } : { kind: 'item', item: 'magnetPlug', target: STRIP };
   const cut = interact(lazyItem(room, input), input);
   if (cut.state.chars.dad !== 'fuses') return [];
   return officeWindow(cut.state).map((w) => ({ state: w.state, beats: [...cut.beats, ...w.beats] }));

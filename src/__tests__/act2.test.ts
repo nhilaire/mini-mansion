@@ -232,7 +232,10 @@ describe('the power cut (AC-64)', () => {
     expect(o.beats).toContainEqual({ type: 'view', view: 'dark' });
     expect(o.beats).toContainEqual(said('dad', 'line.dadFuses'));
     expect(puzzles(o)).toEqual([27]);
-    expect(o.state.inventory).toEqual(['magnetPlug']);
+    // The electromagnet stays plugged in, out of the inventory, and is drawn on the power strip.
+    expect(o.state.inventory).toEqual([]);
+    expect(o.state.flags.magnet_plugged).toBe(true);
+    expect(interact(o.state, { kind: 'verb', verb: 'look', target: 'florent.strip' }).beats).toEqual([said('hero', 'florent.strip.lookPlugged')]);
     expect(o.state.chars.dad).toBe('fuses');
     expect(occupant('garage', o.state.chars)).toBe('dad');
     expect(occupant('office', o.state.chars)).toBeNull();
@@ -247,12 +250,18 @@ describe('the power cut (AC-64)', () => {
   });
 
   it('can be caused again while the office holds something needed, then is useless; never while Papa is away', () => {
+    // Once plugged in, the power strip switched back on blows the fuses again.
     const first = interact(room(), give('magnetPlug', 'florent.strip')).state;
-    expect(interact(first, give('magnetPlug', 'florent.strip')).beats).toContainEqual(said('hero', 'line.fusesNobody'));
+    expect(interact(first, use('florent.strip')).beats).toContainEqual(said('hero', 'line.fusesNobody'));
     const back = interact(first, tick(TIMER_MS.fuses)).state;
-    const again = interact(back, give('magnetPlug', 'florent.strip'));
+    const again = interact(back, use('florent.strip'));
     expect(again.beats).toContainEqual(said('dad', 'line.fusesAgain'));
     expect(again.events).toEqual([]);
+    expect(again.state.chars.dad).toBe('fuses');
+    const plugged = { ...back, flags: { ...back.flags, drawer_open: true as const, pliers_taken: true as const } };
+    expect(interact(plugged, use('florent.strip')).beats).toEqual([said('hero', 'line.fusesNoNeed')]);
+    // Before anything is plugged in, the power strip only says so.
+    expect(interact(room(), use('florent.strip')).beats).toEqual([said('hero', 'florent.strip.use')]);
     const drawerOnly = room({ flags: flags('computer_read', 'dad_wary', 'drawer_open') });
     expect(interact(drawerOnly, give('magnetPlug', 'florent.strip')).state.chars.dad).toBe('fuses');
     const nothingLeft = room({ flags: flags('computer_read', 'dad_wary', 'drawer_open', 'pliers_taken') });
