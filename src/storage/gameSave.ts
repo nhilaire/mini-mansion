@@ -33,5 +33,9 @@ export async function saveGame(state: GameState): Promise<void> {
 }
 
 export async function eraseGame(): Promise<void> {
-  await AsyncStorage.removeItem(SAVE_KEY);
+  try {
+    await AsyncStorage.removeItem(SAVE_KEY);
+  } catch (error) {
+    reportError(error, 'erase_game');
+  }
 }

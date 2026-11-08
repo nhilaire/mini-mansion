@@ -18,7 +18,7 @@ import { loadLanguageSetting, saveLanguageSetting } from './storage/languageSett
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, Settings } from './storage/settings';
 import { Consent, loadConsent, saveConsent } from './telemetry/consentStore';
 import { gameStart, languageChange, settingsChange, Tracked } from './telemetry/gameTelemetry';
-import { applyConsent, track } from './telemetry/telemetry';
+import { applyConsent, reportError, track } from './telemetry/telemetry';
 import { applyTestingLink } from './testing/fastMode';
 import { ErrorBoundary } from './ui/ErrorBoundary';
 import { colors } from './ui/theme';
@@ -84,9 +84,15 @@ export default function App() {
 
   const decide = useCallback(async (granted: boolean) => {
     const value = granted ? 'granted' : 'denied';
-    await saveConsent(value);
-    await applyConsent(granted);
-    setConsentState(value);
+    // The consent screen always moves on, even if the choice cannot be saved or applied (reported, non-fatal).
+    try {
+      await saveConsent(value);
+      await applyConsent(granted);
+    } catch (error) {
+      reportError(error, 'apply_consent');
+    } finally {
+      setConsentState(value);
+    }
   }, []);
 
   const toggleTelemetry = useCallback(
