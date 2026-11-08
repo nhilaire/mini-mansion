@@ -108,6 +108,8 @@ Format: `- [x] T-01 Title (AC-01, AC-02) - proof: unit|e2e|device`. Check the bo
 - [x] T-91 v0.4.0 phone feedback: the garden keeps its look (no parcel) until the delivery view starts, even with a caption still running when the van arrives; the electromagnet stays plugged into the power strip (out of the inventory, drawn on it) and switching the strip back on blows the fuses again (AC-60, AC-64) - proof: unit
 - [x] T-92 v0.4.1: the capture telemetry rooms are exactly the PRD ones (the unused `front` removed, a test ties `CaptureRoom` to the PRD row and to `GuardedRoom`); GitHub release with the arm64 APK (AC-06, AC-07) - proof: unit
 - [x] T-93 phone feedback on v0.4.1: an unfinished electromagnet (a loose part, the magnet without its plug, the plug alone) used on the power strip says what is still missing instead of the generic refusal (AC-64) - proof: unit
+- [ ] T-94 v0.4.2: the garden tap keeps soaking Maman while the big nail is still in the shed, so taking the parcel and the drawer key first no longer locks the nail away; the exhaustive search keeps the nail in the story part instead of assuming it can always be fetched (AC-31) - proof: unit
+- [ ] T-95 v0.4.2: a failing consent or erase write is caught and reported, and the consent screen always moves on (AC-02, AC-42) - proof: unit
 
 ## Notes
 
