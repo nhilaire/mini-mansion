@@ -5,6 +5,7 @@ import { Beat, CharacterStates, Flag, GameEvent, GameState, Input, ItemId, Place
 import { characterPlacement, findHotspot, occupant } from '../game/world';
 import { line, noteText } from '../content/index';
 import { guestSpots } from '../render/Scene';
+import { SOLUTION } from '../game/solution';
 import { fr as frStrings } from '../i18n/fr';
 
 const flags = (...names: Flag[]) => Object.fromEntries(['door_unlocked', ...names].map((n) => [n, true])) as GameState['flags'];
@@ -147,10 +148,40 @@ describe('the hose (AC-61)', () => {
     expect(again.beats).toContainEqual(said('mom', 'line.momSoakedAgain'));
     expect(again.events).toEqual([]);
     expect(interact(at('pool'), use('pool.tap')).beats).toContainEqual(said('hero', 'line.hoseLawn'));
-    const done = gardening({ flags: flags('parcel_taken', 'keyring_taken') });
+    const done = gardening({ flags: flags('parcel_taken', 'keyring_taken', 'nail_taken') });
     const off = interact(done, use('pool.tap'));
     expect(off.beats).toEqual([said('hero', 'line.hoseOff')]);
     expect(off.state.chars.mom).toBe('gardening');
+  });
+
+  it('keeps soaking Maman while the big nail is still in the shed, even with the parcel and the drawer key taken (T-94, AC-31)', () => {
+    const nailLeft = interact(gardening({ flags: flags('parcel_taken', 'keyring_taken') }), use('pool.tap'));
+    expect(nailLeft.beats).toContainEqual(said('mom', 'line.momSoaked'));
+    expect(nailLeft.state.chars.mom).toBe('changing');
+    expect(occupant('garden', nailLeft.state.chars)).toBeNull();
+  });
+
+  it('taking the parcel and the drawer key before the big nail does not lock the nail away: the walkthrough still ends (T-94, AC-31)', () => {
+    const shed = SOLUTION.findIndex((i) => i.kind === 'verb' && i.target === 'garden.shed');
+    expect(shed).toBeGreaterThan(0);
+    // Everything up to the drawer key, the nail left in the shed; Charlie leaves the garden and Maman comes back.
+    let s = playAll(newGame(), SOLUTION.slice(0, shed)).state;
+    expect(s.place).toBe('garden');
+    expect(s.flags.parcel_taken && s.flags.keyring_taken).toBe(true);
+    expect(s.inventory).not.toContain('nail');
+    s = playAll(s, [go('garden.toFootball'), { kind: 'wait' }]).state;
+    expect(s.chars.mom).toBe('gardening');
+    // The hose still lures her out, and the nail can be taken during the window.
+    const soaked = interact({ ...s, place: 'pool' }, use('pool.tap'));
+    expect(keys(soaked.beats)).toContain('line.momSoakedAgain');
+    expect(soaked.state.chars.mom).toBe('changing');
+    const inGarden = playAll(soaked.state, [go('pool.toFootball'), go('football.toGarden')]);
+    expect(inGarden.state.place).toBe('garden');
+    const nail = interact(inGarden.state, take('garden.shed'));
+    expect(nail.state.inventory).toContain('nail');
+    // Back on the walkthrough from there, the game ends.
+    const rest = playAll(nail.state, [go('garden.toFootball'), { kind: 'wait' }, ...SOLUTION.slice(shed + 1)]);
+    expect(rest.state.finished).toBe(true);
   });
 });
 

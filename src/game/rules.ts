@@ -701,10 +701,11 @@ function hotspotVerb(c: Ctx, id: string, verb: Verb): void {
     case 'laundry.etuve:use':
       c.hero(c.is('dough_up') ? 'laundry.etuve.useDough' : 'line.tonkaNoDough');
       return;
-    // E22: the garden tap; the hose soaks Maman when she gardens (CUT14), as long as the garden still holds something.
+    // E22: the garden tap; the hose soaks Maman when she gardens (CUT14), as long as the garden still holds something
+    // (the parcel, the drawer key in her basket, the big nail in the shed): she guards the garden otherwise.
     case 'pool.tap:use':
       if (c.state('mom') !== 'gardening') c.sfx('water').hero('line.hoseLawn');
-      else if (c.is('parcel_taken') && c.is('keyring_taken')) c.hero('line.hoseOff');
+      else if (c.is('parcel_taken') && c.is('keyring_taken') && c.is('nail_taken')) c.hero('line.hoseOff');
       else {
         const again = c.isSolved(22);
         c.sfx('spray');

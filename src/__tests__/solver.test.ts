@@ -107,9 +107,10 @@ const moves = (s: GameState): Input[] => [
 ];
 // The story part after the cellar escape (a capture into the stuck cellar is explored after it).
 const settled = (s: GameState) => storyKey(unstick(s).state);
-// The items taken on the way (hair dryer, sardines, keyring) put in the pocket while they are still to be taken.
+// The items taken on the way (electromagnet, sardines) put in the pocket while they are still to be taken. The drawer
+// key is left out: its early take is explored (hoseSteps) and keyring_taken is in the story part (T-94).
 const withLazy = (s: GameState): GameState => {
-  const extra = (Object.keys(LAZY_ITEMS) as GameState['inventory']).filter((i) => !s.flags[LAZY_ITEMS[i]!]);
+  const extra = (Object.keys(LAZY_ITEMS) as GameState['inventory']).filter((i) => i !== 'keyring' && !s.flags[LAZY_ITEMS[i]!]);
   return { ...s, inventory: [...s.inventory, ...extra], flags: { ...s.flags, ...Object.fromEntries(extra.map((i) => [LAZY_ITEMS[i], true])) } };
 };
 
@@ -191,8 +192,8 @@ describe('story graph (AC-31)', () => {
           // The power cut (the electromagnet plugged in, or the power strip switched back on): only Papa, his timer and E27
           // change (see fuseSteps).
           if ((input.kind === 'item' || (input.kind === 'verb' && input.verb === 'use')) && input.target === 'florent.strip' && storyKey({ ...o.state, chars: s.chars, timers: s.timers, solved: s.solved }) === storyKey(s)) continue;
-          // The basket gives the drawer key and solves E25 (the key is taken on the way, see lazyItem).
-          if (input.kind === 'verb' && input.target === 'garden.basket' && storyKey({ ...o.state, solved: s.solved }) === storyKey(s)) continue;
+          // The basket gives the drawer key and solves E25 (explored in hoseSteps, or taken on the way, see lazyItem).
+          if (input.kind === 'verb' && input.target === 'garden.basket' && storyKey({ ...o.state, flags: clean({ ...o.state.flags, keyring_taken: undefined }), solved: s.solved }) === storyKey(s)) continue;
           // The fragments put together early or in another order: the same recipe in the end (act2.test.ts), and
           // nothing else uses them.
           if (input.kind === 'item' && isRecipeCombination(input.item, input.target)) continue;

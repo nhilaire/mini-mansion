@@ -25,14 +25,22 @@
 //     door, which the key opens: the lock is left out of the story part;
 //   - Théo's electromagnet (its wire, nail, battery and old plug, put together) and the sardines (utility room) are
 //     only needed where they are used (Florent's power strip, the cat): holding them changes nothing else, so they are
-//     left out of the story part and taken (the electromagnet: assembled) "on the way" when used (see lazyItem);
+//     left out of the story part and taken (the electromagnet: assembled) "on the way" when used (see lazyItem). The
+//     big nail is the exception among the parts: it lies in the garden shed, which Maman guards while she gardens
+//     (from E17 on, the garden only opens during a hose window). Whether it was taken stays in the story part
+//     (nail_taken), its take is explored (from a free garden, or during a hose window, see hoseSteps), and the
+//     electromagnet is only assembled on the way once the nail was taken (see lazyAvailable). The wire (garage),
+//     the battery (living room), the old plug (attic) and the sardines (kitchen) lie in places that are never
+//     guarded for good, so they can always be fetched;
 //   - the parcel's delivery (CUT13) only adds the cat, the parcel and a notebook entry, and catches nobody: whatever a
 //     player does while it is on its way can be done once it has arrived, so it is fired as soon as Papa is wary;
 //   - the first power cut and the later ones only differ by Papa's line (fuses_cut is left out of the story part),
 //     and the patches are taken with the O-ring (patches_taken repeats oring_taken);
 //   - Papa's drawer key (in Maman's gardening basket, once he is wary) can be fetched during any hose window until it
 //     is taken (the hose works as long as the garden holds it), and it is only used on the drawer: it is taken "on the
-//     way" too, solving E25;
+//     way" too, solving E25. Taking it early, during a hose window, is explored as well (see hoseSteps), and whether it
+//     was taken stays in the story part (keyring_taken): with the parcel and the big nail, it decides when the hose
+//     stops working, which closes the garden for good;
 //   - while Papa is away from his desk (doorbell, dough, fuse box), only his office opens: the window is explored as
 //     one step (see officeWindow) with what can be done in the office (the computer, the pliers, the drawer), Papa
 //     then back with Charlie out of the office or caught in it. What can be done elsewhere meanwhile can be done before
@@ -93,12 +101,10 @@ export const REDUCED_FLAGS: readonly Flag[] = [
   'stone_right',
   'hairdryer_taken',
   'wire_taken',
-  'nail_taken',
   'battery_taken',
   'plug_taken',
   'magnet_ready',
   'magnet_plugged',
-  'keyring_taken',
   'patches_taken',
   'fuses_cut',
 ];
@@ -124,7 +130,7 @@ export const REDUCED_PUZZLES: readonly number[] = [15, 18];
 // Inputs of the reduced side systems, not explored one by one.
 export const GATE_TARGETS: readonly string[] = ['front.gateLeft', 'front.gateRight', 'football.gate', 'pool.gate'];
 export const BELL = 'front.bell';
-export const SIDE_TAKES: readonly string[] = ['hall.shoes', 'kitchen.fridge', 'utility.flours', 'cellar.rack', 'cellar.hatch', 'cellar.stoneLeft', 'cellar.stoneRight', 'garage.breaker', 'hall.console', 'kitchen.milk', 'kitchen.sardines', 'utility.chestnut', 'utility.riceflour', 'bathroom.hairdryer', 'garage.wire', 'garden.shed', 'living.remote', 'attic.boxes', 'garden.basket', TAP];
+export const SIDE_TAKES: readonly string[] = ['hall.shoes', 'kitchen.fridge', 'utility.flours', 'cellar.rack', 'cellar.hatch', 'cellar.stoneLeft', 'cellar.stoneRight', 'garage.breaker', 'hall.console', 'kitchen.milk', 'kitchen.sardines', 'utility.chestnut', 'utility.riceflour', 'bathroom.hairdryer', 'garage.wire', 'living.remote', 'attic.boxes', 'garden.basket', TAP];
 const PAD_IDS = Object.keys(PADS) as PadId[];
 
 // Story keys are computed once per state object (states are never mutated once returned by the engine).
@@ -240,12 +246,14 @@ export function actionInputs(s: GameState): Input[] {
 }
 
 // A lazy item can be fetched while it is still in its place (the sardines are used up by the cat), once inside;
-// the drawer key once Papa gave it to Maman and she gardens (the hose then gives a window).
+// the drawer key once Papa gave it to Maman and she gardens (the hose then gives a window); the electromagnet once
+// the big nail was taken from the garden shed (the other parts are never locked away).
 export function lazyAvailable(s: GameState, item: ItemId): boolean {
   if (!s.solved.includes(1)) return false;
   if (item === 'keyring' && !s.inventory.includes(item) && !(s.flags.dad_wary && s.flags.machine_done)) return false;
   // The electromagnet left plugged in stays at hand: the power strip switched back on.
   if (item === 'magnetPlug' && s.flags.magnet_plugged) return true;
+  if (item === 'magnetPlug' && !s.inventory.includes(item) && !s.flags.nail_taken) return false;
   return s.inventory.includes(item) || !s.flags[LAZY_ITEMS[item]!];
 }
 
@@ -274,7 +282,8 @@ export function partSteps(members: readonly GameState[]): { state: GameState; be
 }
 
 // The hose in one step: the tap from the pool, then in the garden while Maman changes nothing, the cat fed, or the
-// cat fed and the parcel taken; then Maman comes back with Charlie out of the garden (football corner) or still in it.
+// cat fed and the parcel taken, each with or without the big nail taken from the shed and with or without the drawer
+// key taken from her basket; then Maman comes back with Charlie out of the garden (football corner) or still in it.
 export function hoseSteps(members: readonly GameState[]): { state: GameState; beats: Beat[] }[] {
   const pool = members.find((m) => m.place === 'pool');
   if (!pool || pool.chars.mom !== 'gardening') return [];
@@ -288,6 +297,8 @@ export function hoseSteps(members: readonly GameState[]): { state: GameState; be
     plans.push([feed], [feed, { kind: 'verb', verb: 'take', target: 'garden.parcel' }]);
   }
   if (g.flags.cat_fed && !g.flags.parcel_taken) plans.push([{ kind: 'verb', verb: 'take', target: 'garden.parcel' }]);
+  if (hotspotsIn(g).some((h) => h.id === 'garden.basket')) plans.push(...plans.map((plan): Input[] => [{ kind: 'verb', verb: 'take', target: 'garden.basket' }, ...plan]));
+  if (!g.flags.nail_taken) plans.push(...plans.map((plan): Input[] => [{ kind: 'verb', verb: 'take', target: 'garden.shed' }, ...plan]));
   const out: { state: GameState; beats: Beat[] }[] = [];
   for (const plan of plans) {
     let s = g;

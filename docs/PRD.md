@@ -349,8 +349,8 @@ it was needed for is done, so a capture never blocks the game; then the inhabita
   kit together with the Joint torique (so only during or after his 1st exit, once his console challenge is beaten,
   E31), and the bike pump of the parcel.
 - Maman leaves her room once (E17). In the garden, the hose (E22) sends her to change for 90 s; it can be used again
-  once she is back (`line.momSoakedAgain`), until the parcel and Papa's drawer key have been taken
-  (then `line.hoseOff`: the tap stays closed).
+  once she is back (`line.momSoakedAgain`), until the parcel, Papa's drawer key and the big nail of the shed have
+  been taken (then `line.hoseOff`: the tap stays closed).
 - Julien and Théo leave their rooms once.
 - Non-player characters: the cat lies on the parcel from CUT13 and runs away at E23.
 
@@ -809,7 +809,7 @@ Puzzles, characters, captures, timers
 - AC-61 [unit] Given Maman gardening, when the garden tap is used, then CUT14 plays and Maman changes in her room for
   90 s (garden free, her room guarded; Charlie is caught entering her room meanwhile or still in the garden when she comes
   back); given Maman not gardening, then `line.hoseLawn`; the hose works again once she is back, and says
-  `line.hoseOff` once the parcel and the drawer key are taken.
+  `line.hoseOff` once the parcel, the drawer key and the big nail are taken.
 - AC-62 [unit] Given the cat on the parcel, then the cat and the parcel answer `line.catHiss` until the Boîte de
   sardines is used on the cat (E23), after which the cat is gone and the parcel gives the Fève tonka and the Pompe à
   vélo (E24); once Papa is wary, Maman's gardening basket, left in the garden while she changes, gives the Clé du tiroir
