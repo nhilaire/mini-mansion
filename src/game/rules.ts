@@ -78,7 +78,7 @@ export function interact(state: GameState, input: Input): Outcome {
         return done(c);
       }
       if (!findHotspot(state, input.target)) return rejected(state);
-      useItem(c, input.item, input.target);
+      applyItem(c, input.item, input.target);
       return done(c);
     }
     case 'lookItem':
@@ -855,7 +855,7 @@ const STRIP_PARTS: Partial<Record<ItemId, string>> = {
   plug: 'line.stripPlugAlone',
 };
 
-function useItem(c: Ctx, item: ItemId, target: string): void {
+function applyItem(c: Ctx, item: ItemId, target: string): void {
   if (item === 'gatekey' && GATES.includes(target)) {
     c.remove('gatekey').set('gates_open').sfx('door').hero('e18.open').solve(18);
     return;

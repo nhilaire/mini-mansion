@@ -12,7 +12,7 @@ const flags = (...names: Flag[]) => Object.fromEntries(['door_unlocked', ...name
 const chars = (patch: Partial<CharacterStates>): CharacterStates => ({ ...newGame().chars, ...patch });
 const at = (place: PlaceId, extra: Partial<GameState> = {}): GameState => ({ ...newGame(), place, flags: flags(), ...extra });
 const tick = (ms: number): Input => ({ kind: 'tick', ms });
-const use = (target: string): Input => ({ kind: 'verb', verb: 'use', target });
+const operate = (target: string): Input => ({ kind: 'verb', verb: 'use', target });
 const take = (target: string): Input => ({ kind: 'verb', verb: 'take', target });
 const give = (item: ItemId, target: string): Input => ({ kind: 'item', item, target });
 const go = (exit: string): Input => ({ kind: 'exit', exit });
@@ -25,7 +25,7 @@ const wary = (place: PlaceId, extra: Partial<GameState> = {}) => at(place, { fla
 
 describe('lures and wariness (AC-59)', () => {
   it('Papa back at his desk after E07 notices his computer: he becomes wary and the delivery is 60 s away', () => {
-    const rung = interact(at('front', { flags: flags('computer_read') }), use('front.bell')).state;
+    const rung = interact(at('front', { flags: flags('computer_read') }), operate('front.bell')).state;
     let s = interact({ ...rung, place: 'hall' }, tick(TIMER_MS.answer + TIMER_MS.outside)).state;
     expect(s.chars.dad).toBe('returning');
     expect(s.flags.dad_wary).toBeUndefined();
@@ -39,10 +39,10 @@ describe('lures and wariness (AC-59)', () => {
   });
 
   it('before E07 he only goes back to his desk, the doorbell works again', () => {
-    const rung = interact(at('front'), use('front.bell')).state;
+    const rung = interact(at('front'), operate('front.bell')).state;
     const s = interact({ ...rung, place: 'hall' }, tick(TIMER_MS.answer + TIMER_MS.outside + TIMER_MS.back));
     expect(keys(s.beats)).not.toContain('line.dadWary');
-    expect(interact({ ...s.state, place: 'front', solved: [1] }, use('front.bell')).state.chars.dad).toBe('answering');
+    expect(interact({ ...s.state, place: 'front', solved: [1] }, operate('front.bell')).state.chars.dad).toBe('answering');
   });
 
   it('back from cooking after E07, he becomes wary as well', () => {
@@ -54,7 +54,7 @@ describe('lures and wariness (AC-59)', () => {
   });
 
   it('a wary Papa ignores the doorbell, says so through his door, and the dough no longer frees his office', () => {
-    const bell = interact(wary('front'), use('front.bell'));
+    const bell = interact(wary('front'), operate('front.bell'));
     expect(bell.beats).toContainEqual(said('dad', 'line.bellIgnored'));
     expect(bell.state.chars.dad).toBe('at_desk');
     expect(bell.state.timers.dad).toBeNull();
@@ -118,7 +118,7 @@ describe('the hose (AC-61)', () => {
   const gardening = (extra: Partial<GameState> = {}) => at('pool', { chars: chars({ mom: 'gardening' }), ...extra });
 
   it('soaks Maman (CUT14): she changes in her room for 90 s, the garden is free and her room guarded', () => {
-    const o = interact(gardening(), use('pool.tap'));
+    const o = interact(gardening(), operate('pool.tap'));
     expect(o.beats).toContainEqual({ type: 'view', view: 'hose' });
     expect(o.beats).toContainEqual(said('mom', 'line.momSoaked'));
     expect(puzzles(o)).toEqual([22]);
@@ -126,12 +126,12 @@ describe('the hose (AC-61)', () => {
     expect(o.state.timers.mom).toBe(TIMER_MS.change);
     expect(occupant('garden', o.state.chars)).toBeNull();
     expect(occupant('parents', o.state.chars)).toBe('mom');
-    const intoHerRoom = interact({ ...o.state, place: 'landing' }, use('landing.parentsDoor'));
+    const intoHerRoom = interact({ ...o.state, place: 'landing' }, operate('landing.parentsDoor'));
     expect(intoHerRoom.events).toEqual([{ type: 'capture', room: 'parents', count: 1 }]);
   });
 
   it('she comes back 90 s later and catches Charlie still in the garden', () => {
-    const s = interact(gardening(), use('pool.tap')).state;
+    const s = interact(gardening(), operate('pool.tap')).state;
     const inGarden = { ...s, place: 'garden' as const };
     expect(interact(inGarden, tick(TIMER_MS.change - 1)).state.chars.mom).toBe('changing');
     const o = interact(inGarden, tick(TIMER_MS.change));
@@ -141,21 +141,21 @@ describe('the hose (AC-61)', () => {
   });
 
   it('works again once she is back, waters the lawn when she is not gardening, and stays closed once the garden holds nothing more', () => {
-    let s = interact(gardening(), use('pool.tap')).state;
-    expect(interact(s, use('pool.tap')).beats).toContainEqual(said('hero', 'line.hoseLawn'));
+    let s = interact(gardening(), operate('pool.tap')).state;
+    expect(interact(s, operate('pool.tap')).beats).toContainEqual(said('hero', 'line.hoseLawn'));
     s = interact(s, tick(TIMER_MS.change)).state;
-    const again = interact(s, use('pool.tap'));
+    const again = interact(s, operate('pool.tap'));
     expect(again.beats).toContainEqual(said('mom', 'line.momSoakedAgain'));
     expect(again.events).toEqual([]);
-    expect(interact(at('pool'), use('pool.tap')).beats).toContainEqual(said('hero', 'line.hoseLawn'));
+    expect(interact(at('pool'), operate('pool.tap')).beats).toContainEqual(said('hero', 'line.hoseLawn'));
     const done = gardening({ flags: flags('parcel_taken', 'keyring_taken', 'nail_taken') });
-    const off = interact(done, use('pool.tap'));
+    const off = interact(done, operate('pool.tap'));
     expect(off.beats).toEqual([said('hero', 'line.hoseOff')]);
     expect(off.state.chars.mom).toBe('gardening');
   });
 
   it('keeps soaking Maman while the big nail is still in the shed, even with the parcel and the drawer key taken (T-94, AC-31)', () => {
-    const nailLeft = interact(gardening({ flags: flags('parcel_taken', 'keyring_taken') }), use('pool.tap'));
+    const nailLeft = interact(gardening({ flags: flags('parcel_taken', 'keyring_taken') }), operate('pool.tap'));
     expect(nailLeft.beats).toContainEqual(said('mom', 'line.momSoaked'));
     expect(nailLeft.state.chars.mom).toBe('changing');
     expect(occupant('garden', nailLeft.state.chars)).toBeNull();
@@ -172,7 +172,7 @@ describe('the hose (AC-61)', () => {
     s = playAll(s, [go('garden.toFootball'), { kind: 'wait' }]).state;
     expect(s.chars.mom).toBe('gardening');
     // The hose still lures her out, and the nail can be taken during the window.
-    const soaked = interact({ ...s, place: 'pool' }, use('pool.tap'));
+    const soaked = interact({ ...s, place: 'pool' }, operate('pool.tap'));
     expect(keys(soaked.beats)).toContain('line.momSoakedAgain');
     expect(soaked.state.chars.mom).toBe('changing');
     const inGarden = playAll(soaked.state, [go('pool.toFootball'), go('football.toGarden')]);
@@ -189,7 +189,7 @@ describe('the cat, the parcel and the shed (AC-62)', () => {
   const garden = (inventory: ItemId[] = []) => wary('garden', { flags: flags('computer_read', 'dad_wary', 'delivered'), chars: chars({ mom: 'changing' }), inventory });
 
   it('the cat hisses until it gets the sardines, then the parcel gives the tonka bean and the bike pump', () => {
-    expect(interact(garden(), use('garden.cat')).beats).toContainEqual(said('hero', 'line.catHiss'));
+    expect(interact(garden(), operate('garden.cat')).beats).toContainEqual(said('hero', 'line.catHiss'));
     const refused = interact(garden(), take('garden.parcel'));
     expect(refused.beats).toContainEqual(said('hero', 'line.catHiss'));
     expect(refused.state.inventory).toEqual([]);
@@ -215,7 +215,7 @@ describe('the cat, the parcel and the shed (AC-62)', () => {
   });
 
   it('the sardines are in the fridge, next to the rice milk', () => {
-    const open = interact(at('kitchen'), use('kitchen.fridge')).state;
+    const open = interact(at('kitchen'), operate('kitchen.fridge')).state;
     expect(interact(open, take('kitchen.sardines')).state.inventory).toEqual(['sardines']);
   });
 });
@@ -302,16 +302,16 @@ describe('the power cut (AC-64)', () => {
   it('can be caused again while the office holds something needed, then is useless; never while Papa is away', () => {
     // Once plugged in, the power strip switched back on blows the fuses again.
     const first = interact(room(), give('magnetPlug', 'florent.strip')).state;
-    expect(interact(first, use('florent.strip')).beats).toContainEqual(said('hero', 'line.fusesNobody'));
+    expect(interact(first, operate('florent.strip')).beats).toContainEqual(said('hero', 'line.fusesNobody'));
     const back = interact(first, tick(TIMER_MS.fuses)).state;
-    const again = interact(back, use('florent.strip'));
+    const again = interact(back, operate('florent.strip'));
     expect(again.beats).toContainEqual(said('dad', 'line.fusesAgain'));
     expect(again.events).toEqual([]);
     expect(again.state.chars.dad).toBe('fuses');
     const plugged = { ...back, flags: { ...back.flags, drawer_open: true as const, pliers_taken: true as const } };
-    expect(interact(plugged, use('florent.strip')).beats).toEqual([said('hero', 'line.fusesNoNeed')]);
+    expect(interact(plugged, operate('florent.strip')).beats).toEqual([said('hero', 'line.fusesNoNeed')]);
     // Before anything is plugged in, the power strip only says so.
-    expect(interact(room(), use('florent.strip')).beats).toEqual([said('hero', 'florent.strip.use')]);
+    expect(interact(room(), operate('florent.strip')).beats).toEqual([said('hero', 'florent.strip.use')]);
     const drawerOnly = room({ flags: flags('computer_read', 'dad_wary', 'drawer_open') });
     expect(interact(drawerOnly, give('magnetPlug', 'florent.strip')).state.chars.dad).toBe('fuses');
     const nothingLeft = room({ flags: flags('computer_read', 'dad_wary', 'drawer_open', 'pliers_taken') });
@@ -334,9 +334,9 @@ describe('invisible ink and the cellar bottles (AC-65)', () => {
   });
 
   it('the bottles refuse before N13, then only take the oldest to the youngest (E21)', () => {
-    expect(interact(at('cellar'), use('cellar.bottles')).beats).toEqual([said('hero', 'line.bottlesUnknown')]);
+    expect(interact(at('cellar'), operate('cellar.bottles')).beats).toEqual([said('hero', 'line.bottlesUnknown')]);
     const s = at('cellar', { notes: ['n01', 'n13'] });
-    expect(interact(s, use('cellar.bottles')).beats).toEqual([{ type: 'pad', pad: 'bottles' }]);
+    expect(interact(s, operate('cellar.bottles')).beats).toEqual([{ type: 'pad', pad: 'bottles' }]);
     const wrong = interact(s, { kind: 'pad', pad: 'bottles', code: ['1994', '1987', '2003', '2011'] });
     expect(wrong.beats).toContainEqual(said('hero', 'line.bottlesWrong'));
     expect(wrong.state.inventory).toEqual([]);
@@ -352,7 +352,7 @@ describe('invisible ink and the cellar bottles (AC-65)', () => {
 
 describe('the desk drawer and the attic trunk (AC-66)', () => {
   it('the drawer is locked without its key, then gives the sketchbook (E28)', () => {
-    expect(interact(at('office', { chars: chars({ dad: 'fuses' }) }), use('office.drawer')).beats).toEqual([said('hero', 'line.drawerLocked')]);
+    expect(interact(at('office', { chars: chars({ dad: 'fuses' }) }), operate('office.drawer')).beats).toEqual([said('hero', 'line.drawerLocked')]);
     expect(interact(wary('office', { chars: chars({ dad: 'fuses' }) }), { kind: 'verb', verb: 'look', target: 'office.drawer' }).beats).toEqual([said('hero', 'office.drawer.lookWary')]);
     const o = interact(wary('office', { chars: chars({ dad: 'fuses' }), inventory: ['keyring'] }), give('keyring', 'office.drawer'));
     expect(puzzles(o)).toEqual([28]);
@@ -361,9 +361,9 @@ describe('the desk drawer and the attic trunk (AC-66)', () => {
   });
 
   it('the trunk refuses before N14, then only takes red, yellow, blue, green (E29)', () => {
-    expect(interact(at('attic'), use('attic.trunk')).beats).toEqual([said('hero', 'line.trunkUnknown')]);
+    expect(interact(at('attic'), operate('attic.trunk')).beats).toEqual([said('hero', 'line.trunkUnknown')]);
     const s = at('attic', { notes: ['n01', 'n14'] });
-    expect(interact(s, use('attic.trunk')).beats).toEqual([{ type: 'pad', pad: 'trunk' }]);
+    expect(interact(s, operate('attic.trunk')).beats).toEqual([{ type: 'pad', pad: 'trunk' }]);
     const wrong = interact(s, { kind: 'pad', pad: 'trunk', code: ['red', 'yellow', 'green', 'blue'] });
     expect(wrong.beats).toContainEqual(said('hero', 'line.codeWrong'));
     expect(wrong.events).toEqual([]);
@@ -373,7 +373,7 @@ describe('the desk drawer and the attic trunk (AC-66)', () => {
     expect(interact(s, { kind: 'pad', pad: 'trunk', code: ['red', 'yellow', 'blue', 'pink'] }).accepted).toBe(false);
     // The trunk is open for good: the code is not asked again and the Fragment n° 3 is given only once.
     expect(interact(right.state, { kind: 'pad', pad: 'trunk', code: ['red', 'yellow', 'blue', 'green'] }).accepted).toBe(false);
-    const again = interact(right.state, use('attic.trunk'));
+    const again = interact(right.state, operate('attic.trunk'));
     expect(again.beats).toEqual([said('hero', 'attic.trunk.empty')]);
     expect(again.state.inventory).toEqual(['scrap3']);
   });
@@ -557,11 +557,11 @@ describe('the 2026-10-24 amendment', () => {
 
   it('the drained pool fills up again when the pump is used once more (a gag, nothing else changes)', () => {
     const drained = at('pool', { flags: flags('plug_fixed', 'cover_open', 'pool_drained') });
-    const o = interact(drained, use('pool.pump'));
+    const o = interact(drained, operate('pool.pump'));
     expect(o.beats).toContainEqual(said('narrator', 'pool.fill'));
     expect(o.state.flags.pool_drained).toBeUndefined();
     expect(o.events).toEqual([]);
-    expect(interact(o.state, use('pool.pump')).state.flags.pool_drained).toBe(true);
+    expect(interact(o.state, operate('pool.pump')).state.flags.pool_drained).toBe(true);
   });
 
   it('the trunk buttons are shuffled against the code', () => {
@@ -573,7 +573,7 @@ describe('the 2026-10-24 amendment', () => {
 
   it('the desk drawer only says it is locked, never which key opens it', () => {
     for (const s of [at('office'), wary('office')]) {
-      for (const input of [look('office.drawer'), use('office.drawer')]) {
+      for (const input of [look('office.drawer'), operate('office.drawer')]) {
         const said = interact(s, input).beats.flatMap((b) => (b.type === 'say' ? [fr(b.key)] : []));
         expect(said.join(' ')).toMatch(/fermé à clé/i);
         expect(said.join(' ')).not.toMatch(/petite clé|trousseau/i);
@@ -618,7 +618,7 @@ describe('the 2026-10-24 amendment', () => {
 
 describe('phone feedback of 2026-10-24 (evening)', () => {
   it('the salesman scene: Papa comes out next to Charlie in front of the house (no front door view), then goes back in', () => {
-    const rung = interact(at('front', { solved: [1] }), use('front.bell')).state;
+    const rung = interact(at('front', { solved: [1] }), operate('front.bell')).state;
     const o = interact(rung, tick(TIMER_MS.answer));
     expect(o.beats.some((b) => b.type === 'view')).toBe(false);
     const captor = o.beats.findIndex((b) => b.type === 'captor' && b.character === 'dad');
@@ -659,7 +659,7 @@ describe("Théo's electromagnet and the hair dryer on its hook", () => {
   it('the hair dryer cannot be taken; used alone it has nothing to dry', () => {
     const bath = at('bathroom');
     expect(findHotspot(bath, 'bathroom.hairdryer')?.verbs).toEqual(['look', 'use']);
-    expect(interact(bath, use('bathroom.hairdryer')).beats).toEqual([said('hero', 'line.dryNothing')]);
+    expect(interact(bath, operate('bathroom.hairdryer')).beats).toEqual([said('hero', 'line.dryNothing')]);
     expect(fr('line.dryNothing')).toBe("Je n'ai rien à sécher.");
     expect(fr('bathroom.hairdryer.look')).toMatch(/branché/);
   });

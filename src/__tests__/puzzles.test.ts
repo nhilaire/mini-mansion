@@ -9,7 +9,7 @@ const hero = (key: string) => ({ type: 'say', speaker: 'hero', key });
 const at = (place: PlaceId, extra: Partial<GameState> = {}): GameState => ({ ...newGame(), place, ...extra });
 const flags = (...f: (keyof GameState['flags'])[]) => Object.fromEntries(f.map((x) => [x, true])) as GameState['flags'];
 const chars = (patch: Partial<CharacterStates>): CharacterStates => ({ ...newGame().chars, ...patch });
-const use = (target: string): Input => ({ kind: 'verb', verb: 'use', target });
+const operate = (target: string): Input => ({ kind: 'verb', verb: 'use', target });
 const item = (i: ItemId, target: string): Input => ({ kind: 'item', item: i, target });
 
 // A refusal: accepted, the rule's line, and nothing but that line changes.
@@ -51,7 +51,7 @@ describe('the whole solution (AC-21, AC-32)', () => {
 
 describe('E01: the key under the doormat', () => {
   it('the door is locked without the key; the key opens it, stays in the inventory, and Charlie slips in', () => {
-    expectRefusal(at('front'), use('front.door'), 'front.door.locked');
+    expectRefusal(at('front'), operate('front.door'), 'front.door.locked');
     const { state, outcomes } = playAll(at('front'), [{ kind: 'verb', verb: 'take', target: 'front.doormat' }, item('key', 'front.door')]);
     expect(outcomes[1].events).toEqual([{ type: 'puzzle', puzzle: 1 }]);
     expect(state.place).toBe('hall');
@@ -62,12 +62,12 @@ describe('E01: the key under the doormat', () => {
 
 describe('E16: the doorbell', () => {
   it('refuses before E01, while Papa is not at his desk and once he cooks; otherwise starts the sequence', () => {
-    expectRefusal(at('front'), use('front.bell'), 'line.bellRefuse');
-    expectRefusal(at('front', { flags: flags('door_unlocked'), chars: chars({ dad: 'cooking' }) }), use('front.bell'), 'line.bellNobody');
+    expectRefusal(at('front'), operate('front.bell'), 'line.bellRefuse');
+    expectRefusal(at('front', { flags: flags('door_unlocked'), chars: chars({ dad: 'cooking' }) }), operate('front.bell'), 'line.bellNobody');
     for (const dad of ['answering', 'outside', 'returning'] as const) {
-      expectRefusal(at('front', { flags: flags('door_unlocked'), chars: chars({ dad }) }), use('front.bell'), 'line.bellBusy');
+      expectRefusal(at('front', { flags: flags('door_unlocked'), chars: chars({ dad }) }), operate('front.bell'), 'line.bellBusy');
     }
-    const o = interact(at('front', { flags: flags('door_unlocked') }), use('front.bell'));
+    const o = interact(at('front', { flags: flags('door_unlocked') }), operate('front.bell'));
     expect(o.state.chars.dad).toBe('answering');
     expect(o.events).toEqual([{ type: 'puzzle', puzzle: 16 }]);
     expect(o.beats).toContainEqual({ type: 'say', speaker: 'dad', key: 'line.dadAnswer' });
@@ -82,7 +82,7 @@ describe('E18: the side gates (AC-53)', () => {
       ['football', 'football.gate'],
       ['pool', 'pool.gate'],
     ] as const;
-    for (const [place, gate] of gates) expectRefusal(at(place), use(gate), 'line.gateLocked');
+    for (const [place, gate] of gates) expectRefusal(at(place), operate(gate), 'line.gateLocked');
     const { state, outcomes } = playAll(at('hall', { flags: flags('door_unlocked') }), [
       { kind: 'verb', verb: 'take', target: 'hall.shoes' },
       { kind: 'exit', exit: 'hall.toFront' },
@@ -98,7 +98,7 @@ describe('E18: the side gates (AC-53)', () => {
 describe('E19: the dough', () => {
   it('the rice milk and the sardines in the fridge, the two flours in the cupboard, each taken on its own (AC-71); the processor waits for all three', () => {
     expect(findHotspot(at('kitchen'), 'kitchen.milk')).toBeUndefined();
-    const opened = interact(at('kitchen'), use('kitchen.fridge')).state;
+    const opened = interact(at('kitchen'), operate('kitchen.fridge')).state;
     expect(opened.flags.fridge_open).toBe(true);
     const milk = interact(opened, { kind: 'verb', verb: 'take', target: 'kitchen.milk' });
     expect(milk.state.inventory).toEqual(['ricemilk']);
@@ -112,9 +112,9 @@ describe('E19: the dough', () => {
     const flours = interact(chestnut.state, { kind: 'verb', verb: 'take', target: 'utility.riceflour' });
     expect(flours.state.inventory).toEqual(['chestnut', 'riceflour']);
     expect(findHotspot(flours.state, 'utility.flours')?.verbs).toEqual(['look']);
-    expectRefusal(at('kitchen'), use('kitchen.robot'), 'kitchen.robot.empty');
+    expectRefusal(at('kitchen'), operate('kitchen.robot'), 'kitchen.robot.empty');
     const half = interact(at('kitchen', { inventory: ['ricemilk'] }), item('ricemilk', 'kitchen.robot')).state;
-    expectRefusal(half, use('kitchen.robot'), 'line.doughMissing');
+    expectRefusal(half, operate('kitchen.robot'), 'line.doughMissing');
   });
 });
 
@@ -136,7 +136,7 @@ describe('E02: the ball on the pool cover', () => {
 
 describe('E03: the drumsticks', () => {
   it('the drums without sticks say so; the sticks bring Florent down', () => {
-    expectRefusal(at('music'), use('music.drums'), 'music.drums.use');
+    expectRefusal(at('music'), operate('music.drums'), 'music.drums.use');
     const { state, outcomes } = playAll(at('music'), [{ kind: 'verb', verb: 'take', target: 'music.basket' }, item('sticks', 'music.drums')]);
     expect(outcomes[1].events).toEqual([{ type: 'puzzle', puzzle: 3 }]);
     expect(state.chars.florent).toBe('drumming');
@@ -146,11 +146,11 @@ describe('E03: the drumsticks', () => {
 
 describe('E04: the white queen', () => {
   it('the chessboard misses its queen; putting it back starts Théo\'s game', () => {
-    expectRefusal(at('living', { notes: ['n01', 'n04'] }), use('living.chess'), 'living.chess.lookMissing');
+    expectRefusal(at('living', { notes: ['n01', 'n04'] }), operate('living.chess'), 'living.chess.lookMissing');
     const o = interact(at('living', { inventory: ['queen'] }), item('queen', 'living.chess'));
     expect(o.events).toEqual([{ type: 'puzzle', puzzle: 4 }]);
     expect(o.state.chars.theo).toBe('chess');
-    expectRefusal(o.state, use('living.chess'), 'line.chessBusy');
+    expectRefusal(o.state, operate('living.chess'), 'line.chessBusy');
   });
 });
 
@@ -165,19 +165,19 @@ describe('E05: the Rubik\'s Cube', () => {
 
 describe('E17: the breaker and the washing machine', () => {
   it('needs a fuse in the breaker, the breaker back on and detergent; the cycle ends 1 minute later and Maman goes to the garden (AC-70)', () => {
-    expectRefusal(at('utility'), use('utility.machine'), 'line.machinePower');
+    expectRefusal(at('utility'), operate('utility.machine'), 'line.machinePower');
     expectRefusal(at('utility', { inventory: ['detergent'] }), item('detergent', 'utility.machine'), 'line.machinePower');
-    expect(interact(at('garage'), use('garage.breaker')).beats).toContainEqual({ type: 'say', speaker: 'hero', key: 'line.breakerFuse' });
-    expect(interact(at('garage'), use('garage.breaker')).state.flags.power_on).toBeUndefined();
+    expect(interact(at('garage'), operate('garage.breaker')).beats).toContainEqual({ type: 'say', speaker: 'hero', key: 'line.breakerFuse' });
+    expect(interact(at('garage'), operate('garage.breaker')).state.flags.power_on).toBeUndefined();
     const fuse = interact(at('hall'), { kind: 'verb', verb: 'take', target: 'hall.console' }).state;
     expect(fuse.inventory).toEqual(['fuse']);
     const fitted = interact({ ...fuse, place: 'garage' }, item('fuse', 'garage.breaker')).state;
     expect(fitted.flags.fuse_in).toBe(true);
     expect(fitted.inventory).toEqual([]);
-    const power = interact(fitted, use('garage.breaker'));
+    const power = interact(fitted, operate('garage.breaker'));
     expect(power.state.flags.power_on).toBe(true);
-    expectRefusal(power.state, use('garage.breaker'), 'garage.breaker.already');
-    expectRefusal(at('utility', { flags: flags('power_on') }), use('utility.machine'), 'line.machineEmpty');
+    expectRefusal(power.state, operate('garage.breaker'), 'garage.breaker.already');
+    expectRefusal(at('utility', { flags: flags('power_on') }), operate('utility.machine'), 'line.machineEmpty');
     const started = interact(at('utility', { inventory: ['detergent'], flags: flags('power_on') }), item('detergent', 'utility.machine'));
     expect(started.events).toEqual([]);
     expect(started.state.flags.machine_running).toBe(true);
@@ -188,7 +188,7 @@ describe('E17: the breaker and the washing machine', () => {
     expect(ding.events).toEqual([{ type: 'puzzle', puzzle: 17 }]);
     expect(ding.state.chars.mom).toBe('gardening');
     expect(ding.beats).toContainEqual({ type: 'sfx', sfx: 'ding' });
-    expectRefusal({ ...ding.state, place: 'utility' }, use('utility.machine'), 'line.machineDone');
+    expectRefusal({ ...ding.state, place: 'utility' }, operate('utility.machine'), 'line.machineDone');
   });
 });
 
@@ -197,15 +197,15 @@ describe('E07 / E10 / E12: the keypads (AC-27)', () => {
   const parents = (extra: Partial<GameState> = {}) => at('parents', { chars: chars({ mom: 'gardening' }), flags: flags('safe_found'), ...extra });
 
   it('do not open before their code is in the notebook (no guessing)', () => {
-    expectRefusal(office(), use('office.computer'), 'line.codeUnknown');
-    expectRefusal(parents(), use('parents.safe'), 'line.codeUnknown');
+    expectRefusal(office(), operate('office.computer'), 'line.codeUnknown');
+    expectRefusal(parents(), operate('parents.safe'), 'line.codeUnknown');
     expect(interact(office(), { kind: 'keypad', keypad: 'computer', code: '7867' }).accepted).toBe(false);
     expect(interact(parents(), { kind: 'keypad', keypad: 'safe', code: '1987' }).accepted).toBe(false);
   });
 
   it('once the code is known: only the right code opens, wrong codes have unlimited tries', () => {
     const s = office({ notes: ['n01', 'n08'] });
-    expect(interact(s, use('office.computer')).beats).toEqual([{ type: 'keypad', keypad: 'computer' }]);
+    expect(interact(s, operate('office.computer')).beats).toEqual([{ type: 'keypad', keypad: 'computer' }]);
     for (const code of ['0000', '1987', '7868', '9999']) expectRefusal(s, { kind: 'keypad', keypad: 'computer', code }, 'line.codeWrong');
     const ok = interact(s, { kind: 'keypad', keypad: 'computer', code: '7867' });
     expect(ok.events).toEqual([{ type: 'puzzle', puzzle: 7 }]);
@@ -223,12 +223,12 @@ describe('E07 / E10 / E12: the keypads (AC-27)', () => {
 
   it('the lab door keypad opens once N17 (the back of the recipe) is known and only takes 2510', () => {
     const attic = (extra: Partial<GameState> = {}) => at('attic', { flags: flags('door_revealed'), ...extra });
-    expectRefusal(attic(), use('attic.door'), 'line.doorLocked');
+    expectRefusal(attic(), operate('attic.door'), 'line.doorLocked');
     expect(interact(attic(), { kind: 'keypad', keypad: 'lab', code: '2510' }).accepted).toBe(false);
     // The computer (N10) only says where the code is written.
-    expectRefusal(attic({ notes: ['n01', 'n10'] }), use('attic.door'), 'line.doorLocked');
+    expectRefusal(attic({ notes: ['n01', 'n10'] }), operate('attic.door'), 'line.doorLocked');
     const s = attic({ notes: ['n01', 'n10', 'n17'] });
-    expect(interact(s, use('attic.door')).beats).toEqual([{ type: 'keypad', keypad: 'lab' }]);
+    expect(interact(s, operate('attic.door')).beats).toEqual([{ type: 'keypad', keypad: 'lab' }]);
     for (const code of ['0000', '7867', '1987']) expectRefusal(s, { kind: 'keypad', keypad: 'lab', code }, 'line.codeWrong');
     const ok = interact(s, { kind: 'keypad', keypad: 'lab', code: '2510' });
     expect(ok.state.flags.lab_code).toBe(true);
@@ -240,7 +240,7 @@ describe('E07 / E10 / E12: the keypads (AC-27)', () => {
   });
 
   it('the computer cannot be reached while Papa is at his desk', () => {
-    const o = interact(at('corridor0', { flags: flags('door_unlocked') }), use('corridor0.officeDoor'));
+    const o = interact(at('corridor0', { flags: flags('door_unlocked') }), operate('corridor0.officeDoor'));
     expect(o.state.place).toBe('cellar');
   });
 });
@@ -251,7 +251,7 @@ describe('E08 / E09: the shower and the mirror', () => {
   it('broken: "a seal is missing"; the wrench has nothing to tighten yet (AC-55)', () => {
     const look = interact(room([]), { kind: 'verb', verb: 'look', target: 'parents.shower' });
     expect(look.beats).toEqual([hero('parents.shower.look')]);
-    expectRefusal(room([]), use('parents.shower'), 'line.showerBroken');
+    expectRefusal(room([]), operate('parents.shower'), 'line.showerBroken');
     expectRefusal(room(['wrench']), item('wrench', 'parents.shower'), 'line.wrenchNothing');
   });
 
@@ -260,7 +260,7 @@ describe('E08 / E09: the shower and the mirror', () => {
     expect(fitted.events).toEqual([]);
     expect(fitted.state.inventory).toEqual(['wrench']);
     expect(interact(fitted.state, { kind: 'verb', verb: 'look', target: 'parents.shower' }).beats).toEqual([hero('parents.shower.lookLoose')]);
-    const leak = interact(fitted.state, use('parents.shower'));
+    const leak = interact(fitted.state, operate('parents.shower'));
     expect(leak.beats).toContainEqual(hero('line.showerLoose'));
     expect(leak.state).toEqual(fitted.state);
     const repaired = interact(fitted.state, item('wrench', 'parents.shower'));
@@ -271,12 +271,12 @@ describe('E08 / E09: the shower and the mirror', () => {
 
   it('the hot water reveals the safe code on the mirror and notes it; it stays for good', () => {
     const repaired = room([], { flags: flags('shower_repaired', 'oring_fitted', 'wrench_used') });
-    const o = interact(repaired, use('parents.shower'));
+    const o = interact(repaired, operate('parents.shower'));
     expect(o.events).toEqual([{ type: 'puzzle', puzzle: 9 }]);
     expect(o.state.notes).toContain('n11');
     expect(o.state.flags.mirror_code).toBe(true);
     expect(interact(o.state, { kind: 'verb', verb: 'look', target: 'parents.mirror' }).beats).toEqual([hero('parents.mirror.lookCode')]);
-    const again = interact(o.state, use('parents.shower'));
+    const again = interact(o.state, operate('parents.shower'));
     expect(again.events).toEqual([]);
     expect(again.beats).toContainEqual(hero('parents.shower.again'));
   });
@@ -291,20 +291,20 @@ describe('E14: draining the pool (AC-28)', () => {
   const pool = (extra: Partial<GameState> = {}) => at('pool', extra);
 
   it('the cover switch refuses before E02', () => {
-    expectRefusal(pool(), use('pool.switch'), 'line.coverBall');
+    expectRefusal(pool(), operate('pool.switch'), 'line.coverBall');
   });
 
   it('the pump refuses without the pliers, then with the cover closed', () => {
-    expectRefusal(pool({ flags: flags('ball_freed') }), use('pool.pump'), 'line.pumpPlug');
-    expectRefusal(pool({ flags: flags('ball_freed', 'plug_fixed') }), use('pool.pump'), 'line.pumpCover');
+    expectRefusal(pool({ flags: flags('ball_freed') }), operate('pool.pump'), 'line.pumpPlug');
+    expectRefusal(pool({ flags: flags('ball_freed', 'plug_fixed') }), operate('pool.pump'), 'line.pumpCover');
   });
 
   it('after draining, the bottle can be taken and E14 is solved when taken', () => {
     const { state, outcomes } = playAll(pool({ flags: flags('ball_freed'), inventory: ['pliers'] }), [
-      use('pool.switch'),
+      operate('pool.switch'),
       { kind: 'verb', verb: 'take', target: 'pool.bottle' },
       item('pliers', 'pool.pump'),
-      use('pool.pump'),
+      operate('pool.pump'),
       { kind: 'verb', verb: 'take', target: 'pool.bottle' },
     ]);
     expect(outcomes[1].beats).toContainEqual(hero('pool.bottle.deep'));
@@ -324,7 +324,7 @@ describe('E11-E13: the attic, the lab door, the lab', () => {
     expect(keyFirst.outcomes[0].state.flags.secret_open).toBeUndefined();
     expect(keyFirst.outcomes[1].events).toEqual([{ type: 'puzzle', puzzle: 12 }]);
     expect(keyFirst.state.flags.secret_open).toBe(true);
-    const codeFirst = playAll(revealed.state, [{ kind: 'keypad', keypad: 'lab', code: '2510' }, use('attic.door'), item('oldkey', 'attic.door')]);
+    const codeFirst = playAll(revealed.state, [{ kind: 'keypad', keypad: 'lab', code: '2510' }, operate('attic.door'), item('oldkey', 'attic.door')]);
     expect(codeFirst.outcomes[1].beats).toContainEqual(hero('attic.door.lockStill'));
     expect(codeFirst.outcomes[2].events).toEqual([{ type: 'puzzle', puzzle: 12 }]);
   });
@@ -356,7 +356,7 @@ describe('E06: the chess problem on the board', () => {
     const before = at('living', { flags: flags('queen_placed'), chars: chars({ theo: 'chess' }) });
     expect(interact(before, { kind: 'chess', moves: ['c4g8', 'h6f7'] }).accepted).toBe(false);
     const after = at('living', { flags: flags('queen_placed', 'cube_solved', 'theo_back') });
-    expect(interact(after, use('living.chess')).beats).toEqual([{ type: 'chess' }]);
+    expect(interact(after, operate('living.chess')).beats).toEqual([{ type: 'chess' }]);
     expect(interact(after, { kind: 'chess', moves: ['c4c8', 'h6f7'] }).accepted).toBe(false);
     const o = interact(after, { kind: 'chess', moves: ['c4g8', 'h6f7'] });
     expect(o.events).toEqual([{ type: 'puzzle', puzzle: 6 }]);

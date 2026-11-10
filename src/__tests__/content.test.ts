@@ -36,7 +36,7 @@ function walkthroughKeys(): { keys: Set<string>; heardBefore: Map<number, Set<st
 }
 
 describe('story content in every language', () => {
-  const { keys, heardBefore } = walkthroughKeys();
+  const { keys } = walkthroughKeys();
 
   it('hears a large part of the story along the walkthrough', () => {
     expect(keys.size).toBeGreaterThan(200);

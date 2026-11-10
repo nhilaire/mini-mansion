@@ -166,14 +166,6 @@ function books(b: PixelBuffer, x0: number, x1: number, y: number, h: number, see
   }
 }
 
-function shelfBox(b: PixelBuffer, r: Rect, seed: number, wood: Color = C.wood2) {
-  b.rect(r.x, r.y, r.w, r.h, wood).frame(r.x, r.y, r.w, r.h, shadeOf(wood, C.wood0));
-  for (let y = r.y + 4; y < r.y + r.h - 4; y += 12) {
-    b.hline(r.x + 1, r.x + r.w - 2, y + 9, shadeOf(wood, C.wood0));
-    books(b, r.x + 2, r.x + r.w - 2, y, 9, seed + y);
-  }
-}
-
 // White cube shelves (2 x n) with coloured boxes.
 function cubes(b: PixelBuffer, x: number, y: number, cols: number, rows: number, seed: number) {
   const s = 12;
@@ -208,10 +200,6 @@ function garland(b: PixelBuffer, x0: number, x1: number, y: number, colors: read
     b.ellipse(x, y + sag, 2, 2, colors[i % colors.length]);
     if (x + 6 <= x1) b.line(x + 2, y + sag, x + 4, y + Math.round(Math.sin(((x + 6 - x0) / Math.max(1, x1 - x0)) * Math.PI) * 6), C.stone2);
   }
-}
-
-function lampBall(b: PixelBuffer, x: number, y: number, shadeColor: Color) {
-  b.vline(x, y, y + 20, C.ink).ellipse(x, y - 2, 6, 5, shadeColor).rect(x - 5, y + 20, 11, 2, C.ink);
 }
 
 function toilet(b: PixelBuffer, r: Rect, japanese = false) {

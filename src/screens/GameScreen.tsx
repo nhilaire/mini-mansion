@@ -132,7 +132,6 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
   const notebookRef = useRef(false);
   // Scenes played without control (captures, the front door and kitchen views). No line can be tapped away (PRD AC-49).
   const cinematicRef = useRef(false);
-  const [cinematic, setCinematic] = useState(false);
   // The adult shown next to Charlie during a capture scene.
   const [captor, setCaptor] = useState<CharacterId | null>(null);
   // The family gathered around Charlie for the final scene.
@@ -180,7 +179,6 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
         setView(null);
         setCaptor(null);
         cinematicRef.current = false;
-        setCinematic(false);
         show(null);
         return;
       }
@@ -229,7 +227,6 @@ export function GameScreen({ initialState, startPaused, sfx, onChange, onEnding,
             return;
           }
           cinematicRef.current = b.on;
-          setCinematic(b.on);
           break;
         case 'captor':
           setCaptor(b.character);

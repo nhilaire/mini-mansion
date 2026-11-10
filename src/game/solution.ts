@@ -8,7 +8,7 @@ import { Input, ItemId, KeypadId, PadId } from './types';
 
 const go = (exit: string): Input => ({ kind: 'exit', exit });
 const take = (target: string): Input => ({ kind: 'verb', verb: 'take', target });
-const use = (target: string): Input => ({ kind: 'verb', verb: 'use', target });
+const operate = (target: string): Input => ({ kind: 'verb', verb: 'use', target });
 const look = (target: string): Input => ({ kind: 'verb', verb: 'look', target });
 const give = (item: ItemId, target: string): Input => ({ kind: 'item', item, target });
 const combine = (item: ItemId, other: ItemId): Input => ({ kind: 'item', item, target: `item:${other}` });
@@ -26,7 +26,7 @@ export const SOLUTION: readonly Input[] = [
   take('garage.pole'),
   take('garage.bench'),
   give('fuse', 'garage.breaker'),
-  use('garage.breaker'),
+  operate('garage.breaker'),
   go('garage.toCorridor'),
   go('corridor0.toUtility'),
   take('utility.shelf'),
@@ -44,7 +44,7 @@ export const SOLUTION: readonly Input[] = [
   combine('pole', 'extension'),
   go('football.toPool'),
   give('longpole', 'pool.ball'), // E02
-  use('pool.switch'),
+  operate('pool.switch'),
   go('pool.toFront'),
   go('front.toHall'),
   go('hall.toLiving'),
@@ -53,14 +53,14 @@ export const SOLUTION: readonly Input[] = [
   take('music.basket'),
   give('sticks', 'music.drums'), // E03
   go('music.toKitchen'),
-  use('kitchen.fridge'),
+  operate('kitchen.fridge'),
   take('kitchen.milk'),
   take('kitchen.sardines'),
   go('kitchen.toMusic'),
   go('music.toLiving'),
   go('living.toHall'),
   go('hall.stairs'),
-  use('landing.julienDoor'),
+  operate('landing.julienDoor'),
   take('julien.trophy'),
   go('julien.toLanding'),
   go('landing.toHall'),
@@ -68,17 +68,17 @@ export const SOLUTION: readonly Input[] = [
   give('queen', 'living.chess'), // E04
   go('living.toHall'),
   go('hall.stairs'),
-  use('landing.theoDoor'),
+  operate('landing.theoDoor'),
   give('booklet', 'theo.cube'), // E05
   go('theo.toLanding'), // CUT07
-  use('landing.florentDoor'),
-  use('florent.console'),
+  operate('landing.florentDoor'),
+  operate('florent.console'),
   { kind: 'circuit', board: [...SOLUTION_BOARD] }, // E31: level 99 beaten, the Nerf kit opens
   take('florent.kit'), // the O-ring and the puncture patches
   go('florent.toLanding'),
   go('landing.toHall'),
   go('hall.toLiving'),
-  use('living.chess'),
+  operate('living.chess'),
   { kind: 'chess', moves: [...SOLUTION_MOVES] }, // E06
   go('living.toMusic'),
   go('music.toKitchen'),
@@ -90,8 +90,8 @@ export const SOLUTION: readonly Input[] = [
   go('living.toHall'),
   go('hall.toCorridor'),
   wait(), // CUT12: Papa comes to cook for 90 s
-  use('corridor0.officeDoor'),
-  use('office.computer'),
+  operate('corridor0.officeDoor'),
+  operate('office.computer'),
   code('computer', '7867'), // E07
   take('office.shelf'),
   go('office.toCorridor'),
@@ -101,17 +101,17 @@ export const SOLUTION: readonly Input[] = [
   go('hall.toFront'),
   go('front.toPool'),
   give('pliers', 'pool.pump'),
-  use('pool.pump'),
+  operate('pool.pump'),
   take('pool.bottle'), // E14
   go('pool.toFront'),
   go('front.toHall'),
   go('hall.stairs'),
-  use('landing.parentsDoor'),
+  operate('landing.parentsDoor'),
   give('oring', 'parents.shower'),
   give('wrench', 'parents.shower'), // E08
-  use('parents.shower'), // E09
+  operate('parents.shower'), // E09
   look('parents.painting'),
-  use('parents.safe'),
+  operate('parents.safe'),
   code('safe', '1987'), // E10
   go('parents.toLanding'),
   go('landing.toBathroom'),
@@ -120,7 +120,7 @@ export const SOLUTION: readonly Input[] = [
   go('landing.toHall'),
   go('hall.toFront'),
   go('front.toPool'),
-  use('pool.tap'), // E22: Maman soaked, she changes for 90 s
+  operate('pool.tap'), // E22: Maman soaked, she changes for 90 s
   go('pool.toFootball'),
   go('football.toGarden'),
   give('sardines', 'garden.cat'), // E23
@@ -148,12 +148,12 @@ export const SOLUTION: readonly Input[] = [
   go('garage.toCorridor'), // CUT15: Florent rides away
   go('corridor0.toHall'),
   go('hall.stairs'),
-  use('landing.florentDoor'),
+  operate('landing.florentDoor'),
   give('magnetPlug', 'florent.strip'), // E27: Papa goes down to the fuse box for 60 s
   go('florent.toLanding'),
   go('landing.toHall'),
   go('hall.toCorridor'),
-  use('corridor0.officeDoor'),
+  operate('corridor0.officeDoor'),
   give('keyring', 'office.drawer'), // E28
   go('office.toCorridor'),
   wait(), // Papa back from the garage
@@ -161,18 +161,18 @@ export const SOLUTION: readonly Input[] = [
   go('garage.toCellar'),
   take('cellar.rack'),
   give('bar', 'cellar.stoneLeft'),
-  use('cellar.stoneRight'), // E15: the hatch unlocks
-  use('cellar.bottles'),
+  operate('cellar.stoneRight'), // E15: the hatch unlocks
+  operate('cellar.bottles'),
   pad('bottles', ['1987', '1994', '2003', '2011']), // E21
   go('cellar.toGarage'),
   go('garage.toAttic'),
   give('thinner', 'attic.stain'), // E11
-  use('attic.trunk'),
+  operate('attic.trunk'),
   pad('trunk', ['red', 'yellow', 'blue', 'green']), // E29
   combine('scrap', 'scrap2'),
   combine('recipeHalf', 'scrap3'), // the recipe put together: the lab code on its back (N17)
   give('oldkey', 'attic.door'),
-  use('attic.door'),
+  operate('attic.door'),
   code('lab', '2510'), // E12
   go('attic.toLaundry'),
   give('tonka', 'laundry.etuve'), // E30: the secret touch in the dough Papa carried up

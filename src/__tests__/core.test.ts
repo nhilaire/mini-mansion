@@ -1,10 +1,9 @@
 // T-02: engine core (pathfinding, walking, tutorial, play time, ending time parts).
-import { findPath, pathLength, pointInPolygon, segmentInside } from '../game/geometry';
+import { findPath, pathLength, pointInPolygon, Polygon, segmentInside } from '../game/geometry';
 import { addPlayTime, advanceTutorial, durationSeconds, playTimeParts, tutorialBubble, tutorialDone } from '../game/progress';
 import { newGame } from '../game/rules';
 import { facingOf, poseAt, WALK_FPS, WALK_FRAMES, WALK_SPEED, walkDurationMs, walkFrame } from '../game/walker';
 import { FLOORS, PLACES } from '../game/world';
-import { Polygon } from '../game/geometry';
 
 const U_SHAPE: Polygon = [
   { x: 0, y: 0 },

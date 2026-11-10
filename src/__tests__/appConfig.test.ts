@@ -1,9 +1,6 @@
 // T-16 / AC-05 support: launcher names per language, landscape, immersive plugin, testing deep-link scheme, privacy.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const appJson = require('../../app.json');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const makeConfig = require('../../app.config.js');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const meta = require('../../factory-app.json');
 
 describe('Expo config (AC-05)', () => {
